@@ -87,11 +87,16 @@ Route::prefix('technicien')->middleware(['auth', 'role:technicien'])->group(func
 // ─── Responsable Foyer ────────────────────────────────────────
 Route::prefix('foyer')->middleware(['auth', 'role:resp_foyer'])->group(function () {
     Route::get('/dashboard', [CatalogueController::class, 'dashboard'])->name('foyer.dashboard');
+    
+    Route::post('/catalogue/{catalogue}/modifier', [CatalogueController::class, 'update'])
+        ->name('foyer.catalogue.modifier');
     Route::resource('catalogue', CatalogueController::class)->names('foyer.catalogue');
     Route::get('/reservations', [ReservationController::class, 'index'])->name('foyer.reservations');
     Route::post('/reservations/{reservation}/valider', [ReservationController::class, 'valider'])->name('foyer.reservations.valider');
     Route::post('/reservations/{reservation}/refuser', [ReservationController::class, 'refuser'])->name('foyer.reservations.refuser');
     Route::resource('promotions', PromotionController::class)->names('foyer.promotions');
+    Route::post('/catalogue/{article}/update-promo', [CatalogueController::class, 'updatePromo'])
+        ->name('foyer.catalogue.updatePromo');
 });
 // ─── inscription ────────────────────────────────────────
 Route::get('/inscription', [InscriptionController::class, 'create'])->name('inscription');

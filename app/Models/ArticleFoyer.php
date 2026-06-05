@@ -13,13 +13,18 @@ class ArticleFoyer extends Model
 
     protected $fillable = [
         'resp_foyer_id',
-        'nom_article',
-        'categorie',
-        'description',
-        'prix',
-        'stock',
-        'photo',
-        'disponible',
+    'nom_article',
+    'categorie',
+    'description',
+    'prix',
+    'stock',
+    'photo',
+    'disponible',
+    'date_peremption',
+    'promo_active',
+    'prix_promo',
+    'promo_remarque',
+    'promo_date_fin',
     ];
 
     protected $casts = [
