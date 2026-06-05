@@ -17,9 +17,8 @@ use App\Http\Controllers\Technicien\DemandeMaintController;
 use App\Http\Controllers\Technicien\IncidentController;
 use App\Http\Controllers\ResponsableFoyer\CatalogueController;
 use App\Http\Controllers\ResponsableFoyer\ReservationController;
-use App\Http\Controllers\ResponsableFoyer\PromotionController;
 use App\Http\Controllers\InscriptionController;
-
+use App\Http\Controllers\Etudiante\ProfileController;
 // ─── Page d'accueil ──────────────────────────────────────────
 Route::get('/accueil', function () {
     return view('welcome');
@@ -47,20 +46,84 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
 });
 
 // ─── Étudiante ────────────────────────────────────────────────
-Route::prefix('etudiante')->middleware(['auth', 'role:etudiante'])->group(function () {
-    Route::get('/dashboard', [HebergementController::class, 'dashboard'])->name('etudiante.dashboard');
-    Route::get('/hebergement', [HebergementController::class, 'index'])->name('etudiante.hebergement');
-    Route::post('/hebergement/renouvellement', [HebergementController::class, 'renouveler'])->name('etudiante.renouvellement.store');
-    Route::get('/hebergement/changement', [HebergementController::class, 'showChangement'])->name('etudiante.changement');
-    Route::post('/hebergement/changement', [HebergementController::class, 'demanderChangement'])->name('etudiante.changement.store');
-    Route::get('/maintenance', [MaintenanceController::class, 'index'])->name('etudiante.maintenance');
-    Route::post('/maintenance', [MaintenanceController::class, 'store'])->name('etudiante.maintenance.store');
-    Route::delete('/maintenance/{maintenance}', [MaintenanceController::class, 'destroy'])->name('etudiante.maintenance.destroy');
-    Route::get('/foyer', [FoyerController::class, 'index'])->name('etudiante.foyer');
-    Route::post('/foyer/reserver/{article}', [FoyerController::class, 'reserver'])->name('etudiante.foyer.reserver');
-    Route::get('/foyer/reservations', [FoyerController::class, 'mesReservations'])->name('etudiante.foyer.reservations');
-    Route::delete('/foyer/reservations/{reservation}', [FoyerController::class, 'annuler'])->name('etudiante.foyer.annuler');
-    Route::resource('reclamations', ReclamationController::class)->names('etudiante.reclamations');
+Route::middleware(['auth', 'role:etudiante'])->prefix('etudiante')->name('etudiante.')->group(function () {
+    
+    // Dashboard
+    Route::get('/dashboard', [HebergementController::class, 'dashboard'])->name('dashboard');
+
+    // Notifications
+Route::get('/notifications', function () {
+    $notifications = auth()->user()->notifications()->paginate(15);
+    return view('etudiante.notifications.index', compact('notifications'));
+})->name('notifications');
+
+Route::post('/notifications/{id}/read', function ($id) {
+    $notification = auth()
+        ->user()
+        ->notifications()
+        ->findOrFail($id);
+
+    $notification->markAsRead();
+    return back();
+})->name('notifications.read');
+    // Annonces
+    Route::get('/annonces', function () {
+    $query = \App\Models\Annonce::where(function ($q) {
+        $q->where('destinataire', 'etudiantes')
+          ->orWhere('destinataire', 'tous');
+    })->where('publiee', true);
+    
+    // Filtre catégorie
+    if (request('categorie')) {
+        $query->where('categorie', request('categorie'));
+    }
+    
+    // Recherche
+    if (request('search')) {
+        $query->where(function ($q) {
+            $q->where('titre', 'like', '%' . request('search') . '%')
+              ->orWhere('contenu', 'like', '%' . request('search') . '%');
+        });
+    }
+    
+    $annonces = $query->latest('date_publication')->paginate(10);
+    return view('etudiante.annonces.index', compact('annonces'));
+})->name('annonces');
+
+    // Hébergement
+    Route::prefix('hebergement')->name('hebergement.')->group(function () {
+        Route::get('/renouvellement', [HebergementController::class, 'index'])->name('renouvellement');
+        Route::post('/renouvellement', [HebergementController::class, 'renouveler'])->name('renouveller');
+        Route::get('/demandes', [HebergementController::class, 'statut'])->name('demandes');
+    });
+    Route::get('/hebergement/changement', [HebergementController::class, 'showChangement'])->name('changement');
+    Route::post('/hebergement/changement', [HebergementController::class, 'demanderChangement'])->name('changement.store');
+
+    // Foyer
+    Route::get('/foyer', [FoyerController::class, 'index'])->name('foyer');
+    Route::post('/foyer/reserver/{article}', [FoyerController::class, 'reserver'])->name('foyer.reserver');
+    Route::get('/foyer/reservations', [FoyerController::class, 'mesReservations'])->name('foyer.reservations');
+    Route::delete('/foyer/reservations/{reservation}', [FoyerController::class, 'annuler'])->name('foyer.annuler');
+
+    // Maintenance
+    Route::prefix('maintenance')->name('maintenance.')->group(function () {
+        Route::get('/', [MaintenanceController::class, 'index'])->name('index');
+        Route::get('/signaler', [MaintenanceController::class, 'create'])->name('signaler');
+        Route::post('/', [MaintenanceController::class, 'store'])->name('store');
+        Route::delete('/{maintenance}', [MaintenanceController::class, 'destroy'])->name('destroy');
+    });
+
+    // Réclamations
+    Route::resource('reclamations', ReclamationController::class)->names('reclamations');
+
+    // Profil
+    Route::prefix('profil')->name('profile.')->group(function () {
+        Route::get('/', [ProfileController::class, 'show'])->name('show');
+        Route::get('/edit', [ProfileController::class, 'edit'])->name('edit');
+        Route::put('/', [ProfileController::class, 'update'])->name('update');
+        Route::get('/password', [ProfileController::class, 'editPassword'])->name('edit-password');
+        Route::put('/password', [ProfileController::class, 'updatePassword'])->name('update-password');
+    });
 });
 
 // ─── Responsable Hébergement ──────────────────────────────────
@@ -94,9 +157,16 @@ Route::prefix('foyer')->middleware(['auth', 'role:resp_foyer'])->group(function 
     Route::get('/reservations', [ReservationController::class, 'index'])->name('foyer.reservations');
     Route::post('/reservations/{reservation}/valider', [ReservationController::class, 'valider'])->name('foyer.reservations.valider');
     Route::post('/reservations/{reservation}/refuser', [ReservationController::class, 'refuser'])->name('foyer.reservations.refuser');
-    Route::resource('promotions', PromotionController::class)->names('foyer.promotions');
+    
     Route::post('/catalogue/{article}/update-promo', [CatalogueController::class, 'updatePromo'])
         ->name('foyer.catalogue.updatePromo');
+        // Annonces foyer
+Route::get('/annonces', [\App\Http\Controllers\ResponsableFoyer\AnnonceController::class, 'index'])->name('foyer.annonces.index');
+Route::get('/annonces/create', [\App\Http\Controllers\ResponsableFoyer\AnnonceController::class, 'create'])->name('foyer.annonces.create');
+Route::post('/annonces', [\App\Http\Controllers\ResponsableFoyer\AnnonceController::class, 'store'])->name('foyer.annonces.store');
+Route::delete('/annonces/{annonce}', [\App\Http\Controllers\ResponsableFoyer\AnnonceController::class, 'destroy'])->name('foyer.annonces.destroy');
+Route::get('/annonces/{annonce}/edit', [\App\Http\Controllers\ResponsableFoyer\AnnonceController::class, 'edit'])->name('foyer.annonces.edit');
+Route::post('/annonces/{annonce}/update', [\App\Http\Controllers\ResponsableFoyer\AnnonceController::class, 'update'])->name('foyer.annonces.update');
 });
 // ─── inscription ────────────────────────────────────────
 Route::get('/inscription', [InscriptionController::class, 'create'])->name('inscription');

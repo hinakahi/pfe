@@ -190,7 +190,23 @@
         </div>
     </div>
     <nav class="nav flex-column">
-        @yield('sidebar')
+       <nav class="nav flex-column">
+    @php
+        $role = auth()->user()?->role;
+    @endphp
+
+    @if($role === 'admin')
+        @include('admin.partials._sidebar')
+    @elseif($role === 'etudiante')
+        @include('etudiante.partials._sidebar')
+    @elseif($role === 'resp_hebergement')
+        @include('hebergement.partials._sidebar')
+    @elseif($role === 'technicien')
+        @include('technicien.partials._sidebar')
+    @elseif($role === 'resp_foyer')
+        @include('foyer.partials._sidebar')
+    @endif
+</nav>
     </nav>
     <div style="position:absolute; bottom:20px; width:100%; padding:0 10px;">
         <form method="POST" action="{{ route('logout') }}">

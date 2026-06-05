@@ -10,7 +10,7 @@
    class="nav-link {{ request()->routeIs('foyer.reservations') ? 'active' : '' }}">
     <i class="bi bi-calendar-check"></i> <span>Réservations</span>
 </a>
-<a href="{{ route('foyer.promotions.index') }}"
-   class="nav-link {{ request()->routeIs('foyer.promotions.*') ? 'active' : '' }}">
+<a href="{{ route('foyer.annonces.index') }}"
+   class="nav-link {{ request()->routeIs('foyer.annonces.*') ? 'active' : '' }}">
     <i class="bi bi-megaphone"></i> <span>Annonces</span>
 </a>
