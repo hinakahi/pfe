@@ -275,6 +275,42 @@ function calculEconomie() {
 }
 
 document.addEventListener('DOMContentLoaded', calculEconomie);
+document.addEventListener('DOMContentLoaded', function () {
+    const stockInput       = document.querySelector('input[name="stock"]');
+    const toggleDisponible = document.getElementById('disponible');
+    const togglePromo      = document.getElementById('promo_active');
+    const promoSection     = document.getElementById('promoFields'); // le div qui contient les champs promo
+
+    function checkStock() {
+        const stock = parseInt(stockInput.value) || 0;
+
+        if (stock === 0) {
+            // Désactiver disponible
+            toggleDisponible.checked = false;
+            toggleDisponible.disabled = true;
+
+            // Désactiver promo
+            togglePromo.checked = false;
+            togglePromo.disabled = true;
+
+            // Cacher la section promo si elle existe
+            if (promoSection) promoSection.style.display = 'none';
+
+        } else {
+            // Réactiver les toggles
+            toggleDisponible.disabled = false;
+            togglePromo.disabled = false;
+
+            if (promoSection) promoSection.style.display = '';
+        }
+    }
+
+    // Écouter les changements du stock
+    stockInput.addEventListener('input', checkStock);
+
+    // Vérifier au chargement de la page
+    checkStock();
+});
 </script>
 @endsection
 
@@ -283,3 +319,4 @@ document.addEventListener('DOMContentLoaded', calculEconomie);
     .form-check-input:checked { background-color: #ffc107; border-color: #ffc107; }
     .form-control[readonly] { cursor: not-allowed; }
 </style>
+

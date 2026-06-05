@@ -12,5 +12,5 @@
 </a>
 <a href="{{ route('foyer.promotions.index') }}"
    class="nav-link {{ request()->routeIs('foyer.promotions.*') ? 'active' : '' }}">
-    <i class="bi bi-megaphone"></i> <span>Annonces & Promos</span>
+    <i class="bi bi-megaphone"></i> <span>Annonces</span>
 </a>

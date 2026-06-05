@@ -23,6 +23,20 @@
         display: flex;
         flex-direction: column;
         justify-content: space-between;
+        cursor: pointer;
+        transition: transform 0.18s, box-shadow 0.18s;
+        text-decoration: none;
+    }
+    .stat-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 24px rgba(0,0,0,0.18);
+        text-decoration: none;
+        color: #fff;
+    }
+    .stat-card.active-filter {
+        outline: 3px solid rgba(255,255,255,0.7);
+        outline-offset: 2px;
+        box-shadow: 0 6px 20px rgba(0,0,0,0.22);
     }
     .stat-card .stat-label {
         font-size: 0.85rem;
@@ -47,6 +61,35 @@
         opacity: 0.15;
     }
 
+    /* ── Active filter banner ── */
+    .active-filter-banner {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 1rem;
+        padding: 0.5rem 1rem;
+        background: #f0f6ff;
+        border-radius: 10px;
+        border: 1.5px solid #bfdbfe;
+    }
+    .active-filter-banner span {
+        font-size: 0.88rem;
+        font-weight: 600;
+        color: #1e40af;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+    .active-filter-banner a {
+        font-size: 0.82rem;
+        color: #64748b;
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+    }
+    .active-filter-banner a:hover { color: #ef4444; }
+
     /* ── Main Card ── */
     .res-card {
         background: #fff;
@@ -55,47 +98,6 @@
         border: none;
         overflow: hidden;
     }
-
-    /* ── Filter Tabs ── */
-    .filter-tabs {
-        display: flex;
-        gap: 8px;
-        flex-wrap: wrap;
-        padding: 1.1rem 1.5rem;
-        border-bottom: 1px solid #f1f5f9;
-        background: #f8fafc;
-    }
-    .filter-tab {
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
-        padding: 0.4rem 1rem;
-        border-radius: 20px;
-        font-size: 0.85rem;
-        font-weight: 500;
-        text-decoration: none;
-        border: 1.5px solid #e2e8f0;
-        color: #64748b;
-        background: #fff;
-        transition: all 0.18s;
-    }
-    .filter-tab:hover {
-        border-color: #94a3b8;
-        color: #334155;
-    }
-    .filter-tab.active {
-        background: #1a4fa0;
-        border-color: #1a4fa0;
-        color: #fff;
-    }
-    .filter-tab .tab-count {
-        font-size: 0.75rem;
-        padding: 0.1rem 0.5rem;
-        border-radius: 10px;
-        font-weight: 700;
-    }
-    .filter-tab.active .tab-count { background: rgba(255,255,255,0.25); color: #fff; }
-    .filter-tab:not(.active) .tab-count { background: #f1f5f9; color: #64748b; }
 
     /* ── Table ── */
     .res-table {
@@ -220,54 +222,67 @@
     }
 </style>
 
-{{-- ── STAT CARDS ── --}}
+{{-- ── STAT CARDS (cliquables) ── --}}
 <div class="row g-3 mb-4">
     <div class="col-6 col-md-3">
-        <div class="stat-card" style="background: linear-gradient(135deg,#b85c00,#f5820d);">
+        <a href="{{ route('foyer.reservations', ['statut' => 'en_attente']) }}"
+           class="stat-card {{ $filtre === 'en_attente' ? 'active-filter' : '' }}"
+           style="background: linear-gradient(135deg,#b85c00,#f5820d);">
             <div class="stat-label"><i class="bi bi-hourglass-split"></i> En attente</div>
             <div class="stat-value">{{ $compteurs['en_attente'] }}</div>
             <i class="bi bi-hourglass-split stat-icon"></i>
-        </div>
+        </a>
     </div>
     <div class="col-6 col-md-3">
-        <div class="stat-card" style="background: linear-gradient(135deg,#0d7a4e,#1aad72);">
+        <a href="{{ route('foyer.reservations', ['statut' => 'validee']) }}"
+           class="stat-card {{ $filtre === 'validee' ? 'active-filter' : '' }}"
+           style="background: linear-gradient(135deg,#0d7a4e,#1aad72);">
             <div class="stat-label"><i class="bi bi-check-circle"></i> Validées</div>
             <div class="stat-value">{{ $compteurs['validee'] }}</div>
             <i class="bi bi-check-circle stat-icon"></i>
-        </div>
+        </a>
     </div>
     <div class="col-6 col-md-3">
-        <div class="stat-card" style="background: linear-gradient(135deg,#9b1c1c,#e53e3e);">
+        <a href="{{ route('foyer.reservations', ['statut' => 'refusee']) }}"
+           class="stat-card {{ $filtre === 'refusee' ? 'active-filter' : '' }}"
+           style="background: linear-gradient(135deg,#9b1c1c,#e53e3e);">
             <div class="stat-label"><i class="bi bi-x-circle"></i> Refusées</div>
             <div class="stat-value">{{ $compteurs['refusee'] }}</div>
             <i class="bi bi-x-circle stat-icon"></i>
-        </div>
+        </a>
     </div>
     <div class="col-6 col-md-3">
-        <div class="stat-card" style="background: linear-gradient(135deg,#1a4fa0,#2979d8);">
+        <a href="{{ route('foyer.reservations') }}"
+           class="stat-card {{ $filtre === 'tous' ? 'active-filter' : '' }}"
+           style="background: linear-gradient(135deg,#1a4fa0,#2979d8);">
             <div class="stat-label"><i class="bi bi-list-ul"></i> Total</div>
             <div class="stat-value">{{ $compteurs['en_attente'] + $compteurs['validee'] + $compteurs['refusee'] }}</div>
             <i class="bi bi-list-ul stat-icon"></i>
-        </div>
+        </a>
     </div>
 </div>
 
 {{-- ── MAIN CARD ── --}}
 <div class="res-card">
 
-    {{-- Filter Tabs --}}
-    <div class="filter-tabs">
-        @foreach(['tous' => ['Toutes', 'bi-grid'], 'en_attente' => ['En attente', 'bi-hourglass-split'], 'validee' => ['Validées', 'bi-check-circle'], 'refusee' => ['Refusées', 'bi-x-circle']] as $key => $meta)
-            <a href="{{ route('foyer.reservations', ['statut' => $key]) }}"
-               class="filter-tab {{ $filtre === $key ? 'active' : '' }}">
-                <i class="bi {{ $meta[1] }}"></i>
-                {{ $meta[0] }}
-                @if($key !== 'tous')
-                    <span class="tab-count">{{ $compteurs[$key] }}</span>
-                @endif
-            </a>
-        @endforeach
-    </div>
+    {{-- Bandeau filtre actif --}}
+    @if($filtre !== 'tous')
+        <div style="padding: 0.85rem 1.5rem; border-bottom: 1.5px solid #e2e8f0; background: #f8fafc;">
+            <div class="active-filter-banner" style="margin-bottom:0;">
+                <span>
+                    <i class="bi bi-funnel-fill"></i>
+                    Filtré par :
+                    @if($filtre === 'en_attente') <span style="color:#b45309;">En attente</span>
+                    @elseif($filtre === 'validee') <span style="color:#15803d;">Validées</span>
+                    @elseif($filtre === 'refusee') <span style="color:#b91c1c;">Refusées</span>
+                    @endif
+                </span>
+                <a href="{{ route('foyer.reservations') }}">
+                    <i class="bi bi-x-circle"></i> Voir toutes
+                </a>
+            </div>
+        </div>
+    @endif
 
     {{-- Table --}}
     <div class="table-responsive">
