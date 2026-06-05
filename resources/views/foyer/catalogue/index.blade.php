@@ -230,36 +230,44 @@
 <div class="catalogue-card">
 
     {{-- ── STAT CARDS ── --}}
-    <div class="row g-3 mb-4">
-        <div class="col-6 col-md-3">
+<div class="row g-3 mb-4">
+    <div class="col-6 col-md-3">
+        <a href="{{ route('foyer.catalogue.index') }}" style="text-decoration:none;">
             <div class="stat-card stat-blue">
                 <div class="stat-label"><i class="bi bi-box-seam"></i> Total Articles</div>
                 <div class="stat-value">{{ $articles->count() }}</div>
                 <i class="bi bi-box-seam stat-icon"></i>
             </div>
-        </div>
-        <div class="col-6 col-md-3">
+        </a>
+    </div>
+    <div class="col-6 col-md-3">
+        <a href="{{ route('foyer.catalogue.index', ['filtre' => 'promo']) }}" style="text-decoration:none;">
             <div class="stat-card stat-green">
                 <div class="stat-label"><i class="bi bi-tag-fill"></i> En Promotion</div>
                 <div class="stat-value">{{ $articles->where('promo_active', true)->count() }}</div>
                 <i class="bi bi-tag-fill stat-icon"></i>
             </div>
-        </div>
-        <div class="col-6 col-md-3">
+        </a>
+    </div>
+    <div class="col-6 col-md-3">
+        <a href="{{ route('foyer.catalogue.index', ['filtre' => 'peremption']) }}" style="text-decoration:none;">
             <div class="stat-card stat-orange">
                 <div class="stat-label"><i class="bi bi-clock-fill"></i> Périmés / Proches</div>
                 <div class="stat-value">{{ $articles->filter(function($a){ return $a->date_peremption && $a->date_peremption <= now()->addDays(7); })->count() }}</div>
                 <i class="bi bi-clock-fill stat-icon"></i>
             </div>
-        </div>
-        <div class="col-6 col-md-3">
+        </a>
+    </div>
+    <div class="col-6 col-md-3">
+        <a href="{{ route('foyer.catalogue.index', ['filtre' => 'stock_faible']) }}" style="text-decoration:none;">
             <div class="stat-card stat-red">
                 <div class="stat-label"><i class="bi bi-exclamation-triangle-fill"></i> Stock Faible</div>
                 <div class="stat-value">{{ $articles->where('stock', '<=', 5)->count() }}</div>
                 <i class="bi bi-exclamation-triangle-fill stat-icon"></i>
             </div>
-        </div>
+        </a>
     </div>
+</div>
 
     {{-- ── SEARCH & FILTER ── --}}
     <div class="row g-3 mb-4 align-items-center">
@@ -283,7 +291,21 @@
             </a>
         </div>
     </div>
-
+    @if(isset($filtre) && $filtre)
+    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:1rem;">
+        <span style="background:#fee2e2; color:#b91c1c; padding:0.4rem 1rem; border-radius:20px; font-size:0.85rem; font-weight:600;">
+            <i class="bi bi-funnel-fill me-1"></i>
+            @if($filtre === 'stock_faible') Stock Faible (≤ 5)
+            @elseif($filtre === 'promo') En Promotion
+            @elseif($filtre === 'peremption') Périmés / Proches de péremption
+            @endif
+        </span>
+        <a href="{{ route('foyer.catalogue.index') }}"
+           style="font-size:0.85rem; color:#64748b; text-decoration:none;">
+            <i class="bi bi-x-circle me-1"></i> Voir tout
+        </a>
+    </div>
+@endif
     {{-- ── TABLE ── --}}
     <div class="table-responsive">
         <table class="catalogue-table">

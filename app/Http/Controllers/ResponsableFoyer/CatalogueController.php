@@ -24,12 +24,24 @@ class CatalogueController extends Controller
         return view('foyer.dashboard', compact('stats', 'articles'));
     }
 
-    public function index()
-    {
-        $articles = ArticleFoyer::latest()->get();
+public function index(Request $request)
+{
+    $query = ArticleFoyer::latest();
 
-        return view('foyer.catalogue.index', compact('articles'));
+    if ($request->filtre === 'stock_faible') {
+        $query->where('stock', '<=', 5);
+    } elseif ($request->filtre === 'promo') {
+        $query->where('promo_active', true);
+    } elseif ($request->filtre === 'peremption') {
+        $query->where('date_peremption', '<=', now()->addDays(7))
+              ->whereNotNull('date_peremption');
     }
+
+    $articles = $query->get();
+    $filtre = $request->filtre;
+
+    return view('foyer.catalogue.index', compact('articles', 'filtre'));
+}
 
     public function create()
     {
