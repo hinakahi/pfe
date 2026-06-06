@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -11,36 +10,30 @@ class Chambre extends Model
 
     protected $fillable = [
         'numero',
-        'bloc',
+        'type',
         'etage',
         'capacite',
-        'statut',
-        'resp_hebergement_id',
+        'statut',    // 'libre' ou 'occupee'
+        'publiee',   // true/false — visible aux étudiantes
     ];
 
-    // Relations
-    public function responsable()
+    protected $casts = [
+        'publiee' => 'boolean',
+    ];
+
+    // Scopes utiles
+    public function scopeLibres($query)
     {
-        return $this->belongsTo(User::class, 'resp_hebergement_id');
+        return $query->where('statut', 'libre');
     }
 
-    public function demandesRenouvellement()
+    public function scopeOccupees($query)
     {
-        return $this->hasMany(DemandeRenouvellement::class, 'chambre_id');
+        return $query->where('statut', 'occupee');
     }
 
-    public function demandesChangement()
+    public function scopePubliees($query)
     {
-        return $this->hasMany(DemandeChangement::class, 'chambre_actuelle_id');
-    }
-
-    public function maintenances()
-    {
-        return $this->hasMany(Maintenance::class, 'chambre_id');
-    }
-
-    public function isDisponible(): bool
-    {
-        return $this->statut === 'disponible';
+        return $query->where('publiee', true);
     }
 }

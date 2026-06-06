@@ -1,86 +1,100 @@
 <?php
-
 namespace App\Http\Controllers\ResponsableHebergement;
 
 use App\Http\Controllers\Controller;
 use App\Models\Chambre;
-use App\Models\Maintenance;
-use App\Models\DemandeRenouvellement;
 use Illuminate\Http\Request;
+use App\Imports\ChambresImport;
+use Maatwebsite\Excel\Facades\Excel;
 
 class ChambreController extends Controller
 {
-    public function dashboard()
-    {
-        $stats = [
-            'total_chambres'       => Chambre::count(),
-            'chambres_disponibles' => Chambre::where('statut', 'disponible')->count(),
-            'chambres_occupees'    => Chambre::where('statut', 'occupee')->count(),
-            'renouvellements'      => DemandeRenouvellement::where('statut', 'en_attente')->count(),
-            'pannes'               => Maintenance::where('statut', 'en_attente')->count(),
-        ];
-        return view('hebergement.dashboard', compact('stats'));
-    }
+    // Dashboard
+   public function dashboard()
+{
+    $stats = [
+        'total'    => Chambre::count(),
+        'libres'   => Chambre::where('statut', 'libre')->count(),
+        'occupees' => Chambre::where('statut', 'occupee')->count(),
+        'publiees' => Chambre::where('publiee', true)->count(),
+    ];
+    $dernieres = Chambre::latest()->take(5)->get();
+    return view('hebergement.dashboard', compact('stats', 'dernieres'));
+}
 
-    public function index()
-    {
-        $chambres = Chambre::latest()->get();
-        return view('hebergement.chambres.index', compact('chambres'));
-    }
-
+    // Liste toutes les chambres
+public function index()
+{
+    $chambres = Chambre::orderBy('numero')->paginate(20);
+    $stats = [
+        'total'    => Chambre::count(),
+        'occupees' => Chambre::where('statut', 'occupee')->count(),
+        'libres'   => Chambre::where('statut', 'libre')->count(),
+        'publiees' => Chambre::where('publiee', true)->count(),
+    ];
+    return view('hebergement.chambres.index', compact('chambres', 'stats'));
+}
+    // Formulaire ajout
     public function create()
     {
         return view('hebergement.chambres.create');
     }
 
+    // Enregistrer une nouvelle chambre
     public function store(Request $request)
     {
-        $request->validate([
-            'numero'   => 'required|string|max:191',
-            'bloc'     => 'required|string|max:191',
-            'etage'    => 'required|integer|min:0',
-            'capacite' => 'required|integer|in:1,2',
-            'statut'   => 'required|in:disponible,occupee,maintenance',
-        ]);
+       $request->validate([
+    'numero'   => 'required|unique:chambres,numero',
+    'type'     => 'required|in:individuelle,double',
+    'bloc'     => 'required|string|max:10',
+    'etage'    => 'required|integer|min:0',
+    'capacite' => 'required|integer|min:1|max:2',
+]);
 
-        Chambre::create([
-            'numero'              => $request->numero,
-            'bloc'                => $request->bloc,
-            'etage'               => $request->etage,
-            'capacite'            => $request->capacite,
-            'statut'              => $request->statut,
-            'resp_hebergement_id' => auth()->id(),
-        ]);
+Chambre::create($request->only('numero', 'type', 'bloc', 'etage', 'capacite'));
 
         return redirect()->route('hebergement.chambres.index')
                          ->with('success', 'Chambre ajoutée avec succès.');
     }
 
-    public function edit(Chambre $chambre)
-    {
-        return view('hebergement.chambres.edit', compact('chambre'));
-    }
-
-    public function update(Request $request, Chambre $chambre)
-    {
-        $request->validate([
-            'numero'   => 'required|string|max:191',
-            'bloc'     => 'required|string|max:191',
-            'etage'    => 'required|integer|min:0',
-            'capacite' => 'required|integer|in:1,2',
-            'statut'   => 'required|in:disponible,occupee,maintenance',
-        ]);
-
-        $chambre->update($request->only('numero', 'bloc', 'etage', 'capacite', 'statut'));
-
-        return redirect()->route('hebergement.chambres.index')
-                         ->with('success', 'Chambre modifiée avec succès.');
-    }
-
+    // Supprimer une chambre
     public function destroy(Chambre $chambre)
     {
         $chambre->delete();
         return redirect()->route('hebergement.chambres.index')
-                         ->with('success', 'Chambre supprimée avec succès.');
+                         ->with('success', 'Chambre supprimée.');
     }
+
+    // Publier les chambres libres (les rendre visibles aux étudiantes)
+    public function publierVides()
+    {
+        $nb = Chambre::where('statut', 'libre')->update(['publiee' => true]);
+        return redirect()->route('hebergement.chambres.index')
+                         ->with('success', "$nb chambre(s) publiée(s) avec succès.");
+    }
+
+    // Consulter uniquement les chambres vides publiées
+    public function chambresVides()
+    {
+        $chambres = Chambre::where('statut', 'libre')->where('publiee', true)->get();
+        return view('hebergement.chambres.vides', compact('chambres'));
+    }
+    // Afficher formulaire import
+public function importForm()
+{
+    return view('hebergement.chambres.import');
+}
+
+// Traiter l'import
+public function import(Request $request)
+{
+    $request->validate([
+        'fichier' => 'required|mimes:xlsx,xls,csv'
+    ]);
+
+    Excel::import(new ChambresImport, $request->file('fichier'));
+
+    return redirect()->route('hebergement.chambres.index')
+                     ->with('success', 'Chambres importées avec succès !');
+}
 }

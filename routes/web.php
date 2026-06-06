@@ -139,15 +139,24 @@ Route::post('/notifications/{id}/read', function ($id) {
         Route::put('/password', [ProfileController::class, 'updatePassword'])->name('update-password');
     });
 });
-
 // ─── Responsable Hébergement ──────────────────────────────────
 Route::prefix('hebergement')->middleware(['auth', 'role:resp_hebergement'])->group(function () {
     Route::get('/dashboard', [ChambreController::class, 'dashboard'])->name('hebergement.dashboard');
+
+    // ⚠️ TOUTES avant resource
+    Route::get('/chambres/vides', [ChambreController::class, 'chambresVides'])->name('hebergement.chambres.vides');
+    Route::post('/chambres/publier', [ChambreController::class, 'publierVides'])->name('hebergement.chambres.publier');
+    Route::get('/chambres/import', [ChambreController::class, 'importForm'])->name('hebergement.chambres.import');
+    Route::post('/chambres/import', [ChambreController::class, 'import'])->name('hebergement.chambres.import.store');
+
+    // resource EN DERNIER parmi les chambres
     Route::resource('chambres', ChambreController::class)->names('hebergement.chambres');
-    Route::get('/renouvellements', [RenouvellementController::class, 'index'])->name('hebergement.renouvellements');
+
+    Route::get('/renouvellements', [RenouvellementController::class, 'index'])->name('hebergement.renouvellements.index');
     Route::post('/renouvellements/{demande}/valider', [RenouvellementController::class, 'valider'])->name('hebergement.renouvellements.valider');
     Route::post('/renouvellements/{demande}/refuser', [RenouvellementController::class, 'refuser'])->name('hebergement.renouvellements.refuser');
-    Route::get('/changements', [ChangementController::class, 'index'])->name('hebergement.changements');
+
+    Route::get('/changements', [ChangementController::class, 'index'])->name('hebergement.changements.index');
     Route::post('/changements/{demande}/accepter', [ChangementController::class, 'accepter'])->name('hebergement.changements.accepter');
     Route::post('/changements/{demande}/refuser', [ChangementController::class, 'refuser'])->name('hebergement.changements.refuser');
 });
