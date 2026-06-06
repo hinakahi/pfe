@@ -18,10 +18,12 @@ class Maintenance extends Model
         'statut',
         'urgence',
         'date_signalement',
+        'date_resolution',
     ];
 
     protected $casts = [
         'date_signalement' => 'datetime',
+         'date_resolution'  => 'datetime', 
     ];
 
     public function etudiante()

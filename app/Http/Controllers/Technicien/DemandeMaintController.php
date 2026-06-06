@@ -57,6 +57,9 @@ class DemandeMaintController extends Controller
             'technicien_id' => auth()->id(),
         ]);
         if ($request->statut === 'terminee') {
+            $maintenance->update([
+           'date_resolution' => now(), 
+    ]);
     $maintenance->etudiante->notify(new MaintenanceTermineeNotification($maintenance));
 }
 
