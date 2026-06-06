@@ -66,28 +66,40 @@ Route::post('/notifications/{id}/read', function ($id) {
     $notification->markAsRead();
     return back();
 })->name('notifications.read');
-    // Annonces
     Route::get('/annonces', function () {
+
     $query = \App\Models\Annonce::where(function ($q) {
         $q->where('destinataire', 'etudiantes')
           ->orWhere('destinataire', 'tous');
     })->where('publiee', true);
-    
-    // Filtre catégorie
-    if (request('categorie')) {
-        $query->where('categorie', request('categorie'));
-    }
-    
-    // Recherche
+
     if (request('search')) {
         $query->where(function ($q) {
             $q->where('titre', 'like', '%' . request('search') . '%')
               ->orWhere('contenu', 'like', '%' . request('search') . '%');
         });
     }
-    
-    $annonces = $query->latest('date_publication')->paginate(10);
-    return view('etudiante.annonces.index', compact('annonces'));
+
+    // 🔵 dernière annonce mise en avant
+    $annonceVedette = (clone $query)
+        ->latest('date_publication')
+        ->first();
+
+    // liste normale
+    $annonces = (clone $query);
+
+    if ($annonceVedette) {
+        $annonces->where('id', '!=', $annonceVedette->id);
+    }
+
+    $annonces = $annonces
+        ->latest('date_publication')
+        ->paginate(10);
+
+    return view('etudiante.annonces.index', compact(
+        'annonceVedette',
+        'annonces'
+    ));
 })->name('annonces');
 
     // Hébergement

@@ -13,12 +13,13 @@ class NouvelleAnnonceNotification extends Notification
         return ['database'];
     }
 
-    public function toDatabase(object $notifiable): array
-    {
-        return [
-            'titre'   => $this->annonce->titre,
-            'message' => substr($this->annonce->contenu, 0, 150) . '...',
-            'type'    => 'annonce',
-        ];
-    }
+  public function toDatabase($notifiable): array
+{
+    return [
+        'title'    => $this->annonce->titre,      // ← 'title' pas 'titre'
+        'message'  => $this->annonce->contenu,    // ← 'message' pas 'contenu'
+        'categorie'  => $this->annonce->categorie,
+        'annonce_id' => $this->annonce->id,
+    ];
+}
 }

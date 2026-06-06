@@ -4,6 +4,8 @@ namespace App\Http\Controllers\ResponsableFoyer;
 
 use App\Http\Controllers\Controller;
 use App\Models\Annonce;
+use App\Models\User;
+use App\Notifications\NouvelleAnnonceNotification;
 use Illuminate\Http\Request;
 
 class AnnonceController extends Controller
@@ -11,9 +13,9 @@ class AnnonceController extends Controller
     public function index()
     {
         $annonces = Annonce::where('user_id', auth()->id())
-                           ->orWhere('destinataire', 'etudiantes')
-                           ->latest()
-                           ->paginate(10);
+            ->orWhere('destinataire', 'etudiantes')
+            ->latest()
+            ->paginate(10);
 
         return view('foyer.annonces.index', compact('annonces'));
     }
@@ -25,51 +27,66 @@ class AnnonceController extends Controller
 
     public function store(Request $request)
     {
-        $request->validate([
-            'titre'   => 'required|string|max:191',
-            'contenu' => 'required|string',
+        $validated = $request->validate([
+            'titre'     => 'required|string|max:191',
+            'contenu'   => 'required|string',
             'categorie' => 'required|in:generale,urgente,evenement',
         ]);
 
-        Annonce::create([
+        $annonce = Annonce::create([
             'user_id'          => auth()->id(),
-            'titre'            => $request->titre,
-            'contenu'          => $request->contenu,
-            'categorie'        => $request->categorie,
+            'titre'            => $validated['titre'],
+            'contenu'          => $validated['contenu'],
+            'categorie'        => $validated['categorie'],
             'destinataire'     => 'etudiantes',
             'date_publication' => now(),
         ]);
 
-        return redirect()->route('foyer.annonces.index')
-                         ->with('success', 'Annonce publiée avec succès.');
+        // Notifier toutes les étudiantes
+        User::where('role', 'etudiante')->each(function ($etudiante) use ($annonce) {
+            $etudiante->notify(new NouvelleAnnonceNotification($annonce));
+        });
+
+        return redirect()
+            ->route('foyer.annonces.index')
+            ->with('success', 'Annonce publiée avec succès.');
+    }
+
+    public function edit(Annonce $annonce)
+    {
+        if ($annonce->user_id !== auth()->id()) abort(403);
+        return view('foyer.annonces.edit', compact('annonce'));
+    }
+
+    public function update(Request $request, Annonce $annonce)
+    {
+        if ($annonce->user_id !== auth()->id()) abort(403);
+
+        $validated = $request->validate([
+            'titre'     => 'required|string|max:191',
+            'contenu'   => 'required|string',
+            'categorie' => 'required|in:generale,urgente,evenement',
+        ]);
+
+        $annonce->update($validated);
+
+        // Notifier toutes les étudiantes de la modification
+        User::where('role', 'etudiante')->each(function ($etudiante) use ($annonce) {
+            $etudiante->notify(new NouvelleAnnonce($annonce));
+        });
+
+        return redirect()
+            ->route('foyer.annonces.index')
+            ->with('success', 'Annonce modifiée avec succès.');
     }
 
     public function destroy(Annonce $annonce)
     {
+        if ($annonce->user_id !== auth()->id()) abort(403);
         $annonce->delete();
-        return redirect()->route('foyer.annonces.index')
-                         ->with('success', 'Annonce supprimée.');
+
+        return redirect()
+            ->route('foyer.annonces.index')
+            ->with('success', 'Annonce supprimée.');
     }
-    public function edit(Annonce $annonce)
-{
-    return view('foyer.annonces.edit', compact('annonce'));
-}
-
-public function update(Request $request, Annonce $annonce)
-{
-    $request->validate([
-        'titre'     => 'required|string|max:191',
-        'contenu'   => 'required|string',
-        'categorie' => 'required|in:generale,urgente,evenement',
-    ]);
-
-    $annonce->update([
-        'titre'     => $request->titre,
-        'contenu'   => $request->contenu,
-        'categorie' => $request->categorie,
-    ]);
-
-    return redirect()->route('foyer.annonces.index')
-                     ->with('success', 'Annonce modifiée avec succès.');
-}
 }
