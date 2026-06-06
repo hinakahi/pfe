@@ -19,6 +19,7 @@ use App\Http\Controllers\ResponsableFoyer\CatalogueController;
 use App\Http\Controllers\ResponsableFoyer\ReservationController;
 use App\Http\Controllers\InscriptionController;
 use App\Http\Controllers\Etudiante\ProfileController;
+use App\Http\Controllers\Technicien\StockController;
 // ─── Page d'accueil ──────────────────────────────────────────
 Route::get('/accueil', function () {
     return view('welcome');
@@ -80,7 +81,7 @@ Route::post('/notifications/{id}/read', function ($id) {
         });
     }
 
-    // 🔵 dernière annonce mise en avant
+    // dernière annonce mise en avant
     $annonceVedette = (clone $query)
         ->latest('date_publication')
         ->first();
@@ -118,13 +119,14 @@ Route::post('/notifications/{id}/read', function ($id) {
     Route::delete('/foyer/reservations/{reservation}', [FoyerController::class, 'annuler'])->name('foyer.annuler');
 
     // Maintenance
-    Route::prefix('maintenance')->name('maintenance.')->group(function () {
-        Route::get('/', [MaintenanceController::class, 'index'])->name('index');
-        Route::get('/signaler', [MaintenanceController::class, 'create'])->name('signaler');
-        Route::post('/', [MaintenanceController::class, 'store'])->name('store');
-        Route::delete('/{maintenance}', [MaintenanceController::class, 'destroy'])->name('destroy');
-    });
-
+ Route::prefix('maintenance')->name('maintenance.')->group(function () {
+    Route::get('/', [MaintenanceController::class, 'index'])->name('index');
+    Route::get('/signaler', [MaintenanceController::class, 'create'])->name('signaler');
+    Route::post('/', [MaintenanceController::class, 'store'])->name('store');
+    Route::get('/{maintenance}/edit', [MaintenanceController::class, 'edit'])->name('edit');
+    Route::put('/{maintenance}', [MaintenanceController::class, 'update'])->name('update');
+    Route::delete('/{maintenance}', [MaintenanceController::class, 'destroy'])->name('destroy');
+});
     // Réclamations
     Route::resource('reclamations', ReclamationController::class)->names('reclamations');
 
@@ -157,6 +159,7 @@ Route::prefix('technicien')->middleware(['auth', 'role:technicien'])->group(func
     Route::get('/demandes/{maintenance}', [DemandeMaintController::class, 'show'])->name('technicien.demandes.show');
     Route::post('/demandes/{maintenance}/traiter', [DemandeMaintController::class, 'traiter'])->name('technicien.demandes.traiter');
     Route::post('/incidents', [IncidentController::class, 'store'])->name('technicien.incidents.store');
+    Route::resource('stock', StockController::class)->names('technicien.stock');
 });
 
 // ─── Responsable Foyer ────────────────────────────────────────

@@ -75,10 +75,10 @@
         }
         .main-content {
             margin-left: 250px;
-            padding: 20px;
+            padding: 20px 20px 20px 50px;
             transition: margin-left 0.3s;
         }
-        .main-content.expanded { margin-left: 70px; }
+        .main-content.expanded { margin-left: 0px; }
         .topbar {
             background: var(--bg-topbar);
             padding: 12px 20px;

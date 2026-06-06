@@ -5,7 +5,9 @@ namespace App\Http\Controllers\Technicien;
 use App\Http\Controllers\Controller;
 use App\Models\Maintenance;
 use App\Models\Materiel;
+use App\Notifications\MaintenanceTermineeNotification;
 use Illuminate\Http\Request;
+
 
 class DemandeMaintController extends Controller
 {
@@ -54,6 +56,9 @@ class DemandeMaintController extends Controller
             'statut'       => $request->statut,
             'technicien_id' => auth()->id(),
         ]);
+        if ($request->statut === 'terminee') {
+    $maintenance->etudiante->notify(new MaintenanceTermineeNotification($maintenance));
+}
 
         if ($request->has('materiels')) {
             foreach ($request->materiels as $mat) {
