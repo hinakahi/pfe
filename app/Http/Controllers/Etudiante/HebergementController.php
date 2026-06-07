@@ -7,43 +7,44 @@ use App\Models\Chambre;
 use App\Models\DemandeRenouvellement;
 use App\Models\DemandeChangement;
 use App\Models\Periode;
+use App\Models\Annonce;
+use App\Models\User;
+use App\Notifications\NouvelleDemandeChambre;
 use Illuminate\Http\Request;
 
 class HebergementController extends Controller
 {
     public function dashboard()
-{
-    $user = auth()->user();
-    
-    $maChambre = \App\Models\Chambre::where('etudiante_1', $user->matricule)
-                 ->orWhere('etudiante_2', $user->matricule)
-                 ->first();
+    {
+        $user = auth()->user();
 
-    $derniereDemandeRenouvellement = \App\Models\DemandeRenouvellement::where('etudiante_id', $user->id)
+        $maChambre = Chambre::where('etudiante_1', $user->matricule)
+                     ->orWhere('etudiante_2', $user->matricule)
+                     ->first();
+
+        $derniereDemandeRenouvellement = DemandeRenouvellement::where('etudiante_id', $user->id)
+                                        ->latest()->first();
+        $derniereDemandeChangement = DemandeChangement::where('etudiante_id', $user->id)
                                     ->latest()->first();
-    $derniereDemandeChangement = \App\Models\DemandeChangement::where('etudiante_id', $user->id)
-                                ->latest()->first();
 
-    $annonces = \App\Models\Annonce::latest()->take(3)->get();
-    
-    $notifications = $user->notifications()->take(5)->get();
+        $annonces = Annonce::latest()->take(3)->get();
+        $notifications = $user->notifications()->take(5)->get();
 
-    return view('etudiante.dashboard', compact(
-        'maChambre',
-        'derniereDemandeRenouvellement',
-        'derniereDemandeChangement',
-        'annonces',
-        'notifications'
-    ));
-}
+        return view('etudiante.dashboard', compact(
+            'maChambre',
+            'derniereDemandeRenouvellement',
+            'derniereDemandeChangement',
+            'annonces',
+            'notifications'
+        ));
+    }
 
     public function index()
     {
         $user = auth()->user();
 
-        // ✅ Trouver la chambre actuelle de l'étudiante
-        $maChambre = Chambre::where('etudiante_1', $user->name)
-                     ->orWhere('etudiante_2', $user->name)
+        $maChambre = Chambre::where('etudiante_1', $user->matricule)
+                     ->orWhere('etudiante_2', $user->matricule)
                      ->first();
 
         $periodeRenouvellement = Periode::where('type', 'renouvellement')
@@ -55,23 +56,29 @@ class HebergementController extends Controller
         $demandesRenouvellement = DemandeRenouvellement::where('etudiante_id', $user->id)
                                   ->latest()->get();
 
+        $demandesChangement = DemandeChangement::where('etudiante_id', $user->id)
+                              ->latest()->get();
+
         return view('etudiante.hebergement.index', compact(
+            'maChambre',
             'periodeRenouvellement',
             'demandesRenouvellement',
-            'maChambre'  // ✅ ajouté
+            'demandesChangement'
         ));
     }
 
     public function renouveler(Request $request)
     {
         $request->validate([
-            'chambre_id'              => 'required|exists:chambres,id',
-            'justificatif_scolarite'  => 'required|file|mimes:pdf,jpg,png|max:2048',
-            'justificatif_paiement'   => 'required|file|mimes:pdf,jpg,png|max:2048',
+            'chambre_id'             => 'required|exists:chambres,id',
+            'justificatif_scolarite' => 'required|file|mimes:pdf,jpg,png|max:2048',
+            'justificatif_paiement'  => 'required|file|mimes:pdf,jpg,png|max:2048',
         ]);
 
         $scolarite = $request->file('justificatif_scolarite')->store('justificatifs', 'public');
         $paiement  = $request->file('justificatif_paiement')->store('justificatifs', 'public');
+
+        $chambre = Chambre::find($request->chambre_id);
 
         DemandeRenouvellement::create([
             'etudiante_id'           => auth()->id(),
@@ -81,6 +88,16 @@ class HebergementController extends Controller
             'statut'                 => 'en_attente',
         ]);
 
+        // Notifier le responsable hébergement
+        $responsable = User::where('role', 'resp_hebergement')->first();
+        if ($responsable) {
+            $responsable->notify(new NouvelleDemandeChambre(
+                'renouvellement',
+                auth()->user()->name,
+                $chambre->numero ?? '-'
+            ));
+        }
+
         return redirect()->route('etudiante.hebergement.renouvellement')
                          ->with('success', 'Demande de renouvellement envoyée avec succès.');
     }
@@ -89,18 +106,19 @@ class HebergementController extends Controller
     {
         $user = auth()->user();
 
-        // ✅ Chambre actuelle de l'étudiante
-        $maChambre = Chambre::where('etudiante_1', $user->name)
-                     ->orWhere('etudiante_2', $user->name)
+        $maChambre = Chambre::where('etudiante_1', $user->matricule)
+                     ->orWhere('etudiante_2', $user->matricule)
                      ->first();
 
-        $chambresDisponibles = Chambre::whereNull('etudiante_1')->where('publiee', true)->get();
+        $chambresDisponibles = Chambre::whereNull('etudiante_1')
+                               ->where('publiee', true)
+                               ->paginate(15);
 
         $demandesChangement = DemandeChangement::where('etudiante_id', auth()->id())
                              ->latest()->get();
 
         return view('etudiante.hebergement.changement', compact(
-            'maChambre',           // ✅ ajouté
+            'maChambre',
             'chambresDisponibles',
             'demandesChangement'
         ));
@@ -108,19 +126,43 @@ class HebergementController extends Controller
 
     public function demanderChangement(Request $request)
     {
-        $request->validate([
-            'chambre_actuelle_id'  => 'required|exists:chambres,id',
-            'chambre_demandee_id'  => 'required|exists:chambres,id',
-            'motif'                => 'required|string|max:500',
-        ]);
+        $rules = [
+            'chambre_actuelle_id' => 'required|exists:chambres,id',
+            'chambre_demandee_id' => 'required|exists:chambres,id',
+            'motif'               => 'required|string|max:500',
+        ];
 
-        DemandeChangement::create([
+        $chambre = Chambre::find($request->chambre_demandee_id);
+        if ($chambre && $chambre->type === 'individuelle') {
+            $rules['justificatif'] = 'required|file|mimes:pdf|max:5120';
+        }
+
+        $request->validate($rules);
+
+        $data = [
             'etudiante_id'        => auth()->id(),
             'chambre_actuelle_id' => $request->chambre_actuelle_id,
             'chambre_demandee_id' => $request->chambre_demandee_id,
             'motif'               => $request->motif,
             'statut'              => 'en_attente',
-        ]);
+        ];
+
+        if ($request->hasFile('justificatif')) {
+            $data['justificatif'] = $request->file('justificatif')->store('justificatifs', 'public');
+        }
+
+        DemandeChangement::create($data);
+
+        // Notifier le responsable hébergement
+        $chambreActuelle = Chambre::find($request->chambre_actuelle_id);
+        $responsable = User::where('role', 'resp_hebergement')->first();
+        if ($responsable) {
+            $responsable->notify(new NouvelleDemandeChambre(
+                'changement',
+                auth()->user()->name,
+                $chambreActuelle->numero ?? '-'
+            ));
+        }
 
         return redirect()->route('etudiante.changement')
                          ->with('success', 'Demande de changement envoyée avec succès.');

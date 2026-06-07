@@ -3,6 +3,7 @@ namespace App\Http\Controllers\ResponsableHebergement;
 
 use App\Http\Controllers\Controller;
 use App\Models\DemandeRenouvellement;
+use App\Notifications\RenouvellementTraite;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -28,6 +29,9 @@ class RenouvellementController extends Controller
             'resp_hebergement_id' => Auth::id(),
         ]);
 
+        // Notifier l'étudiante
+        $demande->etudiante->notify(new RenouvellementTraite('validee'));
+
         return back()->with('success', 'Renouvellement validé avec succès.');
     }
 
@@ -42,6 +46,9 @@ class RenouvellementController extends Controller
             'motif_refus'         => $request->motif_refus,
             'resp_hebergement_id' => Auth::id(),
         ]);
+
+        // Notifier l'étudiante
+        $demande->etudiante->notify(new RenouvellementTraite('refusee', $request->motif_refus));
 
         return back()->with('success', 'Renouvellement refusé.');
     }

@@ -9,23 +9,21 @@ use Maatwebsite\Excel\Facades\Excel;
 
 class ChambreController extends Controller
 {
-    public function dashboard()
-    {
-        $chambres = Chambre::all();
+ public function dashboard()
+{
+    $toutes  = Chambre::all();
 
-       $stats = [
-    'total'       => Chambre::count(),
-    'occupees'    => Chambre::whereNotNull('etudiante_1')->whereNotNull('etudiante_2')->count(),
-    'une_place'   => Chambre::where('type', 'Double')
-                        ->whereNotNull('etudiante_1')
-                        ->whereNull('etudiante_2')
-                        ->count(),
-    'disponibles' => Chambre::whereNull('etudiante_1')->count(),
-];
+    $stats = [
+        'total'    => $toutes->count(),
+        'libres'   => $toutes->filter(fn($c) => $c->statut === 'libre')->count(),
+        'occupees' => $toutes->filter(fn($c) => $c->statut === 'occupee')->count(),
+        'publiees' => Chambre::where('publiee', true)->count(),
+    ];
 
-        $dernieres = Chambre::latest()->take(5)->get();
-        return view('hebergement.dashboard', compact('stats', 'dernieres'));
-    }
+    $dernieres = Chambre::latest()->take(5)->get();
+
+    return view('hebergement.dashboard', compact('stats', 'dernieres'));
+}
 public function index(Request $request)
 {
     $query = Chambre::query();

@@ -119,11 +119,13 @@ Route::middleware(['auth', 'role:etudiante'])->prefix('etudiante')->name('etudia
     Route::post('/hebergement/changement', [HebergementController::class, 'demanderChangement'])->name('changement.store');
 
     // Foyer
-    Route::get('/foyer', [FoyerController::class, 'index'])->name('foyer');
-    Route::post('/foyer/reserver/{article}', [FoyerController::class, 'reserver'])->name('foyer.reserver');
-    Route::get('/foyer/reservations', [FoyerController::class, 'mesReservations'])->name('foyer.reservations');
-    Route::delete('/foyer/reservations/{reservation}', [FoyerController::class, 'annuler'])->name('foyer.annuler');
-
+    // Foyer
+Route::get('/foyer', [FoyerController::class, 'dashboard'])->name('foyer');  // ✅ DASHBOARD
+Route::post('/foyer/reserver/{article}', [FoyerController::class, 'reserver'])->name('foyer.reserver');
+Route::get('/foyer/reservations', [FoyerController::class, 'mesReservations'])->name('foyer.reservations');
+Route::delete('/foyer/reservations/{reservation}', [FoyerController::class, 'annuler'])->name('foyer.annuler');
+Route::post('/foyer/confirmer', [FoyerController::class, 'confirmer'])->name('foyer.confirmer');
+Route::get('/foyer/catalogue', [FoyerController::class, 'index'])->name('foyer.catalogue');  // ✅ CATALOGUE
     // Maintenance
     Route::prefix('maintenance')->name('maintenance.')->group(function () {
         Route::get('/', [MaintenanceController::class, 'index'])->name('index');

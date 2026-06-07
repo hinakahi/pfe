@@ -14,7 +14,7 @@
         <a href="#accueil" class="logo-container">
           <div class="logo-icon">
     <img src="{{ asset('photo/mon_logo.jpg') }}" alt="Logo SiOukli">
-</div>
+      </div>
           <div>
             <span class="logo-text">Si<span>Oukli</span></span>
             <small class="logo-sub">Résidence kasri Mohammed · Tamda</small>
@@ -310,8 +310,17 @@
         <div class="footer-main">
           <div>
             <div class="footer-logo-wrap">
-              <div class="footer-icon"><i class="fas fa-building"></i></div>
-              <span class="footer-logo-text">Si<span>Oukli</span></span>
+               <a href="#accueil" class="logo-container">
+          <div class="logo-icon">
+    <img src="{{ asset('photo/mon_logo.jpg') }}" alt="Logo SiOukli">
+      </div>
+          <div>
+            <span class="logo-text">Si<span>Oukli</span></span>
+            <small class="logo-sub">Résidence kasri Mohammed · Tamda</small>
+          </div>
+        </a>
+             
+             
             </div>
             <p class="footer-description">
               Plateforme numérique de gestion de la résidence universitaire Kasri Mohammed Akli (Si Oukli) — Tamda, Tizi Ouzou. Un écosystème digital pour les 1318 résidentes.

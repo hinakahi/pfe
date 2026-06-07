@@ -19,6 +19,7 @@ class DemandeChangement extends Model
         'motif',
         'statut',
         'motif_refus',
+        'justificatif'
     ];
 
     public function etudiante()

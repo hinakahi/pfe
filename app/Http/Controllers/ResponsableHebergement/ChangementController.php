@@ -3,6 +3,7 @@ namespace App\Http\Controllers\ResponsableHebergement;
 
 use App\Http\Controllers\Controller;
 use App\Models\DemandeChangement;
+use App\Notifications\ChangementTraite;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -23,17 +24,14 @@ class ChangementController extends Controller
 
     public function accepter(Request $request, DemandeChangement $demande)
     {
-        // Vérifier que la chambre demandée est disponible
         if ($demande->chambreDemandee && $demande->chambreDemandee->statut !== 'libre') {
             return back()->with('error', 'La chambre demandée n\'est plus disponible.');
         }
 
-        // Libérer l'ancienne chambre
         if ($demande->chambreActuelle) {
             $demande->chambreActuelle->update(['statut' => 'libre']);
         }
 
-        // Occuper la nouvelle chambre
         if ($demande->chambreDemandee) {
             $demande->chambreDemandee->update(['statut' => 'occupee']);
         }
@@ -42,6 +40,9 @@ class ChangementController extends Controller
             'statut'              => 'acceptee',
             'resp_hebergement_id' => Auth::id(),
         ]);
+
+        // Notifier l'étudiante
+        $demande->etudiante->notify(new ChangementTraite('acceptee'));
 
         return back()->with('success', 'Changement de chambre accepté avec succès.');
     }
@@ -57,6 +58,9 @@ class ChangementController extends Controller
             'motif_refus'         => $request->motif_refus,
             'resp_hebergement_id' => Auth::id(),
         ]);
+
+        // Notifier l'étudiante
+        $demande->etudiante->notify(new ChangementTraite('refusee', $request->motif_refus));
 
         return back()->with('success', 'Demande de changement refusée.');
     }
