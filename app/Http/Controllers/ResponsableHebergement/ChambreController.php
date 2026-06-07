@@ -9,55 +9,112 @@ use Maatwebsite\Excel\Facades\Excel;
 
 class ChambreController extends Controller
 {
-    // Dashboard
-   public function dashboard()
+    public function dashboard()
+    {
+        $chambres = Chambre::all();
+
+       $stats = [
+    'total'       => Chambre::count(),
+    'occupees'    => Chambre::whereNotNull('etudiante_1')->whereNotNull('etudiante_2')->count(),
+    'une_place'   => Chambre::where('type', 'Double')
+                        ->whereNotNull('etudiante_1')
+                        ->whereNull('etudiante_2')
+                        ->count(),
+    'disponibles' => Chambre::whereNull('etudiante_1')->count(),
+];
+
+        $dernieres = Chambre::latest()->take(5)->get();
+        return view('hebergement.dashboard', compact('stats', 'dernieres'));
+    }
+public function index(Request $request)
 {
-    $stats = [
-        'total'    => Chambre::count(),
-        'libres'   => Chambre::where('statut', 'libre')->count(),
-        'occupees' => Chambre::where('statut', 'occupee')->count(),
-        'publiees' => Chambre::where('publiee', true)->count(),
-    ];
-    $dernieres = Chambre::latest()->take(5)->get();
-    return view('hebergement.dashboard', compact('stats', 'dernieres'));
+    $query = Chambre::query();
+
+    if ($request->filled('categorie')) {
+        $query->where('type', $request->categorie);
+    }
+
+    if ($request->filled('search')) {
+        $query->where(function($q) use ($request) {
+            $q->where('numero', 'like', '%'.$request->search.'%')
+              ->orWhere('bloc', 'like', '%'.$request->search.'%');
+        });
+    }
+
+   if ($request->boolean('vides')) {
+    $query->whereNull('etudiante_1');
 }
 
-    // Liste toutes les chambres
-public function index()
-{
-    $chambres = Chambre::orderBy('numero')->paginate(20);
-    $stats = [
-        'total'    => Chambre::count(),
-        'occupees' => Chambre::where('statut', 'occupee')->count(),
-        'libres'   => Chambre::where('statut', 'libre')->count(),
-        'publiees' => Chambre::where('publiee', true)->count(),
-    ];
+    $chambres = $query->paginate(20)->withQueryString();
+
+    
+$stats = [
+    'total'       => Chambre::count(),
+    'occupees'    => Chambre::whereNotNull('etudiante_1')->whereNotNull('etudiante_2')->count(),
+    'une_place'   => Chambre::where('type', 'Double')
+                        ->whereNotNull('etudiante_1')
+                        ->whereNull('etudiante_2')
+                        ->count(),
+    'disponibles' => Chambre::whereNull('etudiante_1')->count(),
+];
+
+    //  Ajoute 'stats' ici
     return view('hebergement.chambres.index', compact('chambres', 'stats'));
 }
-    // Formulaire ajout
+
     public function create()
     {
         return view('hebergement.chambres.create');
     }
 
-    // Enregistrer une nouvelle chambre
     public function store(Request $request)
     {
-       $request->validate([
-    'numero'   => 'required|unique:chambres,numero',
-    'type'     => 'required|in:individuelle,double',
-    'bloc'     => 'required|string|max:10',
-    'etage'    => 'required|integer|min:0',
-    'capacite' => 'required|integer|min:1|max:2',
-]);
+        $request->validate([
+            'numero'      => 'required|unique:chambres,numero',
+            'type'        => 'required|in:individuelle,double',
+            'bloc'        => 'required|string|max:10',
+            'etage'       => 'required|integer|min:0',
+            'capacite'    => 'required|integer|min:1|max:2',
+            'etudiante_1' => 'nullable|string|max:100',
+            'etudiante_2' => 'nullable|string|max:100|required_if:type,double',
+        ]);
 
-Chambre::create($request->only('numero', 'type', 'bloc', 'etage', 'capacite'));
+        // etudiante_2 seulement pour les doubles
+        $data = $request->only('numero', 'type', 'bloc', 'etage', 'capacite', 'etudiante_1');
+        if ($request->type === 'double') {
+            $data['etudiante_2'] = $request->etudiante_2;
+        }
+
+        Chambre::create($data);
 
         return redirect()->route('hebergement.chambres.index')
                          ->with('success', 'Chambre ajoutée avec succès.');
     }
 
-    // Supprimer une chambre
+  public function edit(Chambre $chambre)
+{
+    $etudiantes = \App\Models\User::where('role', 'etudiante')
+                  ->select('id', 'name', 'matricule')
+                  ->get();
+    return view('hebergement.chambres.edit', compact('chambre', 'etudiantes'));
+}
+
+    public function update(Request $request, Chambre $chambre)
+    {
+        $request->validate([
+            'etudiante_1' => 'nullable|string|max:100',
+            'etudiante_2' => 'nullable|string|max:100',
+        ]);
+
+        $chambre->update([
+            'etudiante_1' => $request->etudiante_1,
+            'etudiante_2' => $chambre->type === 'double' ? $request->etudiante_2 : null,
+        ]);
+
+        return redirect()->route('hebergement.chambres.index')
+                         ->with('success', 'Chambre mise à jour.');
+    }
+
     public function destroy(Chambre $chambre)
     {
         $chambre->delete();
@@ -65,36 +122,43 @@ Chambre::create($request->only('numero', 'type', 'bloc', 'etage', 'capacite'));
                          ->with('success', 'Chambre supprimée.');
     }
 
-    // Publier les chambres libres (les rendre visibles aux étudiantes)
+    // Publie toutes les chambres avec au moins une place libre
     public function publierVides()
     {
-        $nb = Chambre::where('statut', 'libre')->update(['publiee' => true]);
+        $nb = Chambre::where(function($q) {
+            $q->whereNull('etudiante_1')
+              ->orWhereNull('etudiante_2');
+        })->update(['publiee' => true]);
+
         return redirect()->route('hebergement.chambres.index')
                          ->with('success', "$nb chambre(s) publiée(s) avec succès.");
     }
 
-    // Consulter uniquement les chambres vides publiées
     public function chambresVides()
     {
-        $chambres = Chambre::where('statut', 'libre')->where('publiee', true)->get();
+        $chambres = Chambre::where('publiee', true)
+            ->where(function($q) {
+                $q->whereNull('etudiante_1')
+                  ->orWhereNull('etudiante_2');
+            })->get();
+
         return view('hebergement.chambres.vides', compact('chambres'));
     }
-    // Afficher formulaire import
-public function importForm()
-{
-    return view('hebergement.chambres.import');
-}
 
-// Traiter l'import
-public function import(Request $request)
-{
-    $request->validate([
-        'fichier' => 'required|mimes:xlsx,xls,csv'
-    ]);
+    public function importForm()
+    {
+        return view('hebergement.chambres.import');
+    }
 
-    Excel::import(new ChambresImport, $request->file('fichier'));
+    public function import(Request $request)
+    {
+        $request->validate([
+            'fichier' => 'required|mimes:xlsx,xls,csv'
+        ]);
 
-    return redirect()->route('hebergement.chambres.index')
-                     ->with('success', 'Chambres importées avec succès !');
-}
+        Excel::import(new ChambresImport, $request->file('fichier'));
+
+        return redirect()->route('hebergement.chambres.index')
+                         ->with('success', 'Chambres importées avec succès !');
+    }
 }

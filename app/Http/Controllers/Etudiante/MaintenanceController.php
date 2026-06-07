@@ -14,7 +14,7 @@ class MaintenanceController extends Controller
     {
         $demandes = Maintenance::where('etudiante_id', auth()->id())
                    ->latest()->get();
-        $chambres = Chambre::where('statut', 'occupee')->get();
+        $chambres = Chambre::whereNotNull('etudiante_1')->get();
         return view('etudiante.maintenance.index', compact('demandes', 'chambres'));
     }
 

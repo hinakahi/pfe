@@ -10,12 +10,14 @@ return new class extends Migration
     {
         Schema::create('chambres', function (Blueprint $table) {
             $table->id();
-            $table->string('numero');
+            $table->string('numero')->unique();
+            $table->enum('type', ['individuelle', 'double']);
             $table->string('bloc');
             $table->integer('etage');
-            $table->integer('capacite')->default(2);
-            $table->enum('statut', ['disponible', 'occupee', 'maintenance'])->default('disponible');
-            $table->foreignId('resp_hebergement_id')->nullable()->constrained('users')->nullOnDelete();
+            $table->integer('capacite');
+            $table->string('etudiante_1')->nullable();
+            $table->string('etudiante_2')->nullable();
+            $table->boolean('publiee')->default(false);
             $table->timestamps();
         });
     }

@@ -1,8 +1,43 @@
 @extends('layouts.app')
 @section('page-title', 'Gestion des Chambres')
 
-
 @section('content')
+
+{{-- Stats --}}
+<div class="row g-3 mb-4">
+    <div class="col-md-3">
+        <div class="card text-center border-0 bg-light">
+            <div class="card-body py-3">
+                <div class="text-muted small">Total</div>
+                <div class="fw-bold fs-4">{{ $stats['total'] }}</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-center border-0" style="background:#fff3f3">
+            <div class="card-body py-3">
+                <div class="text-muted small">Occupées</div>
+                <div class="fw-bold fs-4 text-danger">{{ $stats['occupees'] }}</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-center border-0" style="background:#fff8ec">
+            <div class="card-body py-3">
+                <div class="text-muted small">1 place libre</div>
+                <div class="fw-bold fs-4 text-warning">{{ $stats['une_place'] }}</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-center border-0" style="background:#f0faf4">
+            <div class="card-body py-3">
+                <div class="text-muted small">Disponibles</div>
+                <div class="fw-bold fs-4 text-success">{{ $stats['disponibles'] }}</div>
+            </div>
+        </div>
+    </div>
+</div>
 
 {{-- Titre --}}
 <div class="mb-4">
@@ -10,32 +45,37 @@
     <p class="text-muted mb-0">Consulter, filtrer et gérer les affectations de chambres.</p>
 </div>
 
-
-
 {{-- Filtres + Actions --}}
 <div class="card mb-4">
     <div class="card-body">
         <div class="row g-2 align-items-center">
-            <div class="col-md-2">
-                <select class="form-select form-select-sm" id="filtreType" onchange="filtrer()">
+
+            {{-- Formulaire GET filtres --}}
+            <form method="GET" action="{{ route('hebergement.chambres.index') }}" id="filterForm"
+                  class="col-md-7 d-flex gap-2 align-items-center p-0">
+                <select class="form-select form-select-sm" name="categorie" onchange="this.form.submit()">
                     <option value="">Toutes catégories</option>
-                    <option value="individuelle">Individuelle</option>
-                    <option value="double">Double</option>
+                    <option value="individuelle" {{ request('categorie') == 'individuelle' ? 'selected' : '' }}>Individuelle</option>
+                    <option value="double" {{ request('categorie') == 'double' ? 'selected' : '' }}>Double</option>
                 </select>
-            </div>
-            <div class="col-md-2">
-                <div class="form-check">
-                    <input class="form-check-input" type="checkbox" id="filtreVide" onchange="filtrer()">
+
+                <div class="form-check text-nowrap ms-2">
+                    <input class="form-check-input" type="checkbox" name="vides" value="1"
+                           id="filtreVide" {{ request('vides') ? 'checked' : '' }}
+                           onchange="this.form.submit()">
                     <label class="form-check-label" for="filtreVide">Vides uniquement</label>
                 </div>
-            </div>
-            <div class="col-md-3">
-                <input type="text" class="form-control form-control-sm" id="filtreSearch"
-                       placeholder="Rechercher n° chambre ou bloc..." onkeyup="filtrer()">
-            </div>
+
+                <input type="text" class="form-control form-control-sm" name="search"
+                       value="{{ request('search') }}"
+                       placeholder="Rechercher n° chambre ou bloc..."
+                       onkeyup="if(event.key==='Enter') this.form.submit()">
+            </form>
+
+            {{-- Boutons actions --}}
             <div class="col-md-5 text-end d-flex gap-2 justify-content-end">
                 <a href="{{ route('hebergement.chambres.import') }}" class="btn btn-sm btn-outline-success">
-                    <i class="bi bi-file-earmark-excel me-1"></i> Importer Excel Chambres
+                    <i class="bi bi-file-earmark-excel me-1"></i> Importer Excel
                 </a>
                 <form method="POST" action="{{ route('hebergement.chambres.publier') }}" class="d-inline">
                     @csrf
@@ -47,6 +87,7 @@
                     <i class="bi bi-plus"></i>
                 </a>
             </div>
+
         </div>
     </div>
 </div>
@@ -54,42 +95,81 @@
 {{-- Tableau --}}
 <div class="card">
     <div class="card-body p-0">
-        <table class="table table-hover mb-0" id="tableChambres">
+        <table class="table table-hover mb-0">
             <thead class="table-light">
                 <tr>
                     <th>Numéro</th>
                     <th>Type</th>
                     <th>Bloc</th>
                     <th>Étage</th>
-                    <th>Capacité</th>
+                    <th>Étudiante 1</th>
+                    <th>Étudiante 2</th>
                     <th>Statut</th>
                     <th>Publiée</th>
                     <th>Actions</th>
                 </tr>
             </thead>
-            <tbody id="tbody">
+            <tbody>
                 @forelse($chambres as $chambre)
-                <tr data-type="{{ $chambre->type }}"
-                    data-statut="{{ $chambre->statut }}"
-                    data-search="{{ strtolower($chambre->numero . ' ' . $chambre->bloc) }}">
+                <tr>
                     <td><strong>{{ $chambre->numero }}</strong></td>
+
                     <td>
                         @if($chambre->type === 'individuelle')
-                            <span class="badge bg-info">Individuelle</span>
+                            <span class="badge bg-info text-dark">Individuelle</span>
                         @else
-                            <span class="badge bg-purple" style="background:#6f42c1">Double</span>
+                            <span class="badge" style="background:#6f42c1">Double</span>
                         @endif
                     </td>
+
                     <td>{{ $chambre->bloc ?? '-' }}</td>
                     <td>{{ $chambre->etage }}</td>
-                    <td>{{ $chambre->capacite }} pers.</td>
+
+                    {{-- Étudiante 1 --}}
+                    <td>
+                        @if($chambre->etudiante_1)
+                            <span class="d-flex align-items-center gap-2">
+                                <span class="rounded-circle bg-primary text-white d-inline-flex align-items-center justify-content-center"
+                                      style="width:28px;height:28px;font-size:11px">
+                                    {{ strtoupper(substr($chambre->etudiante_1, 0, 2)) }}
+                                </span>
+                                {{ $chambre->etudiante_1 }}
+                            </span>
+                        @else
+                            <span class="text-muted fst-italic small">Place libre</span>
+                        @endif
+                    </td>
+
+                    {{-- Étudiante 2 --}}
+                    <td>
+                        @if($chambre->type === 'double')
+                            @if($chambre->etudiante_2)
+                                <span class="d-flex align-items-center gap-2">
+                                    <span class="rounded-circle text-white d-inline-flex align-items-center justify-content-center"
+                                          style="width:28px;height:28px;font-size:11px;background:#6f42c1">
+                                        {{ strtoupper(substr($chambre->etudiante_2, 0, 2)) }}
+                                    </span>
+                                    {{ $chambre->etudiante_2 }}
+                                </span>
+                            @else
+                                <span class="text-muted fst-italic small">Place libre</span>
+                            @endif
+                        @else
+                            <span class="text-muted">—</span>
+                        @endif
+                    </td>
+
+                    {{-- Statut --}}
                     <td>
                         @if($chambre->statut === 'libre')
                             <span class="badge bg-success">Disponible</span>
+                        @elseif($chambre->statut === 'partielle')
+                            <span class="badge bg-warning text-dark">1 place libre</span>
                         @else
                             <span class="badge bg-danger">Occupée</span>
                         @endif
                     </td>
+
                     <td>
                         @if($chambre->publiee)
                             <span class="badge bg-primary">Oui</span>
@@ -97,19 +177,26 @@
                             <span class="badge bg-secondary">Non</span>
                         @endif
                     </td>
+
                     <td>
-                        <form method="POST" action="{{ route('hebergement.chambres.destroy', $chambre) }}"
-                              onsubmit="return confirm('Supprimer cette chambre ?')">
-                            @csrf @method('DELETE')
-                            <button class="btn btn-sm btn-outline-danger">
-                                <i class="bi bi-trash"></i>
-                            </button>
-                        </form>
+                        <div class="d-flex gap-1">
+                            <a href="{{ route('hebergement.chambres.edit', $chambre) }}"
+                               class="btn btn-sm btn-outline-primary">
+                                <i class="bi bi-pencil"></i>
+                            </a>
+                            <form method="POST" action="{{ route('hebergement.chambres.destroy', $chambre) }}"
+                                  onsubmit="return confirm('Supprimer cette chambre ?')">
+                                @csrf @method('DELETE')
+                                <button class="btn btn-sm btn-outline-danger">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </form>
+                        </div>
                     </td>
                 </tr>
                 @empty
-                <tr id="emptyRow">
-                    <td colspan="8" class="text-center text-muted py-4">Aucune chambre enregistrée.</td>
+                <tr>
+                    <td colspan="9" class="text-center text-muted py-4">Aucune chambre enregistrée.</td>
                 </tr>
                 @endforelse
             </tbody>
@@ -119,29 +206,4 @@
 
 <div class="mt-3">{{ $chambres->links() }}</div>
 
-@endsection
-
-@section('scripts')
-<script>
-function filtrer() {
-    const type    = document.getElementById('filtreType').value.toLowerCase();
-    const vide    = document.getElementById('filtreVide').checked;
-    const search  = document.getElementById('filtreSearch').value.toLowerCase();
-    const rows    = document.querySelectorAll('#tbody tr[data-type]');
-    let visible   = 0;
-
-    rows.forEach(row => {
-        const matchType   = !type   || row.dataset.type === type;
-        const matchVide   = !vide   || row.dataset.statut === 'libre';
-        const matchSearch = !search || row.dataset.search.includes(search);
-
-        if (matchType && matchVide && matchSearch) {
-            row.style.display = '';
-            visible++;
-        } else {
-            row.style.display = 'none';
-        }
-    });
-}
-</script>
 @endsection

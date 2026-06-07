@@ -16,80 +16,66 @@
         border-radius: 16px;
         box-shadow: 0 2px 12px rgba(0,0,0,0.07);
         border: none;
-        max-width: 680px;
+        max-width: 720px;
         margin: 0 auto;
     }
     .form-card .card-body { padding: 2rem; }
-    .form-label { font-weight: 600; color: #1e293b; margin-bottom: 0.5rem; font-size: 0.95rem; }
-    .form-control {
+    .form-label { font-weight: 600; color: #1e293b; margin-bottom: 0.5rem; font-size: 0.95rem; display: block; }
+    .form-control, .form-select {
         border-radius: 10px;
         border: 1.5px solid #e2e8f0;
         padding: 0.7rem 1rem;
         font-size: 0.95rem;
-        transition: border-color 0.15s;
         width: 100%;
         box-sizing: border-box;
+        transition: border-color 0.15s;
     }
-    .form-control:focus { outline: none; border-color: #2979d8; box-shadow: 0 0 0 3px rgba(41,121,216,0.1); }
+    .form-control:focus, .form-select:focus {
+        outline: none;
+        border-color: #2979d8;
+        box-shadow: 0 0 0 3px rgba(41,121,216,0.1);
+    }
     textarea.form-control { resize: vertical; min-height: 150px; font-family: inherit; }
     .mb-4 { margin-bottom: 1.5rem; }
     .text-danger { color: #ef4444; }
+    .invalid-feedback { color: #ef4444; font-size: 0.85rem; margin-top: 0.4rem; display: block; }
+    .is-invalid { border-color: #ef4444 !important; }
 
-    /* Catégories */
-    .cat-options-container { display: flex; gap: 12px; margin-top: 0.75rem; }
+    /* Cartes catégorie */
+    .cat-options-container { display: flex; gap: 10px; margin-top: 0.75rem; flex-wrap: wrap; }
     .cat-option {
-        flex: 1;
+        flex: 1; min-width: 100px;
         border: 2px solid #e2e8f0;
         border-radius: 12px;
-        padding: 1rem;
+        padding: 0.8rem 0.5rem;
         cursor: pointer;
         transition: all 0.18s;
         text-align: center;
     }
-    .cat-option:hover { border-color: #94a3b8; }
     .cat-option input[type="radio"] { display: none; }
-    .cat-option.selected-generale  { border-color: #1d4ed8; background: #eff6ff; }
-    .cat-option.selected-urgente   { border-color: #b91c1c; background: #fef2f2; }
-    .cat-option.selected-evenement { border-color: #15803d; background: #f0fdf4; }
-    .cat-icon  { font-size: 1.8rem; display: block; margin-bottom: 0.4rem; }
-    .cat-label { font-size: 0.85rem; font-weight: 600; color: #334155; }
+    .cat-option:hover { border-color: #94a3b8; }
+    .cat-option.selected { border-color: #2979d8; background: #eff6ff; }
+    .cat-icon  { font-size: 1.5rem; display: block; margin-bottom: 0.3rem; }
+    .cat-label { font-size: 0.8rem; font-weight: 600; color: #334155; }
 
-    /* Destinataire — cartes étudiantes */
-    .dest-options-container { display: flex; gap: 10px; margin-top: 0.75rem; flex-wrap: wrap; }
-    .dest-option {
+    /* Cartes urgence */
+    .urg-options-container { display: flex; gap: 10px; margin-top: 0.75rem; }
+    .urg-option {
         flex: 1;
-        min-width: 130px;
         border: 2px solid #e2e8f0;
         border-radius: 12px;
-        padding: 0.85rem 0.75rem;
+        padding: 0.8rem 0.5rem;
         cursor: pointer;
         transition: all 0.18s;
         text-align: center;
-        position: relative;
     }
-    .dest-option:hover { border-color: #94a3b8; background: #f8fafc; }
-    .dest-option input[type="radio"] { display: none; }
-    .dest-option.selected {
-        border-color: #7c3aed;
-        background: #f5f3ff;
-    }
-    .dest-option.selected .dest-label { color: #6d28d9; }
-    .dest-icon  { font-size: 1.6rem; display: block; margin-bottom: 0.35rem; }
-    .dest-label { font-size: 0.82rem; font-weight: 600; color: #475569; }
-    .dest-check {
-        display: none;
-        position: absolute;
-        top: 6px;
-        right: 8px;
-        width: 18px;
-        height: 18px;
-        background: #7c3aed;
-        border-radius: 50%;
-        align-items: center;
-        justify-content: center;
-    }
-    .dest-option.selected .dest-check { display: flex; }
-    .dest-check i { font-size: 10px; color: #fff; }
+    .urg-option input[type="radio"] { display: none; }
+    .urg-option:hover { border-color: #94a3b8; }
+    .urg-option.selected-general        { border-color: #6c757d; background: #f8f9fa; }
+    .urg-option.selected-urgent         { border-color: #dc3545; background: #fef2f2; }
+    .urg-option.selected-administration { border-color: #212529; background: #f1f3f5; }
+    .urg-icon  { font-size: 1.5rem; display: block; margin-bottom: 0.3rem; }
+    .urg-label { font-size: 0.8rem; font-weight: 600; color: #334155; }
 
     /* Boutons */
     .form-buttons { display: flex; gap: 1rem; margin-top: 2rem; }
@@ -109,14 +95,12 @@
         text-decoration: none; transition: all 0.15s;
     }
     .btn-cancel:hover { border-color: #cbd5e1; background: #f8fafc; }
-    .invalid-feedback { color: #ef4444; font-size: 0.85rem; margin-top: 0.4rem; display: block; }
-    .is-invalid { border-color: #ef4444 !important; }
 </style>
 
 <div class="form-card card">
     <div class="card-body">
         <form method="POST" action="{{ route('foyer.annonces.update', $annonce) }}">
-            
+            @csrf
 
             {{-- Titre --}}
             <div class="mb-4">
@@ -132,26 +116,53 @@
             <div class="mb-4">
                 <label class="form-label">Catégorie <span class="text-danger">*</span></label>
                 <div class="cat-options-container" id="catOptions">
-                    <label class="cat-option {{ old('categorie', $annonce->categorie) === 'generale' ? 'selected-generale' : '' }}" id="opt-generale">
-                        <input type="radio" name="categorie" value="generale"
-                               {{ old('categorie', $annonce->categorie) === 'generale' ? 'checked' : '' }}>
-                        <span class="cat-icon">ℹ️</span>
-                        <span class="cat-label">Générale</span>
+                    @php
+                        $cats = [
+                            'generale'    => ['icon' => '📢', 'label' => 'Générale'],
+                            'hebergement' => ['icon' => '🏠', 'label' => 'Hébergement'],
+                            'foyer'       => ['icon' => '🏘️', 'label' => 'Foyer'],
+                            'maintenance' => ['icon' => '🔧', 'label' => 'Maintenance'],
+                            'promotion'   => ['icon' => '🎉', 'label' => 'Promotion'],
+                        ];
+                        $currentCat = old('categorie', $annonce->categorie);
+                    @endphp
+                    @foreach($cats as $val => $info)
+                    <label class="cat-option {{ $currentCat === $val ? 'selected' : '' }}">
+                        <input type="radio" name="categorie" value="{{ $val }}"
+                               {{ $currentCat === $val ? 'checked' : '' }}>
+                        <span class="cat-icon">{{ $info['icon'] }}</span>
+                        <span class="cat-label">{{ $info['label'] }}</span>
                     </label>
-                    <label class="cat-option {{ old('categorie', $annonce->categorie) === 'urgente' ? 'selected-urgente' : '' }}" id="opt-urgente">
-                        <input type="radio" name="categorie" value="urgente"
-                               {{ old('categorie', $annonce->categorie) === 'urgente' ? 'checked' : '' }}>
-                        <span class="cat-icon">🚨</span>
-                        <span class="cat-label">Urgente</span>
-                    </label>
-                    <label class="cat-option {{ old('categorie', $annonce->categorie) === 'evenement' ? 'selected-evenement' : '' }}" id="opt-evenement">
-                        <input type="radio" name="categorie" value="evenement"
-                               {{ old('categorie', $annonce->categorie) === 'evenement' ? 'checked' : '' }}>
-                        <span class="cat-icon">📅</span>
-                        <span class="cat-label">Événement</span>
-                    </label>
+                    @endforeach
                 </div>
                 @error('categorie')<div class="invalid-feedback">{{ $message }}</div>@enderror
+            </div>
+
+            {{-- Urgence --}}
+            <div class="mb-4">
+                <label class="form-label">Niveau d'urgence <span class="text-danger">*</span></label>
+                @php $currentUrg = old('urgence', $annonce->urgence ?? 'general'); @endphp
+                <div class="urg-options-container" id="urgOptions">
+                    <label class="urg-option {{ $currentUrg === 'general' ? 'selected-general' : '' }}">
+                        <input type="radio" name="urgence" value="general"
+                               {{ $currentUrg === 'general' ? 'checked' : '' }}>
+                        <span class="urg-icon">📌</span>
+                        <span class="urg-label">Général</span>
+                    </label>
+                    <label class="urg-option {{ $currentUrg === 'urgent' ? 'selected-urgent' : '' }}">
+                        <input type="radio" name="urgence" value="urgent"
+                               {{ $currentUrg === 'urgent' ? 'checked' : '' }}>
+                        <span class="urg-icon">🔴</span>
+                        <span class="urg-label">Urgent</span>
+                    </label>
+                    <label class="urg-option {{ $currentUrg === 'administration' ? 'selected-administration' : '' }}">
+                        <input type="radio" name="urgence" value="administration"
+                               {{ $currentUrg === 'administration' ? 'checked' : '' }}>
+                        <span class="urg-icon">👔</span>
+                        <span class="urg-label">Administration</span>
+                    </label>
+                </div>
+                @error('urgence')<div class="invalid-feedback">{{ $message }}</div>@enderror
             </div>
 
             {{-- Contenu --}}
@@ -164,17 +175,13 @@
                 @error('contenu')<div class="invalid-feedback">{{ $message }}</div>@enderror
             </div>
 
-            {{-- Destinataire fixe --}}
-            <input type="hidden" name="destinataire" value="etudiante">
+            {{-- Destinataire caché --}}
+            <input type="hidden" name="destinataire" value="etudiantes">
 
             {{-- Boutons --}}
             <div class="form-buttons">
-                <button type="submit" class="btn-submit">
-                    <i class="bi bi-check-lg"></i> Enregistrer les modifications
-                </button>
-                <a href="{{ route('foyer.annonces.index') }}" class="btn-cancel">
-                    <i class="bi bi-x-lg"></i> Annuler
-                </a>
+                <button type="submit" class="btn-submit">Enregistrer les modifications</button>
+                <a href="{{ route('foyer.annonces.index') }}" class="btn-cancel">Annuler</a>
             </div>
         </form>
     </div>
@@ -187,20 +194,16 @@
 // Catégorie
 document.querySelectorAll('#catOptions .cat-option input').forEach(radio => {
     radio.addEventListener('change', function () {
-        document.querySelectorAll('#catOptions .cat-option').forEach(opt => {
-            opt.className = 'cat-option';
-        });
-        this.closest('.cat-option').classList.add('selected-' + this.value);
+        document.querySelectorAll('#catOptions .cat-option').forEach(opt => opt.className = 'cat-option');
+        this.closest('.cat-option').classList.add('selected');
     });
 });
 
-// Destinataire
-document.querySelectorAll('#destOptions .dest-option input').forEach(radio => {
+// Urgence
+document.querySelectorAll('#urgOptions .urg-option input').forEach(radio => {
     radio.addEventListener('change', function () {
-        document.querySelectorAll('#destOptions .dest-option').forEach(opt => {
-            opt.classList.remove('selected');
-        });
-        this.closest('.dest-option').classList.add('selected');
+        document.querySelectorAll('#urgOptions .urg-option').forEach(opt => opt.className = 'urg-option');
+        this.closest('.urg-option').classList.add('selected-' + this.value);
     });
 });
 </script>

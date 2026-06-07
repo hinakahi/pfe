@@ -12,31 +12,53 @@ use Illuminate\Http\Request;
 class HebergementController extends Controller
 {
     public function dashboard()
-    {
-        $user = auth()->user();
-        $derniereDemandeRenouvellement = DemandeRenouvellement::where('etudiante_id', $user->id)
-                                        ->latest()->first();
-        $derniereDemandeChangement = DemandeChangement::where('etudiante_id', $user->id)
+{
+    $user = auth()->user();
+    
+    $maChambre = \App\Models\Chambre::where('etudiante_1', $user->matricule)
+                 ->orWhere('etudiante_2', $user->matricule)
+                 ->first();
+
+    $derniereDemandeRenouvellement = \App\Models\DemandeRenouvellement::where('etudiante_id', $user->id)
                                     ->latest()->first();
-        return view('etudiante.dashboard', compact(
-            'derniereDemandeRenouvellement',
-            'derniereDemandeChangement'
-        ));
-    }
+    $derniereDemandeChangement = \App\Models\DemandeChangement::where('etudiante_id', $user->id)
+                                ->latest()->first();
+
+    $annonces = \App\Models\Annonce::latest()->take(3)->get();
+    
+    $notifications = $user->notifications()->take(5)->get();
+
+    return view('etudiante.dashboard', compact(
+        'maChambre',
+        'derniereDemandeRenouvellement',
+        'derniereDemandeChangement',
+        'annonces',
+        'notifications'
+    ));
+}
 
     public function index()
     {
         $user = auth()->user();
+
+        // ✅ Trouver la chambre actuelle de l'étudiante
+        $maChambre = Chambre::where('etudiante_1', $user->name)
+                     ->orWhere('etudiante_2', $user->name)
+                     ->first();
+
         $periodeRenouvellement = Periode::where('type', 'renouvellement')
                                 ->where('active', true)
                                 ->where('date_debut', '<=', now())
                                 ->where('date_fin', '>=', now())
                                 ->first();
+
         $demandesRenouvellement = DemandeRenouvellement::where('etudiante_id', $user->id)
                                   ->latest()->get();
+
         return view('etudiante.hebergement.index', compact(
             'periodeRenouvellement',
-            'demandesRenouvellement'
+            'demandesRenouvellement',
+            'maChambre'  // ✅ ajouté
         ));
     }
 
@@ -59,16 +81,26 @@ class HebergementController extends Controller
             'statut'                 => 'en_attente',
         ]);
 
-        return redirect()->route('etudiante.hebergement')
+        return redirect()->route('etudiante.hebergement.renouvellement')
                          ->with('success', 'Demande de renouvellement envoyée avec succès.');
     }
 
     public function showChangement()
     {
-        $chambresDisponibles = Chambre::where('statut', 'disponible')->get();
-        $demandesChangement  = DemandeChangement::where('etudiante_id', auth()->id())
-                              ->latest()->get();
+        $user = auth()->user();
+
+        // ✅ Chambre actuelle de l'étudiante
+        $maChambre = Chambre::where('etudiante_1', $user->name)
+                     ->orWhere('etudiante_2', $user->name)
+                     ->first();
+
+        $chambresDisponibles = Chambre::whereNull('etudiante_1')->where('publiee', true)->get();
+
+        $demandesChangement = DemandeChangement::where('etudiante_id', auth()->id())
+                             ->latest()->get();
+
         return view('etudiante.hebergement.changement', compact(
+            'maChambre',           // ✅ ajouté
             'chambresDisponibles',
             'demandesChangement'
         ));

@@ -11,14 +11,13 @@ use Illuminate\Http\Request;
 class AnnonceController extends Controller
 {
     public function index()
-    {
-        $annonces = Annonce::where('user_id', auth()->id())
-            ->orWhere('destinataire', 'etudiantes')
-            ->latest()
-            ->paginate(10);
+{
+    $annonces = Annonce::where('user_id', auth()->id())
+        ->latest()
+        ->paginate(10);
 
-        return view('foyer.annonces.index', compact('annonces'));
-    }
+    return view('foyer.annonces.index', compact('annonces'));
+}
 
     public function create()
     {
@@ -28,19 +27,21 @@ class AnnonceController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'titre'     => 'required|string|max:191',
-            'contenu'   => 'required|string',
-            'categorie' => 'required|in:generale,urgente,evenement',
-        ]);
-
+    'titre'     => 'required|string|max:191',
+    'contenu'   => 'required|string',
+    'categorie' => 'required|in:generale,hebergement,foyer,maintenance,promotion',
+    'urgence'   => 'required|in:general,urgent,administration',
+]);
         $annonce = Annonce::create([
-            'user_id'          => auth()->id(),
-            'titre'            => $validated['titre'],
-            'contenu'          => $validated['contenu'],
-            'categorie'        => $validated['categorie'],
-            'destinataire'     => 'etudiantes',
-            'date_publication' => now(),
-        ]);
+    'user_id'          => auth()->id(),
+    'titre'            => $validated['titre'],
+    'contenu'          => $validated['contenu'],
+    'categorie'        => $validated['categorie'],
+    'urgence'          => $validated['urgence'],
+    'destinataire'     => 'etudiantes',
+    'publiee'          => true,
+    'date_publication' => now(),
+]);
 
         // Notifier toutes les étudiantes
         User::where('role', 'etudiante')->each(function ($etudiante) use ($annonce) {
@@ -72,7 +73,7 @@ class AnnonceController extends Controller
 
         // Notifier toutes les étudiantes de la modification
         User::where('role', 'etudiante')->each(function ($etudiante) use ($annonce) {
-            $etudiante->notify(new NouvelleAnnonce($annonce));
+           $etudiante->notify(new NouvelleAnnonceNotification($annonce));
         });
 
         return redirect()

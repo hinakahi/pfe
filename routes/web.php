@@ -69,28 +69,45 @@ Route::middleware(['auth', 'role:etudiante'])->prefix('etudiante')->name('etudia
         return back();
     })->name('notifications.read');
 
-    Route::get('/annonces', function () {
-        $query = \App\Models\Annonce::where(function ($q) {
+   Route::get('/annonces', function () {
+
+    // ✅ Ajouter ceci
+    $annoncesUrgentes = \App\Models\Annonce::with('user')
+        ->where('urgence', 'urgent')
+        ->where('publiee', true)
+        ->where(function ($q) {
             $q->where('destinataire', 'etudiantes')
               ->orWhere('destinataire', 'tous');
-        })->where('publiee', true);
+        })
+        ->latest()
+        ->get();
 
-        if (request('search')) {
-            $query->where(function ($q) {
-                $q->where('titre', 'like', '%' . request('search') . '%')
-                  ->orWhere('contenu', 'like', '%' . request('search') . '%');
-            });
-        }
+    $query = \App\Models\Annonce::where(function ($q) {
+        $q->where('destinataire', 'etudiantes')
+          ->orWhere('destinataire', 'tous');
+    })->where('publiee', true);
 
-        $annonceVedette = (clone $query)->latest('date_publication')->first();
-        $annonces = (clone $query);
-        if ($annonceVedette) {
-            $annonces->where('id', '!=', $annonceVedette->id);
-        }
-        $annonces = $annonces->latest('date_publication')->paginate(10);
+    if (request('auteur')) {
+        $query->whereHas('user', function($q) {
+            $q->where('role', request('auteur'));
+        });
+    }
 
-        return view('etudiante.annonces.index', compact('annonceVedette', 'annonces'));
-    })->name('annonces');
+    if (request('search')) {
+        $query->where('titre', 'like', '%'.request('search').'%');
+    }
+        if (request('tri') == 'ancien') {
+        $query->oldest();
+    } else {
+        $query->latest();
+    }
+
+    $annonces = $query->latest()->paginate(10)->withQueryString();
+
+    // annoncesUrgentes 
+    return view('etudiante.annonces.index', compact('annonces', 'annoncesUrgentes'));
+
+})->name('annonces');
 
     // Hébergement
     Route::prefix('hebergement')->name('hebergement.')->group(function () {

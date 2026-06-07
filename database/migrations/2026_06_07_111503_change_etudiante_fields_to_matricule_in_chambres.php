@@ -8,16 +8,15 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('stocks', function (Blueprint $table) {
-            $table->id();
-            $table->string('nom');
-            $table->integer('quantite')->default(0);
-            $table->timestamps();
-        });
+        // Vider les données texte existantes dans etudiante_1 et etudiante_2
+        DB::table('chambres')->update([
+            'etudiante_1' => null,
+            'etudiante_2' => null,
+        ]);
     }
 
     public function down(): void
     {
-        Schema::dropIfExists('stocks');
+        //
     }
 };

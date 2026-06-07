@@ -16,6 +16,9 @@ class Annonce extends Model
         'categorie',
         'destinataire',
         'date_publication',
+        'publiee',
+        'urgence',
+
     ];
 
     protected $casts = [

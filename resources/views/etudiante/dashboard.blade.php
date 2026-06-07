@@ -1,116 +1,99 @@
 @extends('layouts.app')
-
-@section('page-title', 'Dashboard')
-
+@section('page-title', 'Tableau de bord')
 @section('sidebar')
     @include('etudiante.partials._sidebar')
 @endsection
 
 @section('content')
-<div class="container-fluid">
-    <div class="row mb-4">
-        <div class="col-md-12">
-            <div class="card">
-                <div class="card-body">
-                    <h4>Bienvenue, {{ auth()->user()->prenom ?? auth()->user()->name }} ! 👋</h4>
-                    <p class="text-muted">Tableau de bord de votre espace étudiant</p>
+
+{{-- Bienvenue --}}
+<div class="alert alert-info">
+    <i class="bi bi-person-circle me-2"></i>
+    Bienvenue, <strong>{{ auth()->user()->prenom ?? auth()->user()->name }}</strong> 👋 —
+    Matricule : <strong>{{ auth()->user()->matricule }}</strong>
+</div>
+
+{{-- KPIs --}}
+<div class="row">
+    <div class="col-md-3">
+        <div class="stat-card" style="background: linear-gradient(135deg,#1a3c5e,#2d6a9f)">
+            <div class="number"><i class="bi bi-door-closed" style="font-size:1.8rem"></i></div>
+            <div class="label">
+                @if($maChambre)
+                    Chambre {{ $maChambre->numero }} — Bloc {{ $maChambre->bloc }}
+                @else
+                    Non assignée
+                @endif
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <a href="{{ route('etudiante.annonces') }}" class="text-decoration-none">
+        <div class="stat-card" style="background: linear-gradient(135deg,#198754,#20c997)">
+            <div class="number">{{ $annonces->count() }}</div>
+            <div class="label"><i class="bi bi-megaphone me-1"></i>Annonces</div>
+        </div>
+</a>
+    </div>
+    <div class="col-md-3">
+        <a href="{{ route('etudiante.notifications') }}" class="text-decoration-none">
+        <div class="stat-card" style="background: linear-gradient(135deg,#fd7e14,#ffc107)">
+            <div class="number">{{ $notifications->count() }}</div>
+            <div class="label"><i class="bi bi-bell me-1"></i>Notifications</div>
+        </div>
+       </a>
+    </div>
+    <div class="col-md-3">
+        <div class="stat-card" style="background: linear-gradient(135deg,#dc3545,#e91e63)">
+            <div class="number"><i class="bi bi-egg-fried" style="font-size:1.8rem"></i></div>
+            <div class="label"><a href="https://onou.mesrs.dz/doumenu/22" class="text-white text-decoration-none">Menu du jour</a></div>
+        </div>
+    </div>
+</div>
+
+{{-- Ligne 2 : Annonces + Notifications --}}
+<div class="row mt-4">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h6 class="card-title mb-0"><i class="bi bi-megaphone me-1 text-warning"></i> Dernières annonces</h6>
                 </div>
+                <ul class="list-group list-group-flush">
+                    @forelse($annonces as $annonce)
+                    <li class="list-group-item px-0">
+                        <div class="fw-semibold small">{{ $annonce->titre }}</div>
+                        <div class="text-muted" style="font-size:12px">{{ $annonce->created_at->diffForHumans() }}</div>
+                    </li>
+                    @empty
+                    <li class="list-group-item px-0 text-muted text-center">Aucune annonce.</li>
+                    @endforelse
+                </ul>
             </div>
         </div>
     </div>
 
-    <div class="row">
-        <!-- Dernière demande renouvellement -->
-        @if($derniereDemandeRenouvellement)
-        <div class="col-md-6 mb-4">
-            <div class="card">
-                <div class="card-header bg-primary text-white">
-                    <h5 class="mb-0"><i class="bi bi-arrow-counterclockwise"></i> Dernière demande renouvellement</h5>
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h6 class="card-title mb-0"><i class="bi bi-bell me-1 text-success"></i> Notifications récentes</h6>
                 </div>
-                <div class="card-body">
-                    <p><strong>Statut :</strong> 
-                        <span class="badge bg-{{ $derniereDemandeRenouvellement->statut === 'accepte' ? 'success' : ($derniereDemandeRenouvellement->statut === 'refuse' ? 'danger' : 'warning') }}">
-                            {{ $derniereDemandeRenouvellement->statut }}
-                        </span>
-                    </p>
-                    <p><strong>Date :</strong> {{ $derniereDemandeRenouvellement->created_at->format('d/m/Y') }}</p>
-                    <a href="{{ route('etudiante.hebergement.renouvellement') }}" class="btn btn-sm btn-primary">
-                        Voir détails →
-                    </a>
-                </div>
-            </div>
-        </div>
-        @else
-        <div class="col-md-6 mb-4">
-            <div class="card border-warning">
-                <div class="card-body text-center">
-                    <i class="bi bi-info-circle" style="font-size: 2rem; color: #ffc107;"></i>
-                    <p class="mt-2">Aucune demande renouvellement</p>
-                    <a href="{{ route('etudiante.hebergement.renouvellement') }}" class="btn btn-sm btn-warning">
-                        Faire une demande
-                    </a>
-                </div>
-            </div>
-        </div>
-        @endif
-
-        <!-- Dernière demande changement -->
-        @if($derniereDemandeChangement)
-        <div class="col-md-6 mb-4">
-            <div class="card">
-                <div class="card-header bg-info text-white">
-                    <h5 class="mb-0"><i class="bi bi-arrow-left-right"></i> Dernière demande changement</h5>
-                </div>
-                <div class="card-body">
-                    <p><strong>Statut :</strong> 
-                        <span class="badge bg-{{ $derniereDemandeChangement->statut === 'accepte' ? 'success' : ($derniereDemandeChangement->statut === 'refuse' ? 'danger' : 'warning') }}">
-                            {{ $derniereDemandeChangement->statut }}
-                        </span>
-                    </p>
-                    <p><strong>Date :</strong> {{ $derniereDemandeChangement->created_at->format('d/m/Y') }}</p>
-                    <a href="{{ route('etudiante.changement') }}" class="btn btn-sm btn-primary">
-                        Voir détails →
-                    </a>
-                </div>
-            </div>
-        </div>
-        @else
-        <div class="col-md-6 mb-4">
-            <div class="card border-info">
-                <div class="card-body text-center">
-                    <i class="bi bi-info-circle" style="font-size: 2rem; color: #0dcaf0;"></i>
-                    <p class="mt-2">Aucune demande changement</p>
-                    <a href="{{ route('etudiante.changement') }}" class="btn btn-sm btn-info">
-                        Demander un changement
-                    </a>
-                </div>
-            </div>
-        </div>
-        @endif
-    </div>
-
-    <div class="row mt-4">
-        <div class="col-md-12">
-            <div class="card">
-                <div class="card-header bg-secondary text-white">
-                    <h5 class="mb-0"><i class="bi bi-info-circle"></i> Actions rapides</h5>
-                </div>
-                <div class="card-body">
-                    <a href="{{ route('etudiante.hebergement.renouvellement') }}" class="btn btn-outline-primary me-2 mb-2">
-                        <i class="bi bi-arrow-counterclockwise"></i> Renouvellement
-                    </a>
-                    <a href="{{ route('etudiante.changement') }}" class="btn btn-outline-info me-2 mb-2">
-                        <i class="bi bi-arrow-left-right"></i> Changement
-                    </a>
-                    <a href="{{ route('etudiante.foyer') }}" class="btn btn-outline-success me-2 mb-2">
-                        <i class="bi bi-shop"></i> Foyer
-                    </a>
-                    <a href="{{ route('etudiante.maintenance.index') }}" class="btn btn-outline-warning me-2 mb-2">
-                        <i class="bi bi-tools"></i> Maintenance
-                    </a>
-                </div>
+                <ul class="list-group list-group-flush">
+                    @forelse($notifications as $notif)
+                    <li class="list-group-item px-0 small">
+                        {{ $notif->data['message'] ?? 'Notification' }}
+                        <div class="text-muted" style="font-size:11px">{{ $notif->created_at->diffForHumans() }}</div>
+                    </li>
+                    @empty
+                    <li class="list-group-item px-0 text-muted text-center">Aucune notification.</li>
+                    @endforelse
+                </ul>
             </div>
         </div>
     </div>
 </div>
+
+
+
 @endsection
