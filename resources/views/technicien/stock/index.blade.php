@@ -9,7 +9,7 @@
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
             <h5 class="mb-0">Matériels en stock</h5>
-            <small class="text-muted">{{ $stocks->count() }} matériel(s) enregistré(s)</small>
+            <small class="text-muted" id="compteur">{{ $stocks->count() }} matériel(s) enregistré(s)</small>
         </div>
         <a href="{{ route('technicien.stock.create') }}" class="btn btn-primary rounded-pill">
             <i class="bi bi-plus-lg me-1"></i>Ajouter un matériel
@@ -26,10 +26,81 @@
     </div>
     @endif
 
-    {{-- Liste --}}
-    <div class="row g-3">
+    {{-- ══════════════════════════════════════════
+         BARRE DE RECHERCHE + FILTRES
+    ══════════════════════════════════════════ --}}
+    <div class="card mb-4">
+        <div class="card-body py-3">
+            <div class="row g-2 align-items-center">
+
+                {{-- Recherche par nom --}}
+                <div class="col-12 col-md-5">
+                    <div class="input-group">
+                        <span class="input-group-text bg-white border-end-0">
+                            <i class="bi bi-search text-muted"></i>
+                        </span>
+                        <input type="text" id="searchInput"
+                               class="form-control border-start-0 ps-0"
+                               placeholder="Rechercher un matériel…"
+                               oninput="filtrerStock()">
+                    </div>
+                </div>
+
+                {{-- Filtre Catégorie --}}
+                <div class="col-6 col-md-3">
+                    <select id="filtreCategorie" class="form-select" onchange="filtrerStock()">
+                        <option value="">Toutes les catégories</option>
+                        <option value="electricite">Électricité</option>
+                        <option value="plomberie">Plomberie</option>
+                        <option value="menuiserie">Menuiserie</option>
+                        <option value="climatisation">Climatisation</option>
+                        <option value="autre">Autre</option>
+                    </select>
+                </div>
+
+                {{-- Filtre Statut --}}
+                <div class="col-6 col-md-3">
+                    <select id="filtreStatut" class="form-select" onchange="filtrerStock()">
+                        <option value="">Tous les statuts</option>
+                        <option value="disponible">Disponible</option>
+                        <option value="faible">Stock faible</option>
+                        <option value="epuise">Épuisé</option>
+                    </select>
+                </div>
+
+                {{-- Bouton Reset --}}
+                <div class="col-12 col-md-1 text-end">
+                    <button class="btn btn-outline-secondary w-100" onclick="resetFiltres()" title="Réinitialiser">
+                        <i class="bi bi-x-lg"></i>
+                    </button>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    {{-- Message aucun résultat --}}
+    <div id="aucunResultat" class="d-none">
+        <div class="card">
+            <div class="card-body text-center text-muted py-5">
+                <i class="bi bi-search fs-1 opacity-25"></i>
+                <p class="mt-2">Aucun matériel ne correspond à votre recherche.</p>
+                <button class="btn btn-outline-secondary rounded-pill" onclick="resetFiltres()">
+                    <i class="bi bi-x-lg me-1"></i>Réinitialiser les filtres
+                </button>
+            </div>
+        </div>
+    </div>
+
+    {{-- ══════════════════════════════════════════
+         LISTE DES MATÉRIELS
+    ══════════════════════════════════════════ --}}
+    <div class="row g-3" id="stockGrid">
     @forelse($stocks as $stock)
-        <div class="col-md-6 col-xl-4">
+        <div class="col-md-6 col-xl-4 stock-item"
+             data-nom="{{ strtolower($stock->designation) }}"
+             data-categorie="{{ $stock->categorie }}"
+             data-statut="{{ $stock->est_epuise ? 'epuise' : ($stock->est_faible ? 'faible' : 'disponible') }}">
             <div class="card h-100 {{ $stock->est_epuise ? 'border-danger' : ($stock->est_faible ? 'border-warning' : '') }}">
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-start mb-2">
@@ -95,4 +166,51 @@
     </div>
 
 </div>
+
+{{-- ══════════════════════════════════════════
+     SCRIPT DE FILTRAGE (côté client)
+══════════════════════════════════════════ --}}
+<script>
+function filtrerStock() {
+    const recherche   = document.getElementById('searchInput').value.toLowerCase().trim();
+    const categorie   = document.getElementById('filtreCategorie').value;
+    const statut      = document.getElementById('filtreStatut').value;
+
+    const items       = document.querySelectorAll('.stock-item');
+    let   nbVisible   = 0;
+
+    items.forEach(item => {
+        const nom      = item.dataset.nom;
+        const cat      = item.dataset.categorie;
+        const stat     = item.dataset.statut;
+
+        const matchNom      = nom.includes(recherche);
+        const matchCat      = !categorie || cat === categorie;
+        const matchStatut   = !statut   || stat === statut;
+
+        if (matchNom && matchCat && matchStatut) {
+            item.classList.remove('d-none');
+            nbVisible++;
+        } else {
+            item.classList.add('d-none');
+        }
+    });
+
+    // Mise à jour compteur
+    document.getElementById('compteur').textContent =
+        nbVisible + ' matériel(s) affiché(s)';
+
+    // Message aucun résultat
+    document.getElementById('aucunResultat').classList.toggle('d-none', nbVisible > 0);
+    document.getElementById('stockGrid').classList.toggle('d-none', nbVisible === 0);
+}
+
+function resetFiltres() {
+    document.getElementById('searchInput').value     = '';
+    document.getElementById('filtreCategorie').value = '';
+    document.getElementById('filtreStatut').value    = '';
+    filtrerStock();
+}
+</script>
+
 @endsection

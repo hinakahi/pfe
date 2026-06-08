@@ -49,6 +49,8 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::get('/statistiques', [StatistiqueController::class, 'index'])->name('statistiques');
     Route::get('/statistiques/export-pdf', [StatistiqueController::class, 'exportPdf'])->name('statistiques.pdf');
     Route::get('/statistiques/export-excel', [StatistiqueController::class, 'exportExcel'])->name('statistiques.excel');
+    Route::patch('periodes/{periode}/toggle', [PeriodeController::class, 'toggle'])
+    ->name('admin.periodes.toggle');
 });
 
 // ─── Étudiante ────────────────────────────────────────────────

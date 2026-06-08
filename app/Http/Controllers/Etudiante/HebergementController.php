@@ -47,11 +47,18 @@ class HebergementController extends Controller
                      ->orWhere('etudiante_2', $user->matricule)
                      ->first();
 
+        // ✅ Les deux périodes récupérées
         $periodeRenouvellement = Periode::where('type', 'renouvellement')
                                 ->where('active', true)
                                 ->where('date_debut', '<=', now())
                                 ->where('date_fin', '>=', now())
                                 ->first();
+
+        $periodeChangement = Periode::where('type', 'changement')
+                            ->where('active', true)
+                            ->where('date_debut', '<=', now())
+                            ->where('date_fin', '>=', now())
+                            ->first();
 
         $demandesRenouvellement = DemandeRenouvellement::where('etudiante_id', $user->id)
                                   ->latest()->get();
@@ -62,6 +69,7 @@ class HebergementController extends Controller
         return view('etudiante.hebergement.index', compact(
             'maChambre',
             'periodeRenouvellement',
+            'periodeChangement',        // ✅ ajouté
             'demandesRenouvellement',
             'demandesChangement'
         ));
@@ -69,6 +77,17 @@ class HebergementController extends Controller
 
     public function renouveler(Request $request)
     {
+        // ✅ Vérification période renouvellement
+        $periode = Periode::where('type', 'renouvellement')
+                  ->where('active', true)
+                  ->where('date_debut', '<=', now())
+                  ->where('date_fin', '>=', now())
+                  ->first();
+
+        if (!$periode) {
+            return back()->with('error', 'La période de renouvellement est fermée.');
+        }
+
         $request->validate([
             'chambre_id'             => 'required|exists:chambres,id',
             'justificatif_scolarite' => 'required|file|mimes:pdf,jpg,png|max:2048',
@@ -88,7 +107,6 @@ class HebergementController extends Controller
             'statut'                 => 'en_attente',
         ]);
 
-        // Notifier le responsable hébergement
         $responsable = User::where('role', 'resp_hebergement')->first();
         if ($responsable) {
             $responsable->notify(new NouvelleDemandeChambre(
@@ -110,6 +128,13 @@ class HebergementController extends Controller
                      ->orWhere('etudiante_2', $user->matricule)
                      ->first();
 
+        // ✅ Vérification période pour afficher ou bloquer la page
+        $periodeChangement = Periode::where('type', 'changement')
+                            ->where('active', true)
+                            ->where('date_debut', '<=', now())
+                            ->where('date_fin', '>=', now())
+                            ->first();
+
         $chambresDisponibles = Chambre::whereNull('etudiante_1')
                                ->where('publiee', true)
                                ->paginate(15);
@@ -119,6 +144,7 @@ class HebergementController extends Controller
 
         return view('etudiante.hebergement.changement', compact(
             'maChambre',
+            'periodeChangement',        // ✅ ajouté
             'chambresDisponibles',
             'demandesChangement'
         ));
@@ -126,6 +152,17 @@ class HebergementController extends Controller
 
     public function demanderChangement(Request $request)
     {
+        // ✅ Vérification période changement
+        $periode = Periode::where('type', 'changement')
+                  ->where('active', true)
+                  ->where('date_debut', '<=', now())
+                  ->where('date_fin', '>=', now())
+                  ->first();
+
+        if (!$periode) {
+            return back()->with('error', 'La période de changement est fermée.');
+        }
+
         $rules = [
             'chambre_actuelle_id' => 'required|exists:chambres,id',
             'chambre_demandee_id' => 'required|exists:chambres,id',
@@ -153,7 +190,6 @@ class HebergementController extends Controller
 
         DemandeChangement::create($data);
 
-        // Notifier le responsable hébergement
         $chambreActuelle = Chambre::find($request->chambre_actuelle_id);
         $responsable = User::where('role', 'resp_hebergement')->first();
         if ($responsable) {

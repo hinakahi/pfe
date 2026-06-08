@@ -28,12 +28,40 @@ class ChangementController extends Controller
             return back()->with('error', 'La chambre demandée n\'est plus disponible.');
         }
 
+        $etudiante = $demande->etudiante;
+
+        // ✅ Libérer l'ancienne chambre
         if ($demande->chambreActuelle) {
-            $demande->chambreActuelle->update(['statut' => 'libre']);
+            $chambreActuelle = $demande->chambreActuelle;
+
+            if ($chambreActuelle->etudiante_1 === $etudiante->matricule) {
+                $chambreActuelle->update([
+                    'etudiante_1' => null,
+                    'statut'      => 'libre',
+                ]);
+            } elseif ($chambreActuelle->etudiante_2 === $etudiante->matricule) {
+                $chambreActuelle->update([
+                    'etudiante_2' => null,
+                    'statut'      => 'libre',
+                ]);
+            }
         }
 
+        // ✅ Affecter la nouvelle chambre
         if ($demande->chambreDemandee) {
-            $demande->chambreDemandee->update(['statut' => 'occupee']);
+            $chambreNouvelle = $demande->chambreDemandee;
+
+            if (is_null($chambreNouvelle->etudiante_1)) {
+                $chambreNouvelle->update([
+                    'etudiante_1' => $etudiante->matricule,
+                    'statut'      => 'occupee',
+                ]);
+            } elseif (is_null($chambreNouvelle->etudiante_2)) {
+                $chambreNouvelle->update([
+                    'etudiante_2' => $etudiante->matricule,
+                    'statut'      => 'occupee',
+                ]);
+            }
         }
 
         $demande->update([
@@ -41,7 +69,6 @@ class ChangementController extends Controller
             'resp_hebergement_id' => Auth::id(),
         ]);
 
-        // Notifier l'étudiante
         $demande->etudiante->notify(new ChangementTraite('acceptee'));
 
         return back()->with('success', 'Changement de chambre accepté avec succès.');
@@ -59,7 +86,6 @@ class ChangementController extends Controller
             'resp_hebergement_id' => Auth::id(),
         ]);
 
-        // Notifier l'étudiante
         $demande->etudiante->notify(new ChangementTraite('refusee', $request->motif_refus));
 
         return back()->with('success', 'Demande de changement refusée.');

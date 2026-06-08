@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
@@ -27,17 +28,18 @@ class PeriodeController extends Controller
             'libelle'    => 'required|string|max:191',
             'date_debut' => 'required|date',
             'date_fin'   => 'required|date|after:date_debut',
+            'active'     => 'boolean',
         ]);
 
         $periode = Periode::create([
-    'admin_id'   => auth()->id(),
-    'type'       => $request->type,
-    'libelle'    => $request->libelle,
-    'date_debut' => $request->date_debut,
-    'date_fin'   => $request->date_fin,
-]);
+            'admin_id'   => auth()->id(),
+            'type'       => $request->type,
+            'libelle'    => $request->libelle,
+            'date_debut' => $request->date_debut,
+            'date_fin'   => $request->date_fin,
+            'active'     => $request->boolean('active', true), // true par défaut
+        ]);
 
-        // Notification automatique aux étudiantes
         $etudiantes = User::where('role', 'etudiante')->get();
         Notification::send($etudiantes, new NouvelleperiodeNotification($periode));
 
@@ -59,10 +61,23 @@ class PeriodeController extends Controller
             'active'     => 'boolean',
         ]);
 
-        $periode->update($request->all());
+        $periode->update([
+            'libelle'    => $request->libelle,
+            'date_debut' => $request->date_debut,
+            'date_fin'   => $request->date_fin,
+            'active'     => $request->boolean('active'),
+        ]);
 
         return redirect()->route('admin.periodes.index')
             ->with('success', 'Période modifiée.');
+    }
+
+    public function toggle(Periode $periode)
+    {
+        $periode->update(['active' => !$periode->active]);
+
+        return redirect()->route('admin.periodes.index')
+            ->with('success', 'Statut mis à jour.');
     }
 
     public function destroy(Periode $periode)

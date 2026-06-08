@@ -6,25 +6,56 @@
 <div class="container-fluid">
 
     {{-- Filtres --}}
-    <div class="d-flex flex-wrap gap-2 mb-4">
-        @foreach([
-            'tous'       => ['label'=>'Toutes',     'class'=>'btn-primary'],
-            'en_attente' => ['label'=>'En attente', 'class'=>'btn-warning'],
-            'en_cours'   => ['label'=>'En cours',   'class'=>'btn-info'],
-            'terminee'   => ['label'=>'Terminées',  'class'=>'btn-success'],
-        ] as $val => $f)
-        <a href="?statut={{ $val }}"
-           class="btn btn-sm {{ request('statut', 'tous') === $val ? $f['class'] : 'btn-outline-secondary' }} rounded-pill">
-            {{ $f['label'] }}
-            <span class="ms-1 opacity-75">
-                ({{ $val === 'tous'
-                    ? $demandes->count()
-                    : $demandes->where('statut', $val)->count() }})
-            </span>
-        </a>
-        @endforeach
+<div class="d-flex flex-wrap gap-2 mb-4">
+
+    {{-- Dropdown Statut --}}
+    <div class="dropdown">
+        <button class="btn btn-sm btn-outline-secondary rounded-pill dropdown-toggle" type="button" data-bs-toggle="dropdown">
+           
+            @php
+                $statutLabels = ['tous'=>'Tous les statuts','en_attente'=>'En attente','en_cours'=>'En cours','terminee'=>'Terminées'];
+            @endphp
+            {{ $statutLabels[request('statut', 'tous')] }}
+        </button>
+        <ul class="dropdown-menu">
+            @foreach([
+                'tous'       => 'Tous les statuts',
+                'en_attente' => 'En attente',
+                'en_cours'   => 'En cours',
+                'terminee'   => 'Terminées',
+            ] as $val => $label)
+            <li>
+                <a class="dropdown-item {{ request('statut', 'tous') === $val ? 'active' : '' }}"
+                   href="?statut={{ $val }}&type={{ request('type', 'tous') }}">
+                    {{ $label }}
+                </a>
+            </li>
+            @endforeach
+        </ul>
     </div>
 
+    {{-- Dropdown Type --}}
+    <div class="dropdown">
+        <button class="btn btn-sm btn-outline-secondary rounded-pill dropdown-toggle" type="button" data-bs-toggle="dropdown">
+            
+            @php
+                $typeLabels = ['tous'=>'Tous les types','electricite'=>'Électricité','plomberie'=>'Plomberie','menuiserie'=>'Menuiserie','climatisation'=>'Climatisation','autre'=>'Autre'];
+            @endphp
+            {{ $typeLabels[request('type', 'tous')] }}
+        </button>
+        <ul class="dropdown-menu">
+            @foreach($typeLabels as $val => $label)
+            <li>
+                <a class="dropdown-item {{ request('type', 'tous') === $val ? 'active' : '' }}"
+                   href="?statut={{ request('statut', 'tous') }}&type={{ $val }}">
+                    {{ $label }}
+                </a>
+            </li>
+            @endforeach
+        </ul>
+    </div>
+
+</div>
     {{-- Liste --}}
     <div class="d-flex flex-column gap-3">
     @forelse($demandes as $d)
@@ -82,10 +113,17 @@
                     </div>
 
                     {{-- Bouton --}}
-                    <a href="{{ route('technicien.demandes.show', $d->id) }}"
-                       class="btn btn-sm btn-primary align-self-start">
-                        <i class="bi bi-wrench me-1"></i>Traiter
-                    </a>
+                    @if($d->statut === 'terminee')
+                        <a href="{{ route('technicien.demandes.show', $d->id) }}"
+                           class="btn btn-sm btn-outline-secondary align-self-start">
+                            <i class="bi bi-eye me-1"></i>Voir
+                        </a>
+                    @else
+                        <a href="{{ route('technicien.demandes.show', $d->id) }}"
+                           class="btn btn-sm btn-primary align-self-start">
+                            <i class="bi bi-wrench me-1"></i>Traiter
+                        </a>
+                    @endif
 
                 </div>
             </div>

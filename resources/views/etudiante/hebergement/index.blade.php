@@ -90,14 +90,25 @@
                 </div>
                 <p class="text-muted small mb-3">Demandez à changer de chambre en choisissant parmi les disponibles.</p>
 
-                @if($maChambre)
-                    <a href="{{ route('etudiante.changement') }}"
-                       class="btn btn-sm w-100 text-white fw-semibold"
-                       style="background:#fd7e14;">
-                        <i class="bi bi-shuffle me-1"></i> Voir les chambres disponibles
-                    </a>
+                @if($periodeChangement)
+                    <div class="rounded-2 px-3 py-2 small mb-3" style="background:#e8f4fd; color:#1a3c5e;">
+                        <i class="bi bi-info-circle me-1"></i>
+                        Période ouverte jusqu'au
+                        <strong>{{ \Carbon\Carbon::parse($periodeChangement->date_fin)->format('d/m/Y') }}</strong>
+                    </div>
+                    @if($maChambre)
+                        <a href="{{ route('etudiante.changement') }}"
+                           class="btn btn-sm w-100 text-white fw-semibold"
+                           style="background:#fd7e14;">
+                            <i class="bi bi-shuffle me-1"></i> Voir les chambres disponibles
+                        </a>
+                    @else
+                        <div class="alert alert-warning py-2 small mb-0">Aucune chambre assignée.</div>
+                    @endif
                 @else
-                    <div class="alert alert-warning py-2 small mb-0">Aucune chambre assignée.</div>
+                    <div class="alert alert-warning py-2 small mb-0">
+                        <i class="bi bi-exclamation-triangle me-1"></i> Aucune période active.
+                    </div>
                 @endif
             </div>
         </div>
@@ -142,7 +153,7 @@
                         </tr>
                         @empty
                         <tr>
-                            <td colspan="3" class="text-center text-muted py-3">Aucune demande.</td>
+                            <td colspan="4" class="text-center text-muted py-3">Aucune demande.</td>
                         </tr>
                         @endforelse
                     </tbody>

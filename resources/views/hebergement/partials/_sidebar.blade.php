@@ -21,9 +21,17 @@
 <a href="{{ route('hebergement.renouvellements.index') }}" class="nav-link {{ request()->routeIs('hebergement.renouvellements.*') ? 'active' : '' }}">
     <i class="bi bi-arrow-repeat"></i>
     <span>Renouvellements</span>
+    @php $nbRenouvellements = \App\Models\DemandeRenouvellement::where('statut', 'en_attente')->count(); @endphp
+    @if($nbRenouvellements > 0)
+        <span class="badge bg-danger ms-auto">{{ $nbRenouvellements }}</span>
+    @endif
 </a>
 
 <a href="{{ route('hebergement.changements.index') }}" class="nav-link {{ request()->routeIs('hebergement.changements.*') ? 'active' : '' }}">
     <i class="bi bi-shuffle"></i>
     <span>Changements</span>
+    @php $nbChangements = \App\Models\DemandeChangement::where('statut', 'en_attente')->count(); @endphp
+    @if($nbChangements > 0)
+        <span class="badge bg-danger ms-auto">{{ $nbChangements }}</span>
+    @endif
 </a>

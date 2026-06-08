@@ -8,24 +8,28 @@
     <p class="text-muted mb-0">Traiter les demandes de changement soumises par les étudiantes.</p>
 </div>
 
-{{-- Stats --}}
+{{-- Stats cliquables --}}
 <div class="row g-3 mb-4">
     <div class="col-md-6">
-        <div class="p-4 rounded-3 text-white" style="background: linear-gradient(135deg, #fd7e14, #ffc107);">
-            <div style="font-size:2rem; font-weight:700;">{{ $enAttente->count() }}</div>
-            <div><i class="bi bi-hourglass-split me-1"></i> En attente de traitement</div>
-        </div>
+        <a href="#section-attente" style="text-decoration:none;">
+            <div class="p-4 rounded-3 text-white" style="background: linear-gradient(135deg, #fd7e14, #ffc107); cursor:pointer; transition: opacity .2s;" onmouseover="this.style.opacity='.85'" onmouseout="this.style.opacity='1'">
+                <div style="font-size:2rem; font-weight:700;">{{ $enAttente->count() }}</div>
+                <div><i class="bi bi-hourglass-split me-1"></i> En attente de traitement</div>
+            </div>
+        </a>
     </div>
     <div class="col-md-6">
-        <div class="p-4 rounded-3 text-white" style="background: linear-gradient(135deg, #28a745, #20c997);">
-            <div style="font-size:2rem; font-weight:700;">{{ $traitees->count() }}</div>
-            <div><i class="bi bi-check-circle me-1"></i> Traitées récemment</div>
-        </div>
+        <a href="#section-traitees" style="text-decoration:none;">
+            <div class="p-4 rounded-3 text-white" style="background: linear-gradient(135deg, #28a745, #20c997); cursor:pointer; transition: opacity .2s;" onmouseover="this.style.opacity='.85'" onmouseout="this.style.opacity='1'">
+                <div style="font-size:2rem; font-weight:700;">{{ $traitees->count() }}</div>
+                <div><i class="bi bi-check-circle me-1"></i> Traitées récemment</div>
+            </div>
+        </a>
     </div>
 </div>
 
 {{-- En attente --}}
-<div class="card mb-4">
+<div class="card mb-4" id="section-attente">
     <div class="card-body">
         <h6 class="fw-bold mb-3">
             <i class="bi bi-hourglass-split me-2 text-warning"></i>En attente
@@ -127,7 +131,7 @@
 </div>
 
 {{-- Traitées --}}
-<div class="card">
+<div class="card" id="section-traitees">
     <div class="card-body">
         <h6 class="fw-bold mb-3">
             <i class="bi bi-clock-history me-2 text-secondary"></i>Traitées récemment
