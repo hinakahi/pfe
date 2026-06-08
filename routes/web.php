@@ -46,10 +46,9 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::resource('annonces', AnnonceController::class);
     Route::resource('periodes', PeriodeController::class);
     Route::resource('matricules', \App\Http\Controllers\Admin\MatriculeController::class);
-    Route::get('/statistiques', [StatistiqueController::class, 'index'])->name('statistiques'); // ✅ corrigé
     Route::get('/statistiques', [StatistiqueController::class, 'index'])->name('statistiques');
-Route::get('/statistiques/export-pdf', [StatistiqueController::class, 'exportPdf'])->name('statistiques.pdf'); // ← ajouter
-Route::get('/statistiques/export-excel', [StatistiqueController::class, 'exportExcel'])->name('statistiques.excel'); // ← ajouter
+    Route::get('/statistiques/export-pdf', [StatistiqueController::class, 'exportPdf'])->name('statistiques.pdf');
+    Route::get('/statistiques/export-excel', [StatistiqueController::class, 'exportExcel'])->name('statistiques.excel');
 });
 
 // ─── Étudiante ────────────────────────────────────────────────
@@ -57,7 +56,7 @@ Route::middleware(['auth', 'role:etudiante'])->prefix('etudiante')->name('etudia
 
     Route::get('/dashboard', [HebergementController::class, 'dashboard'])->name('dashboard');
 
-    // Notifications
+    // ─── Notifications ───────────────────────────────────────
     Route::get('/notifications', function () {
         $notifications = auth()->user()->notifications()->paginate(15);
         return view('etudiante.notifications.index', compact('notifications'));
@@ -69,47 +68,45 @@ Route::middleware(['auth', 'role:etudiante'])->prefix('etudiante')->name('etudia
         return back();
     })->name('notifications.read');
 
-   Route::get('/annonces', function () {
+    // ─── Annonces ────────────────────────────────────────────
+    Route::get('/annonces', function () {
+        $annoncesUrgentes = \App\Models\Annonce::with('user')
+            ->where('urgence', 'urgent')
+            ->where('publiee', true)
+            ->where(function ($q) {
+                $q->where('destinataire', 'etudiantes')
+                  ->orWhere('destinataire', 'tous');
+            })
+            ->latest()
+            ->get();
 
-    // ✅ Ajouter ceci
-    $annoncesUrgentes = \App\Models\Annonce::with('user')
-        ->where('urgence', 'urgent')
-        ->where('publiee', true)
-        ->where(function ($q) {
+        $query = \App\Models\Annonce::where(function ($q) {
             $q->where('destinataire', 'etudiantes')
               ->orWhere('destinataire', 'tous');
-        })
-        ->latest()
-        ->get();
+        })->where('publiee', true);
 
-    $query = \App\Models\Annonce::where(function ($q) {
-        $q->where('destinataire', 'etudiantes')
-          ->orWhere('destinataire', 'tous');
-    })->where('publiee', true);
+        if (request('auteur')) {
+            $query->whereHas('user', function ($q) {
+                $q->where('role', request('auteur'));
+            });
+        }
 
-    if (request('auteur')) {
-        $query->whereHas('user', function($q) {
-            $q->where('role', request('auteur'));
-        });
-    }
+        if (request('search')) {
+            $query->where('titre', 'like', '%' . request('search') . '%');
+        }
 
-    if (request('search')) {
-        $query->where('titre', 'like', '%'.request('search').'%');
-    }
         if (request('tri') == 'ancien') {
-        $query->oldest();
-    } else {
-        $query->latest();
-    }
+            $query->oldest();
+        } else {
+            $query->latest();
+        }
 
-    $annonces = $query->latest()->paginate(10)->withQueryString();
+        $annonces = $query->paginate(10)->withQueryString();
 
-    // annoncesUrgentes 
-    return view('etudiante.annonces.index', compact('annonces', 'annoncesUrgentes'));
+        return view('etudiante.annonces.index', compact('annonces', 'annoncesUrgentes'));
+    })->name('annonces');
 
-})->name('annonces');
-
-    // Hébergement
+    // ─── Hébergement ─────────────────────────────────────────
     Route::prefix('hebergement')->name('hebergement.')->group(function () {
         Route::get('/renouvellement', [HebergementController::class, 'index'])->name('renouvellement');
         Route::post('/renouvellement', [HebergementController::class, 'renouveler'])->name('renouveller');
@@ -118,15 +115,19 @@ Route::middleware(['auth', 'role:etudiante'])->prefix('etudiante')->name('etudia
     Route::get('/hebergement/changement', [HebergementController::class, 'showChangement'])->name('changement');
     Route::post('/hebergement/changement', [HebergementController::class, 'demanderChangement'])->name('changement.store');
 
-    // Foyer
-    // Foyer
-Route::get('/foyer', [FoyerController::class, 'dashboard'])->name('foyer');  // ✅ DASHBOARD
-Route::post('/foyer/reserver/{article}', [FoyerController::class, 'reserver'])->name('foyer.reserver');
-Route::get('/foyer/reservations', [FoyerController::class, 'mesReservations'])->name('foyer.reservations');
-Route::delete('/foyer/reservations/{reservation}', [FoyerController::class, 'annuler'])->name('foyer.annuler');
-Route::post('/foyer/confirmer', [FoyerController::class, 'confirmer'])->name('foyer.confirmer');
-Route::get('/foyer/catalogue', [FoyerController::class, 'index'])->name('foyer.catalogue');  // ✅ CATALOGUE
-    // Maintenance
+    // ─── Foyer ───────────────────────────────────────────────
+    Route::prefix('foyer')->name('foyer.')->group(function () {
+        Route::get('/', [FoyerController::class, 'dashboard'])->name('dashboard');
+        Route::get('/articles', [FoyerController::class, 'categories'])->name('articles');
+        Route::get('/articles/{categorie}', [FoyerController::class, 'index'])->name('catalogue');
+        Route::get('/reservations', [FoyerController::class, 'mesReservations'])->name('reservations');
+        Route::get('/promotions', [FoyerController::class, 'promotions'])->name('promotions');
+        Route::post('/reserver/{article}', [FoyerController::class, 'reserver'])->name('reserver');
+        Route::post('/commander', [FoyerController::class, 'confirmer'])->name('confirmer');
+        Route::delete('/annuler/{reservation}', [FoyerController::class, 'annuler'])->name('annuler');
+    });
+
+    // ─── Maintenance ─────────────────────────────────────────
     Route::prefix('maintenance')->name('maintenance.')->group(function () {
         Route::get('/', [MaintenanceController::class, 'index'])->name('index');
         Route::get('/signaler', [MaintenanceController::class, 'create'])->name('signaler');
@@ -136,10 +137,10 @@ Route::get('/foyer/catalogue', [FoyerController::class, 'index'])->name('foyer.c
         Route::delete('/{maintenance}', [MaintenanceController::class, 'destroy'])->name('destroy');
     });
 
-    // Réclamations
+    // ─── Réclamations ────────────────────────────────────────
     Route::resource('reclamations', ReclamationController::class)->names('reclamations');
 
-    // Profil
+    // ─── Profil ──────────────────────────────────────────────
     Route::prefix('profil')->name('profile.')->group(function () {
         Route::get('/', [ProfileController::class, 'show'])->name('show');
         Route::get('/edit', [ProfileController::class, 'edit'])->name('edit');
@@ -192,11 +193,11 @@ Route::prefix('foyer')->middleware(['auth', 'role:resp_foyer'])->group(function 
     Route::post('/annonces/{annonce}/update', [\App\Http\Controllers\ResponsableFoyer\AnnonceController::class, 'update'])->name('foyer.annonces.update');
 });
 
-// ─── Inscription ────────────────────────────────────────
+// ─── Inscription ─────────────────────────────────────────────
 Route::get('/inscription', [InscriptionController::class, 'create'])->name('inscription');
 Route::post('/inscription', [InscriptionController::class, 'store'])->name('inscription.store');
 
-// ─── Email ────────────────────────────────────────
+// ─── Email Test ──────────────────────────────────────────────
 Route::get('/test-mail', function () {
     Mail::raw('Si tu reçois ce mail, ta configuration Laravel est parfaite !', function ($message) {
         $message->to('adelkahina62@gmail.com')

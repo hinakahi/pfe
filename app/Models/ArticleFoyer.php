@@ -27,10 +27,14 @@ class ArticleFoyer extends Model
     'promo_date_fin',
     ];
 
-    protected $casts = [
-        'disponible' => 'boolean',
-        'prix' => 'decimal:2',
-    ];
+   protected $casts = [
+    'disponible'      => 'boolean',
+    'prix'            => 'decimal:2',
+    'promo_active'    => 'boolean',
+    'prix_promo'      => 'decimal:2',
+    'promo_date_fin'  => 'date',        
+    'date_peremption' => 'date',        
+];
 
     public function responsable()
     {
