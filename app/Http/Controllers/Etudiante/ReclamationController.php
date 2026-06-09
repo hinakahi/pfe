@@ -1,17 +1,25 @@
 <?php
-
 namespace App\Http\Controllers\Etudiante;
 
 use App\Http\Controllers\Controller;
 use App\Models\Reclamation;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class ReclamationController extends Controller
 {
+    // Sécurité : l'étudiante ne voit que SES réclamations
+    private function myReclamations()
+    {
+        return Reclamation::where('etudiante_id', Auth::id());
+    }
+
     public function index()
     {
-        $reclamations = Reclamation::where('etudiante_id', auth()->id())
-                       ->latest()->get();
+        $reclamations = $this->myReclamations()
+            ->orderBy('created_at', 'desc')
+            ->paginate(10);
+
         return view('etudiante.reclamations.index', compact('reclamations'));
     }
 
@@ -23,33 +31,50 @@ class ReclamationController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'sujet'   => 'required|string|max:191',
-            'message' => 'required|string|max:1000',
+            'sujet'   => 'required|string|max:255',
+            'message' => 'required|string|min:10',
+        ], [
+            'sujet.required'   => 'Le sujet est obligatoire.',
+            'message.required' => 'Le message est obligatoire.',
+            'message.min'      => 'Le message doit contenir au moins 10 caractères.',
         ]);
 
         Reclamation::create([
-            'etudiante_id' => auth()->id(),
+            'etudiante_id' => Auth::id(),
             'sujet'        => $request->sujet,
             'message'      => $request->message,
             'statut'       => 'en_attente',
         ]);
 
-        return redirect()->route('etudiante.reclamations.index')
-                         ->with('success', 'Réclamation envoyée avec succès.');
+        return redirect()
+            ->route('etudiante.reclamations.index')
+            ->with('success', 'Votre réclamation a été envoyée avec succès.');
     }
 
-    public function destroy(Reclamation $reclamation)
+    public function show(Reclamation $reclamation)
     {
-        if ($reclamation->etudiante_id !== auth()->id()) {
-            abort(403);
-        }
+        abort_if($reclamation->etudiante_id !== Auth::id(), 403);
+        return view('etudiante.reclamations.show', compact('reclamation'));
+    }
 
-        if ($reclamation->statut !== 'en_attente') {
-            return back()->with('error', 'Impossible de supprimer cette réclamation.');
-        }
+    // ─── Admin ──────────────────────
+    public function indexAdmin()
+    {
+        $reclamations = Reclamation::with('etudiante')->latest()->get();
+        return view('admin.reclamations.index', compact('reclamations'));
+    }
 
-        $reclamation->delete();
-        return redirect()->route('etudiante.reclamations.index')
-                         ->with('success', 'Réclamation supprimée avec succès.');
+    public function showAdmin(Reclamation $reclamation)
+    {
+        return view('admin.reclamations.show', compact('reclamation'));
+    }
+
+    public function updateAdmin(Request $request, Reclamation $reclamation)
+    {
+        $reclamation->update([
+            'statut' => $request->statut,
+            'reponse' => $request->reponse,
+        ]);
+        return back()->with('success', 'Mise à jour réussie');
     }
 }

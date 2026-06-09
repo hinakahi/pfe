@@ -285,32 +285,35 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
-                  @forelse($panierArticles as $item)
-<div id="panier-item-{{ $item->id }}" style="display: flex; align-items: center; gap: 12px; padding: 12px 0; border-bottom: 1px solid #dee2e6; transition: opacity 0.3s;">
-    @if($item->article->photo)
-        <img src="{{ asset('storage/' . $item->article->photo) }}" 
-             alt="{{ $item->article->nom_article }}"
-             style="width: 60px; height: 60px; object-fit: cover; border-radius: 8px;">
-    @else
-        <div style="width: 60px; height: 60px; background: linear-gradient(135deg,#e8f0fe,#d2e3fc); border-radius: 8px; display: flex; align-items: center; justify-content: center;">
-            <i class="bi bi-box-seam" style="color: #4a90d9;"></i>
-        </div>
-    @endif
-    <div style="flex: 1;">
-        <strong>{{ $item->article->nom_article }}</strong><br>
-        <span style="color: #666; font-size: 0.9rem;">Qté: {{ $item->quantite }} × {{ number_format($item->article->prix, 2) }} DA</span>
-    </div>
-    <div style="text-align: right;">
-        <strong style="color: #1a3c5e; font-size: 1.1rem;">{{ number_format($item->article->prix * $item->quantite, 2) }} DA</strong>
-    </div>
-    <button type="button" class="btn btn-outline-danger btn-sm" title="Supprimer" 
-            onclick="supprimerArticlePanier({{ $item->id }})">
-        <i class="bi bi-x-lg"></i>
-    </button>
-</div>
-@empty
-<p class="text-center text-muted">Panier vide</p>
-@endforelse
+                      @forelse($panierArticles as $item)
+                <div style="display: flex; align-items: center; gap: 12px; padding: 12px 0; border-bottom: 1px solid #dee2e6;">
+                    @if($item->article->photo)
+                        <img src="{{ asset('storage/' . $item->article->photo) }}" 
+                             alt="{{ $item->article->nom_article }}"
+                             style="width: 60px; height: 60px; object-fit: cover; border-radius: 8px;">
+                    @else
+                        <div style="width: 60px; height: 60px; background: linear-gradient(135deg,#e8f0fe,#d2e3fc); border-radius: 8px; display: flex; align-items: center; justify-content: center;">
+                            <i class="bi bi-box-seam" style="color: #4a90d9;"></i>
+                        </div>
+                    @endif
+                    <div style="flex: 1;">
+                        <strong>{{ $item->article->nom_article }}</strong><br>
+                        <span style="color: #666; font-size: 0.9rem;">Qté: {{ $item->quantite }} × {{ number_format($item->article->prix, 2) }} DA</span>
+                    </div>
+                    <div style="text-align: right;">
+                        <strong style="color: #1a3c5e; font-size: 1.1rem;">{{ number_format($item->article->prix * $item->quantite, 2) }} DA</strong>
+                    </div>
+                    <form method="POST" action="{{ route('etudiante.foyer.annuler', $item->id) }}" style="display: inline;">
+                        @csrf
+                        @method('DELETE')
+                        <button type="submit" class="btn btn-outline-danger btn-sm" title="Supprimer" onclick="return confirm('Supprimer cet article ?')">
+                            <i class="bi bi-x-lg"></i>
+                        </button>
+                    </form>
+                </div>
+                @empty
+                <p class="text-center text-muted">Panier vide</p>
+                @endforelse
                 </div>
                 <div class="modal-footer" style="border-top: 2px solid #dee2e6;">
                     <div style="flex: 1; text-align: left;">
@@ -352,33 +355,5 @@ document.querySelectorAll('.filter-tabs button').forEach(btn => {
         });
     });
 });
-
-// ✅ AJOUTEZ CETTE FONCTION ICI
-function supprimerArticlePanier(id) {
-    if (!confirm('Supprimer cet article du panier ?')) return;
-    
-    // ✅ Supprimer IMMÉDIATEMENT du DOM
-    const element = document.getElementById(`panier-item-${id}`);
-    element.style.opacity = '0';
-    setTimeout(() => element.remove(), 300);
-    
-    // Envoyer la requête en arrière-plan
-    fetch(`/etudiante/foyer/annuler/${id}`, {
-        method: 'DELETE',
-        headers: {
-            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-            'Content-Type': 'application/json',
-            'Accept': 'application/json'
-        }
-    })
-    .then(response => {
-        if (response.ok) {
-            console.log('Article supprimé');
-            // Recharger après 2 secondes pour mettre à jour le total
-            setTimeout(() => location.reload(), 2000);
-        }
-    })
-    .catch(error => console.error('Erreur:', error));
-}
 </script>
 @endsection

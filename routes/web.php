@@ -51,6 +51,10 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::get('/statistiques/export-excel', [StatistiqueController::class, 'exportExcel'])->name('statistiques.excel');
     Route::patch('periodes/{periode}/toggle', [PeriodeController::class, 'toggle'])
     ->name('admin.periodes.toggle');
+    // ─── Réclamations Admin ─────────────────────────────────
+    Route::get('reclamations', [ReclamationController::class, 'indexAdmin'])->name('reclamations.index');
+    Route::get('reclamations/{reclamation}', [ReclamationController::class, 'showAdmin'])->name('reclamations.show');
+    Route::patch('reclamations/{reclamation}', [ReclamationController::class, 'updateAdmin'])->name('reclamations.update');
 });
 
 // ─── Étudiante ────────────────────────────────────────────────
@@ -140,7 +144,11 @@ Route::middleware(['auth', 'role:etudiante'])->prefix('etudiante')->name('etudia
     });
 
     // ─── Réclamations ────────────────────────────────────────
-    Route::resource('reclamations', ReclamationController::class)->names('reclamations');
+    
+    Route::resource('reclamations', ReclamationController::class)
+    ->names('reclamations')
+    ->only(['index', 'create', 'store', 'show']);
+    
 
     // ─── Profil ──────────────────────────────────────────────
     Route::prefix('profil')->name('profile.')->group(function () {
@@ -193,6 +201,10 @@ Route::prefix('foyer')->middleware(['auth', 'role:resp_foyer'])->group(function 
     Route::delete('/annonces/{annonce}', [\App\Http\Controllers\ResponsableFoyer\AnnonceController::class, 'destroy'])->name('foyer.annonces.destroy');
     Route::get('/annonces/{annonce}/edit', [\App\Http\Controllers\ResponsableFoyer\AnnonceController::class, 'edit'])->name('foyer.annonces.edit');
     Route::post('/annonces/{annonce}/update', [\App\Http\Controllers\ResponsableFoyer\AnnonceController::class, 'update'])->name('foyer.annonces.update');
+    Route::post('foyer/notifications/mark-all-read', function () {
+    auth()->user()->unreadNotifications->markAsRead();
+    return back();
+})->name('foyer.notifications.markAllRead')->middleware('auth');
 });
 
 // ─── Inscription ─────────────────────────────────────────────

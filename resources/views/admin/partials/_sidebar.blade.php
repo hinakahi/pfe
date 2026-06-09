@@ -2,6 +2,9 @@
    class="nav-link {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">
     <i class="bi bi-speedometer2"></i> <span>Dashboard</span>
 </a>
+<a href="{{ route('admin.reclamations.index') }}" class="nav-link">
+    <i class="bi bi-file-earmark-text"></i> <span>Réclamations</span>
+</a>
 <a href="{{ route('admin.statistiques') }}" class="nav-link {{ request()->routeIs('admin.statistiques') ? 'active' : '' }}">
     <i class="bi bi-pie-chart-fill"></i> <span>Statistiques</span>
 </a>
@@ -21,3 +24,5 @@
    class="nav-link {{ request()->routeIs('admin.annonces.*') ? 'active' : '' }}">
     <i class="bi bi-megaphone"></i> <span>Annonces</span>
 </a>
+
+

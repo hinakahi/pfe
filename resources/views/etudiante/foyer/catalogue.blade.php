@@ -484,7 +484,81 @@
     </div>
 </div>
 
+{{-- ===== PANIER STICKY ===== --}}
+@if(auth()->check())
+@php
+    $panierCount    = \App\Models\Reservation::where('etudiante_id', auth()->id())->where('statut','panier')->count();
+    $panierTotal    = \App\Models\Reservation::where('etudiante_id', auth()->id())->where('statut','panier')->get()->sum(fn($r) => $r->article->prix * $r->quantite);
+    $panierArticles = \App\Models\Reservation::where('etudiante_id', auth()->id())->where('statut','panier')->get();
+@endphp
+
+{{-- Bouton sticky --}}
+<button type="button" id="panierBtn"
+        style="position:fixed; bottom:30px; right:30px; width:60px; height:60px; border-radius:50%; background:linear-gradient(135deg,#1a3c5e,#2d6a9f); color:#fff; border:none; cursor:pointer; box-shadow:0 4px 12px rgba(0,0,0,0.3); z-index:999; display:flex; align-items:center; justify-content:center; font-size:1.8rem;"
+        data-bs-toggle="modal" data-bs-target="#modalPanierSticky">
+    <i class="bi bi-cart3"></i>
+    <span class="badge-count" style="position:absolute; top:-8px; right:-8px; background:#dc3545; color:#fff; border-radius:50%; width:28px; height:28px; display:flex; align-items:center; justify-content:center; font-size:0.8rem; font-weight:bold;">{{ $panierCount }}</span>
+</button>
+
+{{-- Modal panier sticky --}}
+<div class="modal fade" id="modalPanierSticky" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="bi bi-cart3 me-2"></i>Mon Panier</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="panierModalBody">
+                @forelse($panierArticles as $item)
+                <div id="panier-item-{{ $item->id }}"
+                     data-prix="{{ $item->article->prix }}"
+                     data-qte="{{ $item->quantite }}"
+                     style="display:flex; align-items:center; gap:12px; padding:12px 0; border-bottom:1px solid #dee2e6; transition:opacity 0.3s;">
+                    @if($item->article->photo)
+                        <img src="{{ asset('storage/'.$item->article->photo) }}"
+                             style="width:60px; height:60px; object-fit:cover; border-radius:8px;">
+                    @else
+                        <div style="width:60px; height:60px; background:linear-gradient(135deg,#e8f0fe,#d2e3fc); border-radius:8px; display:flex; align-items:center; justify-content:center;">
+                            <i class="bi bi-box-seam" style="color:#4a90d9;"></i>
+                        </div>
+                    @endif
+                    <div style="flex:1;">
+                        <strong>{{ $item->article->nom_article }}</strong><br>
+                        <span style="color:#666; font-size:.9rem;">Qté: {{ $item->quantite }} × {{ number_format($item->article->prix,2) }} DA</span>
+                    </div>
+                    <strong style="color:#1a3c5e;">{{ number_format($item->article->prix * $item->quantite,2) }} DA</strong>
+                    <button type="button" class="btn btn-outline-danger btn-sm"
+                            onclick="supprimerArticlePanier({{ $item->id }})">
+                        <i class="bi bi-x-lg"></i>
+                    </button>
+                </div>
+                @empty
+                <p class="text-center text-muted">Panier vide</p>
+                @endforelse
+            </div>
+            <div class="modal-footer" style="border-top:2px solid #dee2e6;">
+                <div style="flex:1;">
+                    <strong class="total-label"
+                            data-total="{{ $panierTotal }}"
+                            style="font-size:1.2rem; color:#1a3c5e;">
+                        Total : {{ number_format($panierTotal,2) }} DA
+                    </strong>
+                </div>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+                <form method="POST" action="{{ route('etudiante.foyer.confirmer') }}" style="display:inline;">
+                    @csrf
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-check-circle me-1"></i>Confirmer la commande
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+@endif
+
 @endsection
+
 
 @section('scripts')
 <script>
@@ -562,6 +636,52 @@ document.getElementById('btnList').addEventListener('click', function() {
 function updateCount() {
     const n = document.querySelectorAll('.art-item:not([style*="none"])').length;
     document.getElementById('countLabel').textContent = n + ' article(s)';
+}
+// ── Badge panier ──
+function updateBadge(delta) {
+    const badge = document.querySelector('#panierBtn .badge-count');
+    if (!badge) return;
+    let count = parseInt(badge.textContent) + delta;
+    if (count < 0) count = 0;
+    badge.textContent = count;
+}
+
+// ── Supprimer du panier ──
+function supprimerArticlePanier(id) {
+    if (!confirm('Supprimer cet article du panier ?')) return;
+
+    const element = document.getElementById(`panier-item-${id}`);
+    if (!element) return;
+
+    const soustrait = parseFloat(element.dataset.prix) * parseFloat(element.dataset.qte);
+    element.style.opacity = '0';
+    setTimeout(() => element.remove(), 300);
+
+    const totalEl = document.querySelector('.total-label');
+    if (totalEl) {
+        const nouveau = Math.max(0, parseFloat(totalEl.dataset.total) - soustrait);
+        totalEl.dataset.total = nouveau;
+        totalEl.textContent = `Total : ${nouveau.toFixed(2)} DA`;
+    }
+
+    updateBadge(-1);
+
+    fetch(`/etudiante/foyer/annuler/${id}`, {
+        method: 'DELETE',
+        headers: {
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+            'Accept': 'application/json'
+        }
+    })
+    .then(() => {
+        const restants = document.querySelectorAll('[id^="panier-item-"]').length;
+        if (restants === 0) {
+            document.getElementById('panierModalBody').innerHTML =
+                '<p class="text-center text-muted">Panier vide</p>';
+            if (totalEl) { totalEl.textContent = 'Total : 0.00 DA'; totalEl.dataset.total = '0'; }
+        }
+    })
+    .catch(err => console.error(err));
 }
 </script>
 @endsection
