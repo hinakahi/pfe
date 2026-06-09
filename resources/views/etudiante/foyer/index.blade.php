@@ -1,273 +1,328 @@
 @extends('layouts.app')
-@section('title', 'Articles - ' . ucfirst($categorie))
-@section('page-title', ucfirst($categorie))
+
+@section('title', 'Foyer - Catalogue')
+@section('page-title', 'Foyer')
+
+@section('styles')
+<style>
+    .article-card {
+        border-radius: 14px;
+        overflow: hidden;
+        transition: transform 0.2s, box-shadow 0.2s;
+        height: 100%;
+    }
+    .article-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 8px 24px rgba(0,0,0,0.13);
+    }
+    .article-img {
+        width: 100%;
+        height: 170px;
+        object-fit: cover;
+        background: #f0f4f8;
+    }
+    .article-img-placeholder {
+        width: 100%;
+        height: 170px;
+        background: linear-gradient(135deg, #e8f0fe, #d2e3fc);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2.5rem;
+        color: #4a90d9;
+    }
+    .stock-badge {
+        font-size: 0.75rem;
+        padding: 3px 10px;
+        border-radius: 20px;
+    }
+    .prix-label {
+        font-size: 1.15rem;
+        font-weight: 700;
+        color: #1a3c5e;
+    }
+    [data-theme="dark"] .prix-label { color: #7eb3e8; }
+    [data-theme="dark"] .article-img-placeholder {
+        background: linear-gradient(135deg, #1a2f4a, #1e3d5c);
+        color: #7eb3e8;
+    }
+    .filter-bar {
+        background: var(--bg-card);
+        border-radius: 12px;
+        padding: 14px 18px;
+        margin-bottom: 20px;
+        box-shadow: var(--shadow);
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+        align-items: center;
+    }
+    .filter-bar input, .filter-bar select {
+        border-radius: 8px;
+        border: 1px solid #dee2e6;
+        padding: 6px 12px;
+        font-size: 0.9rem;
+    }
+    [data-theme="dark"] .filter-bar input,
+    [data-theme="dark"] .filter-bar select {
+        background: #2d3139;
+        border-color: #444;
+        color: var(--text-main);
+    }
+    .btn-reserver {
+        background: linear-gradient(135deg, #1a3c5e, #2d6a9f);
+        color: #fff;
+        border: none;
+        border-radius: 8px;
+        padding: 7px 16px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        width: 100%;
+        transition: opacity 0.2s;
+    }
+    .btn-reserver:hover { opacity: 0.88; color: #fff; }
+    .btn-reserver:disabled {
+        background: #adb5bd;
+        cursor: not-allowed;
+    }
+    .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+        color: var(--text-muted);
+    }
+    .empty-state i { font-size: 3rem; margin-bottom: 12px; display: block; }
+</style>
+@endsection
 
 @section('content')
 
-{{-- Flèche retour --}}
-<div class="mb-4">
-    <a href="{{ route('etudiante.foyer.articles') }}"
-       class="btn btn-outline-secondary btn-sm">
-        <i class="bi bi-arrow-left me-1"></i> Retour aux catégories
+{{-- En-tête --}}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h4 class="fw-bold mb-1">
+            <i class="bi bi-shop me-2" style="color:#2d6a9f;"></i>Catalogue du Foyer
+        </h4>
+        <p class="text-muted small mb-0">Parcourez les articles disponibles et passez vos réservations</p>
+    </div>
+    <a href="{{ route('etudiante.foyer.reservations') }}" class="btn btn-outline-primary btn-sm">
+        <i class="bi bi-cart-check me-1"></i>Mes réservations
     </a>
 </div>
 
-{{-- Barre de recherche --}}
-<form method="GET" action="{{ route('etudiante.foyer.catalogue', $categorie) }}" class="mb-4">
-    <div class="input-group" style="max-width:400px;">
-        <span class="input-group-text bg-white">
-            <i class="bi bi-search text-muted"></i>
-        </span>
-        <input type="text" name="search" value="{{ request('search') }}"
-               class="form-control border-start-0"
-               placeholder="Rechercher un article...">
-        @if(request('search'))
-        <a href="{{ route('etudiante.foyer.catalogue', $categorie) }}"
-           class="btn btn-outline-secondary">
-            <i class="bi bi-x"></i>
-        </a>
-        @endif
-    </div>
-</form>
+{{-- Barre de filtre --}}
+<div class="filter-bar">
+    <i class="bi bi-search text-muted"></i>
+    <input type="text" id="searchInput" placeholder="Rechercher un article..." style="min-width:200px; flex:1;">
+    <select id="sortSelect" style="min-width:160px;">
+        <option value="">Trier par...</option>
+        <option value="prix-asc">Prix croissant</option>
+        <option value="prix-desc">Prix décroissant</option>
+        <option value="nom">Nom A→Z</option>
+    </select>
+    <span class="text-muted small ms-auto" id="countLabel">
+        {{ $articles->count() }} article(s)
+    </span>
+</div>
 
-{{-- Grille articles --}}
+{{-- Grille des articles --}}
 @if($articles->isEmpty())
-    <div class="text-center text-muted py-5">
-        <i class="bi bi-box-seam fs-1 d-block mb-3"></i>
-        Aucun article disponible pour le moment.
+    <div class="empty-state">
+        <i class="bi bi-box-seam"></i>
+        <h6>Aucun article disponible pour le moment</h6>
+        <p class="small">Revenez plus tard, le responsable du foyer mettra à jour le catalogue.</p>
     </div>
 @else
-<div class="row g-3">
-    @foreach($articles as $article)
-    <div class="col-md-3 col-sm-6">
-        <div class="card h-100 position-relative" 
-             style="border-radius:12px; overflow:hidden;">
+    <div class="row g-3" id="articlesGrid">
+        @foreach($articles as $article)
+        <div class="col-6 col-md-4 col-lg-3 article-item"
+             data-nom="{{ strtolower($article->nom_article) }}"
+             data-prix="{{ $article->prix }}">
+            <div class="card article-card h-100">
 
-            {{-- Badge PROMO --}}
-            @if($article->promo_active && $article->prix_promo)
-            <div style="position:absolute; top:8px; left:8px; z-index:2;">
-                <span class="badge" 
-                      style="background:linear-gradient(135deg,#dc3545,#e91e63); 
-                             font-size:0.72rem; padding:4px 8px;">
-                    <i class="bi bi-tag-fill me-1"></i>PROMO
-                    @if($article->promo_date_fin)
-                        — jusqu'au {{ \Carbon\Carbon::parse($article->promo_date_fin)->format('d/m') }}
-                    @endif
-                </span>
-            </div>
-            @endif
-
-            {{-- Photo --}}
-            <div style="height:130px; overflow:hidden;">
+                {{-- Image --}}
                 @if($article->photo)
                     <img src="{{ asset('storage/' . $article->photo) }}"
-                         style="width:100%; height:130px; object-fit:cover;">
+                         alt="{{ $article->nom_article }}"
+                         class="article-img">
                 @else
-                    <div style="height:130px; 
-                                background:linear-gradient(135deg,#1a3c5e,#2d6a9f);
-                                display:flex; align-items:center; justify-content:center;">
-                        @if($categorie == 'fastfood')
-                            <i class="bi bi-egg-fried text-white" style="font-size:3rem;"></i>
-                        @elseif($categorie == 'magasin')
-                            <i class="bi bi-bag text-white" style="font-size:3rem;"></i>
+                    <div class="article-img-placeholder">
+                        <i class="bi bi-box-seam"></i>
+                    </div>
+                @endif
+
+                <div class="card-body d-flex flex-column gap-2 p-3">
+
+                    {{-- Nom + stock --}}
+                    <div class="d-flex justify-content-between align-items-start gap-1">
+                        <h6 class="fw-semibold mb-0" style="font-size:.92rem; line-height:1.3;">
+                            {{ $article->nom_article }}
+                        </h6>
+                        @if($article->stock > 5)
+                            <span class="badge bg-success stock-badge">En stock</span>
+                        @elseif($article->stock > 0)
+                            <span class="badge bg-warning text-dark stock-badge">Stock faible</span>
                         @else
-                            <i class="bi bi-cup-hot text-white" style="font-size:3rem;"></i>
+                            <span class="badge bg-danger stock-badge">Épuisé</span>
                         @endif
                     </div>
-                @endif
-            </div>
 
-            <div class="card-body p-3 d-flex flex-column">
-
-                {{-- Nom --}}
-                <div class="fw-bold mb-1">{{ $article->nom_article }}</div>
-
-                {{-- Description --}}
-                @if($article->description)
-                <div class="text-muted small mb-2">
-                    {{ Str::limit($article->description, 50) }}
-                </div>
-                @endif
-
-                {{-- Prix --}}
-                <div class="mb-2">
-                    @if($article->promo_active && $article->prix_promo)
-                        <div class="text-decoration-line-through text-muted" 
-                             style="font-size:0.8rem;">
-                            {{ number_format($article->prix, 2) }} DA
-                        </div>
-                        <div class="fw-bold" style="color:#dc3545; font-size:1.1rem;">
-                            {{ number_format($article->prix_promo, 2) }} DA
-                        </div>
-                    @else
-                        <div class="fw-bold text-primary" style="font-size:1.1rem;">
-                            {{ number_format($article->prix, 2) }} DA
-                        </div>
+                    {{-- Description --}}
+                    @if($article->description)
+                    <p class="text-muted small mb-0" style="font-size:.8rem; line-height:1.4;">
+                        {{ Str::limit($article->description, 60) }}
+                    </p>
                     @endif
-                </div>
 
-                {{-- Stock + Péremption --}}
-                <div class="d-flex gap-1 flex-wrap mb-3">
-                    <span class="badge {{ $article->stock <= 5 ? 'bg-warning text-dark' : 'bg-success' }}"
-                          style="font-size:0.65rem;">
-                        <i class="bi bi-box me-1"></i>Stock : {{ $article->stock }}
-                    </span>
-                    @if($article->date_peremption)
-                    <span class="badge bg-light text-muted border" style="font-size:0.65rem;">
-                        <i class="bi bi-calendar me-1"></i>
-                        {{ \Carbon\Carbon::parse($article->date_peremption)->format('d/m/Y') }}
-                    </span>
-                    @endif
-                </div>
+                    {{-- Prix + stock restant --}}
+                    <div class="d-flex justify-content-between align-items-center mt-auto">
+                        <span class="prix-label">{{ number_format($article->prix, 2) }} DA</span>
+                        <span class="text-muted small">{{ $article->stock }} restant(s)</span>
+                    </div>
 
-                {{-- Bouton ajouter au panier --}}
-                <form method="POST"
-                      action="{{ route('etudiante.foyer.reserver', $article->id) }}"
-                      class="mt-auto d-flex gap-1">
-                    @csrf
-                    <input type="number" name="quantite" value="1" min="1"
-                           max="{{ $article->stock }}"
-                           class="form-control form-control-sm"
-                           style="width:60px;">
-                    <button type="submit" class="btn btn-primary btn-sm flex-grow-1">
-                        <i class="bi bi-cart-plus me-1"></i>Ajouter
+                    {{-- Bouton réserver --}}
+                    @if($article->stock > 0)
+                    <button type="button"
+                            class="btn-reserver"
+                            data-bs-toggle="modal"
+                            data-bs-target="#modalReserver"
+                            data-id="{{ $article->id }}"
+                            data-nom="{{ $article->nom_article }}"
+                            data-prix="{{ $article->prix }}"
+                            data-stock="{{ $article->stock }}">
+                        <i class="bi bi-cart-plus me-1"></i>Réserver
                     </button>
-                </form>
+                    @else
+                    <button class="btn-reserver" disabled>
+                        <i class="bi bi-x-circle me-1"></i>Indisponible
+                    </button>
+                    @endif
 
+                </div>
             </div>
         </div>
+        @endforeach
     </div>
-    @endforeach
-</div>
 @endif
 
-{{-- Panier flottant --}}
-@php
-    $panierCount = $panier->count();
-    $panierTotal = $panier->sum(function($r) {
-        $prix = ($r->article->promo_active && $r->article->prix_promo)
-                ? $r->article->prix_promo : $r->article->prix;
-        return $r->quantite * $prix;
-    });
-@endphp
+{{-- ===== MODAL RÉSERVATION ===== --}}
+<div class="modal fade" id="modalReserver" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style="border-radius:14px; border:none;">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title fw-bold">
+                    <i class="bi bi-cart-plus me-2" style="color:#2d6a9f;"></i>
+                    Réserver un article
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="formReserver" method="POST" action="">
+                @csrf
+                <div class="modal-body pt-2">
 
-<div style="position:fixed; bottom:30px; right:30px; z-index:1000;">
-    <button onclick="document.getElementById('panierModal').style.display='flex'"
-            class="btn btn-primary rounded-circle shadow-lg"
-            style="width:60px; height:60px; font-size:1.4rem; 
-                   position:relative; display:flex; 
-                   align-items:center; justify-content:center;">
-        <i class="bi bi-cart3"></i>
-        @if($panierCount > 0)
-        <span style="position:absolute; top:-5px; right:-5px; background:#dc3545;
-                     color:white; border-radius:50%; width:22px; height:22px;
-                     font-size:0.7rem; display:flex; align-items:center; 
-                     justify-content:center; font-weight:700;">
-            {{ $panierCount }}
-        </span>
-        @endif
-    </button>
-</div>
-
-{{-- Modal Panier --}}
-<div id="panierModal"
-     style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5);
-            z-index:2000; align-items:center; justify-content:center;">
-    <div style="background:white; width:440px; max-height:85vh; border-radius:20px;
-                overflow:hidden; display:flex; flex-direction:column; 
-                box-shadow:0 20px 60px rgba(0,0,0,0.3);">
-
-        {{-- Header --}}
-        <div class="d-flex justify-content-between align-items-center p-4"
-             style="border-bottom:1px solid #f0f0f0;">
-            <h6 class="mb-0 fw-bold fs-5">
-                <i class="bi bi-cart3 me-2"></i>Mon panier
-                @if($panierCount > 0)
-                    <span class="badge bg-primary ms-1">{{ $panierCount }}</span>
-                @endif
-            </h6>
-            <button onclick="document.getElementById('panierModal').style.display='none'"
-                    style="background:none; border:none; font-size:1.4rem; 
-                           cursor:pointer; color:#666;">✕</button>
-        </div>
-
-        {{-- Liste articles --}}
-        <div style="overflow-y:auto; flex:1; padding:1rem 1.5rem;">
-            @if($panier->isEmpty())
-                <div class="text-center text-muted py-5">
-                    <i class="bi bi-cart-x fs-1 d-block mb-2"></i>
-                    Votre panier est vide.
-                </div>
-            @else
-                @foreach($panier as $r)
-                @php
-                    $prix = ($r->article->promo_active && $r->article->prix_promo)
-                            ? $r->article->prix_promo : $r->article->prix;
-                    $sousTotal = $r->quantite * $prix;
-                @endphp
-                <div class="d-flex justify-content-between align-items-center py-3"
-                     style="border-bottom:1px solid #f5f5f5;">
-                    <div>
-                        <div class="fw-semibold">{{ $r->article->nom_article }}</div>
-                        <div class="text-muted small">
-                            {{ number_format($prix, 0) }} DA × {{ $r->quantite }} =
-                            <strong>{{ number_format($sousTotal, 0) }} DA</strong>
+                    <div class="p-3 rounded-3 mb-3"
+                         style="background: linear-gradient(135deg,#e8f0fe,#d2e3fc);">
+                        <div class="fw-semibold" id="modalNomArticle" style="color:#1a3c5e;"></div>
+                        <div class="small text-muted mt-1">
+                            Prix unitaire : <strong id="modalPrixArticle" style="color:#1a3c5e;"></strong>
                         </div>
                     </div>
-                    <form method="POST"
-                          action="{{ route('etudiante.foyer.annuler', $r->id) }}">
-                        @csrf
-                        @method('DELETE')
-                        <button type="submit"
-                                style="background:none; border:none; 
-                                       color:#dc3545; cursor:pointer; font-size:1.1rem;">
-                            ✕
+
+                    <label class="form-label fw-semibold small">Quantité souhaitée</label>
+                    <div class="input-group">
+                        <button type="button" class="btn btn-outline-secondary" id="btnMoins">
+                            <i class="bi bi-dash"></i>
                         </button>
-                    </form>
-                </div>
-                @endforeach
+                        <input type="number" name="quantite" id="inputQuantite"
+                               class="form-control text-center fw-bold"
+                               value="1" min="1" max="1" readonly>
+                        <button type="button" class="btn btn-outline-secondary" id="btnPlus">
+                            <i class="bi bi-plus"></i>
+                        </button>
+                    </div>
+                    <div class="small text-muted mt-1">
+                        Stock disponible : <span id="modalStock" class="fw-semibold"></span>
+                    </div>
 
-                {{-- Total --}}
-                <div class="d-flex justify-content-between align-items-center pt-3">
-                    <span class="fw-bold fs-6">Total</span>
-                    <span class="fw-bold fs-5 text-primary">
-                        {{ number_format($panierTotal, 0) }} DA
-                    </span>
-                </div>
-            @endif
-        </div>
+                    <div class="mt-3 p-2 rounded-3 text-center"
+                         style="background:var(--bg-body); border:1px dashed #2d6a9f;">
+                        <span class="small text-muted">Total estimé : </span>
+                        <span class="fw-bold" id="totalEstime" style="color:#1a3c5e; font-size:1.05rem;"></span>
+                    </div>
 
-        {{-- Bouton Commander --}}
-        @if($panierCount > 0)
-        <div style="border-top:1px solid #f0f0f0; padding:1rem 1.5rem;">
-            <form method="POST" action="{{ route('etudiante.foyer.confirmer') }}">
-                @csrf
-                <button type="submit" class="btn w-100 text-white fw-semibold py-3"
-                        style="background:linear-gradient(135deg,#198754,#20c997); 
-                               border-radius:12px; font-size:1rem;">
-                    <i class="bi bi-check2-circle me-2"></i>
-                    Commander — {{ number_format($panierTotal, 0) }} DA
-                </button>
+                </div>
+                <div class="modal-footer border-0 pt-0">
+                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Annuler</button>
+                    <button type="submit" class="btn text-white fw-semibold"
+                            style="background: linear-gradient(135deg,#1a3c5e,#2d6a9f); border:none; border-radius:8px;">
+                        <i class="bi bi-check-circle me-1"></i>Confirmer la réservation
+                    </button>
+                </div>
             </form>
-            <button onclick="document.getElementById('panierModal').style.display='none'"
-                    class="btn btn-light w-100 mt-2"
-                    style="border-radius:12px;">
-                Continuer mes achats
-            </button>
         </div>
-        @endif
-
     </div>
 </div>
 
 @endsection
 
-@section('styles')
-<style>
-.card:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 8px 20px rgba(0,0,0,0.12) !important;
-    transition: all 0.3s;
+@section('scripts')
+<script>
+// ── Remplir le modal ──
+const modalReserver = document.getElementById('modalReserver');
+modalReserver.addEventListener('show.bs.modal', e => {
+    const btn = e.relatedTarget;
+    const id    = btn.dataset.id;
+    const nom   = btn.dataset.nom;
+    const prix  = parseFloat(btn.dataset.prix);
+    const stock = parseInt(btn.dataset.stock);
+
+    document.getElementById('modalNomArticle').textContent = nom;
+    document.getElementById('modalPrixArticle').textContent = prix.toFixed(2) + ' DA';
+    document.getElementById('modalStock').textContent = stock;
+    document.getElementById('inputQuantite').max = stock;
+    document.getElementById('inputQuantite').value = 1;
+    document.getElementById('totalEstime').textContent = prix.toFixed(2) + ' DA';
+    document.getElementById('formReserver').action = `/etudiante/foyer/reserver/${id}`;
+});
+
+// ── +/- quantité ──
+const inputQte = document.getElementById('inputQuantite');
+function updateTotal() {
+    const prix = parseFloat(document.getElementById('modalPrixArticle').textContent);
+    const qte  = parseInt(inputQte.value);
+    document.getElementById('totalEstime').textContent = (prix * qte).toFixed(2) + ' DA';
 }
-</style>
+document.getElementById('btnMoins').addEventListener('click', () => {
+    if (inputQte.value > 1) { inputQte.value--; updateTotal(); }
+});
+document.getElementById('btnPlus').addEventListener('click', () => {
+    if (inputQte.value < inputQte.max) { inputQte.value++; updateTotal(); }
+});
+
+// ── Recherche ──
+document.getElementById('searchInput').addEventListener('input', function() {
+    const q = this.value.toLowerCase();
+    document.querySelectorAll('.article-item').forEach(el => {
+        el.style.display = el.dataset.nom.includes(q) ? '' : 'none';
+    });
+    updateCount();
+});
+
+// ── Tri ──
+document.getElementById('sortSelect').addEventListener('change', function() {
+    const grid = document.getElementById('articlesGrid');
+    const items = [...grid.querySelectorAll('.article-item')];
+    items.sort((a, b) => {
+        if (this.value === 'prix-asc')  return a.dataset.prix - b.dataset.prix;
+        if (this.value === 'prix-desc') return b.dataset.prix - a.dataset.prix;
+        if (this.value === 'nom')       return a.dataset.nom.localeCompare(b.dataset.nom);
+        return 0;
+    });
+    items.forEach(el => grid.appendChild(el));
+});
+
+function updateCount() {
+    const visible = document.querySelectorAll('.article-item:not([style*="none"])').length;
+    document.getElementById('countLabel').textContent = visible + ' article(s)';
+}
+</script>
 @endsection

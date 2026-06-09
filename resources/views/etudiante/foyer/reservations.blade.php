@@ -1,248 +1,384 @@
 @extends('layouts.app')
-@section('title', 'Mes Réservations')
-@section('page-title', 'Mes Réservations')
 
-@section('content')
-
-{{-- Flèche retour --}}
-<div class="mb-4">
-    <a href="{{ route('etudiante.foyer.dashboard') }}"
-       class="btn btn-outline-secondary btn-sm">
-        <i class="bi bi-arrow-left me-1"></i> Retour au foyer
-    </a>
-</div>
-
-{{-- Stats : 3 cartes seulement (sans Total) --}}
-<div class="row mb-4">
-    <div class="col-md-4">
-        <div class="stat-card" style="background:linear-gradient(135deg,#fd7e14,#ffc107)">
-            <div class="number">{{ $reservations->where('statut','en_attente')->count() }}</div>
-            <div class="label"><i class="bi bi-hourglass-split me-1"></i>En attente</div>
-        </div>
-    </div>
-    <div class="col-md-4">
-        <div class="stat-card" style="background:linear-gradient(135deg,#198754,#20c997)">
-            <div class="number">{{ $reservations->where('statut','validee')->count() }}</div>
-            <div class="label"><i class="bi bi-check-circle me-1"></i>Validées</div>
-        </div>
-    </div>
-    <div class="col-md-4">
-        <div class="stat-card" style="background:linear-gradient(135deg,#dc3545,#e91e63)">
-            <div class="number">{{ $reservations->where('statut','annulee')->count() }}</div>
-            <div class="label"><i class="bi bi-x-circle me-1"></i>Annulées</div>
-        </div>
-    </div>
-</div>
-
-{{-- Barre recherche + Filtres --}}
-<div class="card mb-4">
-    <div class="card-body">
-        <form method="GET" action="{{ route('etudiante.foyer.reservations') }}">
-            <div class="row g-3 align-items-end">
-
-                {{-- Recherche --}}
-                <div class="col-md-5">
-                    <label class="form-label text-muted small fw-semibold">
-                        <i class="bi bi-search me-1"></i>Rechercher
-                    </label>
-                    <input type="text" name="search"
-                           value="{{ request('search') }}"
-                           class="form-control"
-                           placeholder="Nom de l'article...">
-                </div>
-
-                {{-- Filtre statut --}}
-                <div class="col-md-4">
-                    <label class="form-label text-muted small fw-semibold">
-                        <i class="bi bi-funnel me-1"></i>Statut
-                    </label>
-                    <select name="statut" class="form-select">
-                        <option value="tous" {{ request('statut','tous') == 'tous' ? 'selected' : '' }}>
-                            Tous
-                        </option>
-                        <option value="en_attente" {{ request('statut') == 'en_attente' ? 'selected' : '' }}>
-                            En attente
-                        </option>
-                        <option value="validee" {{ request('statut') == 'validee' ? 'selected' : '' }}>
-                            Validées
-                        </option>
-                        <option value="annulee" {{ request('statut') == 'annulee' ? 'selected' : '' }}>
-                            Annulées
-                        </option>
-                        <option value="refusee" {{ request('statut') == 'refusee' ? 'selected' : '' }}>
-                            Refusées
-                        </option>
-                    </select>
-                </div>
-
-                {{-- Boutons --}}
-                <div class="col-md-3 d-flex gap-2">
-                    <button type="submit" class="btn btn-primary flex-grow-1">
-                        <i class="bi bi-search me-1"></i>Filtrer
-                    </button>
-                    <a href="{{ route('etudiante.foyer.reservations') }}"
-                       class="btn btn-outline-secondary">
-                        <i class="bi bi-x"></i>
-                    </a>
-                </div>
-
-            </div>
-        </form>
-    </div>
-</div>
-
-{{-- Contenu principal --}}
-<div class="row">
-
-    {{-- Tableau réservations --}}
-    <div class="col-md-8">
-        <div class="card">
-            <div class="card-body">
-                <h6 class="card-title mb-3">
-                    <i class="bi bi-calendar-check me-1 text-primary"></i>
-                    Mes réservations
-                    @if(request('search') || (request('statut') && request('statut') != 'tous'))
-                        <span class="badge bg-primary ms-2">Filtrées</span>
-                    @endif
-                </h6>
-
-                @if($reservations->isEmpty())
-                    <div class="text-center text-muted py-5">
-                        <i class="bi bi-cart-x fs-1 d-block mb-2"></i>
-                        Aucune réservation trouvée.
-                        <div class="mt-3">
-                            <a href="{{ route('etudiante.foyer.articles') }}"
-                               class="btn btn-sm btn-primary">
-                                <i class="bi bi-shop me-1"></i>Voir le catalogue
-                            </a>
-                        </div>
-                    </div>
-                @else
-                <div class="table-responsive">
-                    <table class="table table-hover align-middle">
-                        <thead class="table-light">
-                            <tr>
-                                <th>Article</th>
-                                <th>Quantité</th>
-                                <th>Date</th>
-                                <th>Statut</th>
-                                <th>Action</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach($reservations as $r)
-                            <tr>
-                                <td>
-                                    <div class="d-flex align-items-center gap-2">
-                                        @if($r->article && $r->article->photo)
-                                            <img src="{{ asset('storage/' . $r->article->photo) }}"
-                                                 style="width:35px; height:35px; 
-                                                        object-fit:cover; border-radius:8px;">
-                                        @else
-                                            <div style="width:35px; height:35px; border-radius:8px;
-                                                        background:linear-gradient(135deg,#1a3c5e,#2d6a9f);
-                                                        display:flex; align-items:center; justify-content:center;">
-                                                <i class="bi bi-box text-white" style="font-size:0.8rem;"></i>
-                                            </div>
-                                        @endif
-                                        <span class="fw-semibold">
-                                            {{ $r->article->nom_article ?? '-' }}
-                                        </span>
-                                    </div>
-                                </td>
-                                <td>{{ $r->quantite }}</td>
-                                <td>{{ $r->created_at->format('d/m/Y') }}</td>
-                                <td>
-                                    @if($r->statut === 'en_attente')
-                                        <span class="badge bg-warning text-dark">
-                                            <i class="bi bi-hourglass-split me-1"></i>En attente
-                                        </span>
-                                    @elseif($r->statut === 'validee')
-                                        <span class="badge bg-success">
-                                            <i class="bi bi-check-circle me-1"></i>Validée
-                                        </span>
-                                    @elseif($r->statut === 'annulee')
-                                        <span class="badge bg-danger">
-                                            <i class="bi bi-x-circle me-1"></i>Annulée
-                                        </span>
-                                    @elseif($r->statut === 'refusee')
-                                        <span class="badge bg-secondary">
-                                            <i class="bi bi-slash-circle me-1"></i>Refusée
-                                        </span>
-                                    @elseif($r->statut === 'panier')
-                                        <span class="badge bg-info text-dark">
-                                            <i class="bi bi-cart3 me-1"></i>Panier
-                                        </span>
-                                    @endif
-                                </td>
-                                <td>
-                                    @if(in_array($r->statut, ['en_attente', 'panier']))
-                                    <form method="POST"
-                                          action="{{ route('etudiante.foyer.annuler', $r->id) }}"
-                                          onsubmit="return confirm('Annuler cette réservation ?')">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button class="btn btn-sm btn-outline-danger">
-                                            <i class="bi bi-x-lg me-1"></i>Annuler
-                                        </button>
-                                    </form>
-                                    @else
-                                        <span class="text-muted small">—</span>
-                                    @endif
-                                </td>
-                            </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
-                </div>
-                @endif
-            </div>
-        </div>
-    </div>
-
-    {{-- Promotions --}}
-    <div class="col-md-4">
-        <div class="card h-100">
-            <div class="card-body">
-                <h6 class="card-title mb-3">
-                    <i class="bi bi-tag me-1 text-warning"></i>Promotions en cours
-                </h6>
-                @forelse($promotions as $promo)
-                <div class="mb-3 p-3 rounded"
-                     style="background:linear-gradient(135deg,#fff8e1,#fff3cd); 
-                            border-left:4px solid #ffc107;">
-                    <div class="fw-semibold small">{{ $promo->titre }}</div>
-                    <div class="text-muted" style="font-size:12px;">
-                        {{ Str::limit($promo->contenu, 70) }}
-                    </div>
-                    <div class="text-muted mt-1" style="font-size:11px;">
-                        <i class="bi bi-clock me-1"></i>
-                        {{ $promo->created_at->diffForHumans() }}
-                    </div>
-                </div>
-                @empty
-                <div class="text-muted text-center py-4">
-                    <i class="bi bi-tag fs-2 d-block mb-2"></i>
-                    Aucune promotion en cours.
-                </div>
-                @endforelse
-            </div>
-        </div>
-    </div>
-
-</div>
-
-@endsection
+@section('title', 'Mes Réservations - Foyer')
+@section('page-title', 'Foyer')
 
 @section('styles')
 <style>
-.stat-card {
-    border-radius: 12px;
-    padding: 20px;
-    color: white;
-    margin-bottom: 10px;
-}
-.stat-card .number { font-size: 2rem; font-weight: 700; }
-.stat-card .label { font-size: 0.85rem; opacity: 0.85; }
+    .resa-card {
+        border-radius: 14px;
+        overflow: hidden;
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .resa-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+    }
+    .statut-pill {
+        font-size: 0.78rem;
+        font-weight: 600;
+        padding: 4px 12px;
+        border-radius: 20px;
+    }
+    .statut-en_attente  { background: #fff3cd; color: #856404; }
+    .statut-validee     { background: #d1e7dd; color: #0a3622; }
+    .statut-refusee     { background: #f8d7da; color: #58151c; }
+    .statut-annulee     { background: #e2e3e5; color: #41464b; }
+    .article-thumb {
+        width: 56px; height: 56px;
+        border-radius: 10px;
+        object-fit: cover;
+        background: #e8f0fe;
+        flex-shrink: 0;
+    }
+    .article-thumb-placeholder {
+        width: 56px; height: 56px;
+        border-radius: 10px;
+        background: linear-gradient(135deg,#e8f0fe,#d2e3fc);
+        display: flex; align-items: center; justify-content: center;
+        color: #4a90d9; font-size: 1.4rem;
+        flex-shrink: 0;
+    }
+    .filter-tabs {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+        margin-bottom: 20px;
+    }
+    .filter-tabs button {
+        border: none;
+        border-radius: 20px;
+        padding: 5px 16px;
+        font-size: 0.85rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.2s;
+        background: var(--bg-card);
+        color: var(--text-muted);
+        box-shadow: var(--shadow);
+    }
+    .filter-tabs button.active {
+        background: linear-gradient(135deg,#1a3c5e,#2d6a9f);
+        color: #fff;
+    }
+    .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+        color: var(--text-muted);
+    }
+    .empty-state i { font-size: 3rem; margin-bottom: 12px; display: block; }
+    .prix-total {
+        font-size: 0.95rem;
+        font-weight: 700;
+        color: #1a3c5e;
+    }
+    [data-theme="dark"] .prix-total { color: #7eb3e8; }
 </style>
+@endsection
+
+@section('content')
+
+{{-- En-tête --}}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h4 class="fw-bold mb-1">
+            <i class="bi bi-cart-check me-2" style="color:#2d6a9f;"></i>Mes Réservations
+        </h4>
+        <p class="text-muted small mb-0">Suivi de toutes vos réservations du foyer</p>
+    </div>
+    <a href="{{ route('etudiante.foyer.dashboard') }}" class="btn btn-outline-primary btn-sm">
+        <i class="bi bi-shop me-1"></i>Retour au catalogue
+    </a>
+</div>
+
+{{-- Statistiques rapides --}}
+<div class="row g-3 mb-4">
+    @php
+        $total      = $reservations->count();
+        $enAttente  = $reservations->where('statut','en_attente')->count();
+        $validees   = $reservations->where('statut','validee')->count();
+        $refusees   = $reservations->where('statut','refusee')->count();
+    @endphp
+    <div class="col-6 col-md-3">
+        <div class="card text-center p-3">
+            <div style="font-size:1.6rem; font-weight:700; color:#1a3c5e;">{{ $total }}</div>
+            <div class="small text-muted">Total</div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="card text-center p-3">
+            <div style="font-size:1.6rem; font-weight:700; color:#856404;">{{ $enAttente }}</div>
+            <div class="small text-muted">En attente</div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="card text-center p-3">
+            <div style="font-size:1.6rem; font-weight:700; color:#0a3622;">{{ $validees }}</div>
+            <div class="small text-muted">Validées</div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="card text-center p-3">
+            <div style="font-size:1.6rem; font-weight:700; color:#58151c;">{{ $refusees }}</div>
+            <div class="small text-muted">Refusées</div>
+        </div>
+    </div>
+</div>
+
+{{-- Onglets filtre --}}
+<div class="filter-tabs">
+    <button class="active" data-filter="all">Toutes ({{ $total }})</button>
+    <button data-filter="en_attente">
+        <i class="bi bi-clock me-1"></i>En attente ({{ $enAttente }})
+    </button>
+    <button data-filter="validee">
+        <i class="bi bi-check-circle me-1"></i>Validées ({{ $validees }})
+    </button>
+    <button data-filter="refusee">
+        <i class="bi bi-x-circle me-1"></i>Refusées ({{ $refusees }})
+    </button>
+    <button data-filter="annulee">
+        <i class="bi bi-slash-circle me-1"></i>Annulées
+    </button>
+</div>
+
+{{-- Liste des réservations --}}
+@if($reservations->isEmpty())
+    <div class="empty-state">
+        <i class="bi bi-cart-x"></i>
+        <h6>Aucune réservation</h6>
+        <p class="small">Vous n'avez pas encore fait de réservation.</p>
+        <a href="{{ route('etudiante.foyer.dashboard') }}" class="btn btn-primary btn-sm mt-2">
+            <i class="bi bi-shop me-1"></i>Voir le catalogue
+        </a>
+    </div>
+@else
+    <div id="reservationsList">
+        @foreach($reservations as $resa)
+        <div class="card resa-card mb-3 resa-item" data-statut="{{ $resa->statut }}">
+            <div class="card-body p-3">
+                <div class="d-flex align-items-center gap-3">
+
+                    {{-- Image article --}}
+                    @if($resa->article->photo)
+                        <img src="{{ asset('storage/' . $resa->article->photo) }}"
+                             alt="{{ $resa->article->nom_article }}"
+                             class="article-thumb">
+                    @else
+                        <div class="article-thumb-placeholder">
+                            <i class="bi bi-box-seam"></i>
+                        </div>
+                    @endif
+
+                    {{-- Info --}}
+                    <div class="flex-grow-1 min-width-0">
+                        <div class="d-flex justify-content-between align-items-start flex-wrap gap-2">
+                            <div>
+                                <h6 class="fw-semibold mb-0">{{ $resa->article->nom_article }}</h6>
+                                <div class="small text-muted mt-1">
+                                    <i class="bi bi-calendar3 me-1"></i>
+                                    {{ $resa->date_reservation->format('d/m/Y à H:i') }}
+                                </div>
+                            </div>
+                            <span class="statut-pill statut-{{ $resa->statut }}">
+                                @switch($resa->statut)
+                                    @case('en_attente') <i class="bi bi-clock me-1"></i>En attente @break
+                                    @case('validee')    <i class="bi bi-check-circle me-1"></i>Validée @break
+                                    @case('refusee')    <i class="bi bi-x-circle me-1"></i>Refusée @break
+                                    @case('annulee')    <i class="bi bi-slash-circle me-1"></i>Annulée @break
+                                @endswitch
+                            </span>
+                        </div>
+
+                        <div class="d-flex align-items-center justify-content-between mt-2 flex-wrap gap-2">
+                            <div class="small text-muted">
+                                Quantité :
+                                <span class="fw-semibold">{{ $resa->quantite }}</span>
+                                &nbsp;•&nbsp;
+                                Prix unitaire :
+                                <span class="fw-semibold">{{ number_format($resa->article->prix, 2) }} DA</span>
+                            </div>
+                            <div class="prix-total">
+                                Total : {{ number_format($resa->article->prix * $resa->quantite, 2) }} DA
+                            </div>
+                        </div>
+                    </div>
+
+                    {{-- Bouton annuler --}}
+                    @if($resa->statut === 'en_attente')
+                    <div class="ms-2">
+                        <button type="button"
+                                class="btn btn-outline-danger btn-sm"
+                                data-bs-toggle="modal"
+                                data-bs-target="#modalAnnuler"
+                                data-id="{{ $resa->id }}"
+                                data-nom="{{ $resa->article->nom_article }}"
+                                title="Annuler">
+                            <i class="bi bi-x-lg"></i>
+                        </button>
+                    </div>
+                    @endif
+
+                </div>
+            </div>
+        </div>
+        @endforeach
+    </div>
+@endif
+
+{{-- ===== MODAL ANNULER ===== --}}
+<div class="modal fade" id="modalAnnuler" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered modal-sm">
+        <div class="modal-content" style="border-radius:14px; border:none;">
+            <div class="modal-header border-0 pb-0">
+                <h6 class="modal-title fw-bold">
+                    <i class="bi bi-exclamation-triangle me-2 text-warning"></i>Annuler la réservation
+                </h6>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body pt-1">
+                <p class="small text-muted mb-0">
+                    Voulez-vous annuler la réservation de
+                    <strong id="modalNomAnnuler"></strong> ?
+                </p>
+            </div>
+            <div class="modal-footer border-0 pt-0">
+                <button type="button" class="btn btn-light btn-sm" data-bs-dismiss="modal">Non</button>
+                <form id="formAnnuler" method="POST" action="" class="d-inline">
+                    @csrf
+                    @method('DELETE')
+                    <button type="submit" class="btn btn-danger btn-sm">
+                        <i class="bi bi-x-circle me-1"></i>Oui, annuler
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+@if(auth()->check())
+    @php
+        $panierCount = \App\Models\Reservation::where('etudiante_id', auth()->id())
+            ->where('statut', 'panier')->count();
+        $panierTotal = \App\Models\Reservation::where('etudiante_id', auth()->id())
+    ->where('statut', 'panier')->get()->sum(fn($r) => $r->article->prix * $r->quantite);
+        $panierArticles = \App\Models\Reservation::where('etudiante_id', auth()->id())
+            ->where('statut', 'panier')->get();
+    @endphp
+    
+    @if($panierCount > 0)
+    <!-- Bouton panier sticky -->
+    <button type="button" 
+            style="position: fixed; bottom: 30px; right: 30px; width: 60px; height: 60px; border-radius: 50%; background: linear-gradient(135deg,#1a3c5e,#2d6a9f); color: #fff; border: none; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.3); z-index: 999; display: flex; align-items: center; justify-content: center; font-size: 1.8rem;"
+            data-bs-toggle="modal" data-bs-target="#modalPanier">
+        <i class="bi bi-cart3"></i>
+        <span style="position: absolute; top: -8px; right: -8px; background: #dc3545; color: #fff; border-radius: 50%; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; font-weight: bold;">{{ $panierCount }}</span>
+    </button>
+
+    <!-- Modal Panier -->
+    <div class="modal fade" id="modalPanier" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="bi bi-cart3 me-2"></i>Mon Panier
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                  @forelse($panierArticles as $item)
+<div id="panier-item-{{ $item->id }}" style="display: flex; align-items: center; gap: 12px; padding: 12px 0; border-bottom: 1px solid #dee2e6; transition: opacity 0.3s;">
+    @if($item->article->photo)
+        <img src="{{ asset('storage/' . $item->article->photo) }}" 
+             alt="{{ $item->article->nom_article }}"
+             style="width: 60px; height: 60px; object-fit: cover; border-radius: 8px;">
+    @else
+        <div style="width: 60px; height: 60px; background: linear-gradient(135deg,#e8f0fe,#d2e3fc); border-radius: 8px; display: flex; align-items: center; justify-content: center;">
+            <i class="bi bi-box-seam" style="color: #4a90d9;"></i>
+        </div>
+    @endif
+    <div style="flex: 1;">
+        <strong>{{ $item->article->nom_article }}</strong><br>
+        <span style="color: #666; font-size: 0.9rem;">Qté: {{ $item->quantite }} × {{ number_format($item->article->prix, 2) }} DA</span>
+    </div>
+    <div style="text-align: right;">
+        <strong style="color: #1a3c5e; font-size: 1.1rem;">{{ number_format($item->article->prix * $item->quantite, 2) }} DA</strong>
+    </div>
+    <button type="button" class="btn btn-outline-danger btn-sm" title="Supprimer" 
+            onclick="supprimerArticlePanier({{ $item->id }})">
+        <i class="bi bi-x-lg"></i>
+    </button>
+</div>
+@empty
+<p class="text-center text-muted">Panier vide</p>
+@endforelse
+                </div>
+                <div class="modal-footer" style="border-top: 2px solid #dee2e6;">
+                    <div style="flex: 1; text-align: left;">
+                        <strong style="font-size: 1.2rem; color: #1a3c5e;">Total : {{ number_format($panierTotal, 2) }} DA</strong>
+                    </div>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                    <form method="POST" action="{{ route('etudiante.foyer.confirmer') }}" style="display: inline;">
+                        @csrf
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-check-circle me-1"></i>Confirmer la commande
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    @endif
+@endif
+
+@endsection
+
+@section('scripts')
+<script>
+// ── Modal annuler ──
+document.getElementById('modalAnnuler').addEventListener('show.bs.modal', e => {
+    const btn = e.relatedTarget;
+    document.getElementById('modalNomAnnuler').textContent = btn.dataset.nom;
+    document.getElementById('formAnnuler').action = `/etudiante/foyer/reservations/${btn.dataset.id}`;
+});
+
+// ── Filtre par statut ──
+document.querySelectorAll('.filter-tabs button').forEach(btn => {
+    btn.addEventListener('click', function() {
+        document.querySelectorAll('.filter-tabs button').forEach(b => b.classList.remove('active'));
+        this.classList.add('active');
+        const filter = this.dataset.filter;
+        document.querySelectorAll('.resa-item').forEach(item => {
+            item.style.display = (filter === 'all' || item.dataset.statut === filter) ? '' : 'none';
+        });
+    });
+});
+
+// ✅ AJOUTEZ CETTE FONCTION ICI
+function supprimerArticlePanier(id) {
+    if (!confirm('Supprimer cet article du panier ?')) return;
+    
+    // ✅ Supprimer IMMÉDIATEMENT du DOM
+    const element = document.getElementById(`panier-item-${id}`);
+    element.style.opacity = '0';
+    setTimeout(() => element.remove(), 300);
+    
+    // Envoyer la requête en arrière-plan
+    fetch(`/etudiante/foyer/annuler/${id}`, {
+        method: 'DELETE',
+        headers: {
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+        }
+    })
+    .then(response => {
+        if (response.ok) {
+            console.log('Article supprimé');
+            // Recharger après 2 secondes pour mettre à jour le total
+            setTimeout(() => location.reload(), 2000);
+        }
+    })
+    .catch(error => console.error('Erreur:', error));
+}
+</script>
 @endsection

@@ -5,175 +5,124 @@ namespace App\Http\Controllers\Etudiante;
 use App\Http\Controllers\Controller;
 use App\Models\ArticleFoyer;
 use App\Models\Reservation;
-use App\Models\Annonce;
-use App\Models\User;
 use Illuminate\Http\Request;
 
 class FoyerController extends Controller
 {
-    // ─── Dashboard — 3 cartes ────────────────────────────────
-    public function dashboard()
+    public function dashboard(Request $request)
     {
-        $reservations      = Reservation::where('etudiante_id', auth()->id())->get();
-        $totalReservations = $reservations->count();
-        $enAttente         = $reservations->where('statut', 'en_attente')->count();
-        $validees          = $reservations->where('statut', 'validee')->count();
-        $annulees          = $reservations->where('statut', 'annulee')->count();
-        $totalArticles     = ArticleFoyer::where('disponible', true)->where('stock', '>', 0)->count();
-        $promotions        = Annonce::where('categorie', 'promotion')
-                             ->where('destinataire', 'etudiantes')
-                             ->latest()->get();
-        $totalPromotions   = $promotions->count();
-
-        return view('etudiante.foyer.dashboard', compact(
-            'totalReservations', 'enAttente', 'validees', 'annulees',
-            'totalArticles', 'promotions', 'totalPromotions'
-        ));
-    }
-
-    // ─── Page 3 cartes catégories ────────────────────────────
-    public function categories()
-    {
-        $fastfood  = ArticleFoyer::where('categorie', 'fastfood')
-                     ->where('disponible', true)->where('stock', '>', 0)->count();
-        $cafeteria = ArticleFoyer::where('categorie', 'cafeteria')
-                     ->where('disponible', true)->where('stock', '>', 0)->count();
-        $magasin   = ArticleFoyer::where('categorie', 'magasin')
-                     ->where('disponible', true)->where('stock', '>', 0)->count();
-
-        $panierCount = Reservation::where('etudiante_id', auth()->id())
-                       ->where('statut', 'panier')->count();
-
-        return view('etudiante.foyer.categories', compact(
-            'fastfood', 'cafeteria', 'magasin', 'panierCount'
-        ));
-    }
-
-    // ─── Liste articles par catégorie ────────────────────────
-    public function index(Request $request, $categorie)
-    {
-        $query = ArticleFoyer::where('categorie', $categorie)
-                 ->where('disponible', true)
-                 ->where('stock', '>', 0);
-
-        // Recherche
-        if ($request->search) {
-            $query->where('nom_article', 'like', '%' . $request->search . '%');
-        }
-
-        $articles = $query->latest()->get();
-
-        $panier = Reservation::where('etudiante_id', auth()->id())
-                  ->where('statut', 'panier')
-                  ->with('article')->get();
-
-        return view('etudiante.foyer.index', compact('articles', 'categorie', 'panier'));
-    }
-
-    // ─── Mes réservations ────────────────────────────────────
-    public function mesReservations(Request $request)
-    {
-        $query = Reservation::where('etudiante_id', auth()->id())
-                 ->with('article');
-
-        // Filtre statut
-        if ($request->statut && $request->statut !== 'tous') {
-            $query->where('statut', $request->statut);
-        }
-
-        // Recherche par nom article
-        if ($request->search) {
-            $query->whereHas('article', function ($q) use ($request) {
-                $q->where('nom_article', 'like', '%' . $request->search . '%');
+        $user = auth()->user();
+        
+        $query = Reservation::where('etudiante_id', $user->id);
+        
+        if ($request->has('search') && $request->search) {
+            $query->whereHas('article', function($q) {
+                $q->where('nom_article', 'like', '%' . request('search') . '%');
             });
         }
-
+        
+        if ($request->has('statut') && $request->statut !== 'tous') {
+            $query->where('statut', $request->statut);
+        }
+        
         $reservations = $query->latest()->get();
+        
+        $totalReservations = Reservation::where('etudiante_id', $user->id)->count();
+        $totalArticles = ArticleFoyer::where('disponible', true)->count();
+        $totalPromotions = ArticleFoyer::where('promo_active', true)->count();
+        $promotions = ArticleFoyer::where('promo_active', true)->latest()->limit(5)->get();
+        
+        return view('etudiante.foyer.dashboard', compact(
+            'reservations', 'promotions',
+            'totalReservations', 'totalArticles', 'totalPromotions'
+        ));
+    }
 
-        $promotions = Annonce::where('categorie', 'promotion')
-                     ->where('destinataire', 'etudiantes')
-                     ->latest()->take(3)->get();
+    public function categories()
+    {
+        $articles = ArticleFoyer::where('disponible', true)->latest()->get();
+        return view('etudiante.foyer.articles', compact('articles'));
+    }
 
+   public function index($categorie)
+{
+    $query = ArticleFoyer::where('disponible', true);
+    
+    // Filtrer par catégorie si ce n'est pas "tous"
+    if ($categorie !== 'tous') {
+        $query->where('categorie', $categorie);
+    }
+    
+    $articles = $query->latest()->paginate(12);
+    
+    return view('etudiante.foyer.catalogue', compact('articles', 'categorie'));
+}
+
+    public function reservations()
+    {
+        $reservations = Reservation::where('etudiante_id', auth()->user()->id)
+            ->with('article')
+            ->get();
+        $promotions = [];
         return view('etudiante.foyer.reservations', compact('reservations', 'promotions'));
     }
 
-    // ─── Promotions ──────────────────────────────────────────
     public function promotions()
     {
-        $promotions = Annonce::where('categorie', 'promotion')
-                     ->where('destinataire', 'etudiantes')
-                     ->latest()->get();
-
+        $promotions = ArticleFoyer::where('promo_active', true)->paginate(12);
         return view('etudiante.foyer.promotions', compact('promotions'));
     }
 
-    // ─── Ajouter au panier ───────────────────────────────────
     public function reserver(Request $request, ArticleFoyer $article)
     {
-        $request->validate([
-            'quantite' => 'required|integer|min:1|max:' . $article->stock,
+        $validated = $request->validate([
+            'quantite' => 'required|integer|min:1',
         ]);
-
-        if (!$article->isEnStock()) {
-            return back()->with('error', 'Article non disponible.');
+        
+        if ($article->stock < $validated['quantite']) {
+            return back()->with('error', 'Stock insuffisant');
         }
-
-        // Si déjà dans le panier → incrémenter
-        $existing = Reservation::where('etudiante_id', auth()->id())
-                    ->where('article_id', $article->id)
-                    ->where('statut', 'panier')
-                    ->first();
-
-        if ($existing) {
-            $existing->increment('quantite', $request->quantite);
-        } else {
-            Reservation::create([
-                'etudiante_id' => auth()->id(),
-                'article_id'   => $article->id,
-                'quantite'     => $request->quantite,
-                'statut'       => 'panier',
-            ]);
-        }
-
-        return back()->with('success', 'Article ajouté au panier !');
+        
+        Reservation::create([
+            'etudiante_id' => auth()->id(),
+            'article_id' => $article->id,
+            'quantite' => $validated['quantite'],
+            'statut' => 'panier',
+        ]);
+        
+        return back()->with('success', 'Article ajouté au panier');
     }
 
-    // ─── Commander (panier → en_attente + notification) ──────
-    public function confirmer()
+    public function confirmer(Request $request)
     {
-        $reservations = Reservation::where('etudiante_id', auth()->id())
-                        ->where('statut', 'panier')->get();
-
-        if ($reservations->isEmpty()) {
-            return back()->with('error', 'Votre panier est vide.');
+        $user = auth()->user();
+        
+        $panier = Reservation::where('etudiante_id', $user->id)
+            ->where('statut', 'panier')
+            ->get();
+        
+        if ($panier->isEmpty()) {
+            return back()->with('error', 'Votre panier est vide');
         }
-
-        foreach ($reservations as $r) {
-            $r->update(['statut' => 'en_attente']);
+        
+        foreach ($panier as $item) {
+            $item->update(['statut' => 'en_attente']);
         }
-
-        // Notification au responsable foyer
-        $respFoyer = User::where('role', 'resp_foyer')->first();
-        if ($respFoyer) {
-            $respFoyer->notify(new \App\Notifications\NouvelleCommande(auth()->user()));
-        }
-
-        return redirect()->route('etudiante.foyer.reservations')
-                         ->with('success', 'Commande envoyée avec succès !');
+        
+        return back()->with('success', 'Commande confirmée. En attente de validation.');
     }
 
-    // ─── Retirer du panier ───────────────────────────────────
     public function annuler(Reservation $reservation)
     {
         if ($reservation->etudiante_id !== auth()->id()) {
-            abort(403);
+            return back()->with('error', 'Accès non autorisé');
         }
-
+        
         if (!in_array($reservation->statut, ['en_attente', 'panier'])) {
-            return back()->with('error', 'Impossible d\'annuler cette réservation.');
+            return back()->with('error', 'Cette réservation ne peut pas être annulée');
         }
-
+        
         $reservation->delete();
-        return back()->with('success', 'Article retiré.');
+        return back()->with('success', 'Réservation annulée');
     }
 }

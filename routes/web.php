@@ -117,17 +117,17 @@ Route::middleware(['auth', 'role:etudiante'])->prefix('etudiante')->name('etudia
     Route::get('/hebergement/changement', [HebergementController::class, 'showChangement'])->name('changement');
     Route::post('/hebergement/changement', [HebergementController::class, 'demanderChangement'])->name('changement.store');
 
-    // ─── Foyer ───────────────────────────────────────────────
-    Route::prefix('foyer')->name('foyer.')->group(function () {
-        Route::get('/', [FoyerController::class, 'dashboard'])->name('dashboard');
-        Route::get('/articles', [FoyerController::class, 'categories'])->name('articles');
-        Route::get('/articles/{categorie}', [FoyerController::class, 'index'])->name('catalogue');
-        Route::get('/reservations', [FoyerController::class, 'mesReservations'])->name('reservations');
-        Route::get('/promotions', [FoyerController::class, 'promotions'])->name('promotions');
-        Route::post('/reserver/{article}', [FoyerController::class, 'reserver'])->name('reserver');
-        Route::post('/commander', [FoyerController::class, 'confirmer'])->name('confirmer');
-        Route::delete('/annuler/{reservation}', [FoyerController::class, 'annuler'])->name('annuler');
-    });
+  // ─── Etudiante Foyer ──────────────────────────────────────
+  Route::prefix('foyer')->name('foyer.')->group(function () {
+    Route::get('/', [FoyerController::class, 'dashboard'])->name('dashboard');
+    Route::get('/articles', [FoyerController::class, 'categories'])->name('articles');
+    Route::get('/articles/{categorie}', [FoyerController::class, 'index'])->name('catalogue');
+    Route::get('/reservations', [FoyerController::class, 'reservations'])->name('reservations');
+    Route::get('/promotions', [FoyerController::class, 'promotions'])->name('promotions');
+    Route::post('/reserver/{article}', [FoyerController::class, 'reserver'])->name('reserver');
+    Route::post('/commander', [FoyerController::class, 'confirmer'])->name('confirmer');
+    Route::delete('/annuler/{reservation}', [FoyerController::class, 'annuler'])->name('annuler');
+});
 
     // ─── Maintenance ─────────────────────────────────────────
     Route::prefix('maintenance')->name('maintenance.')->group(function () {

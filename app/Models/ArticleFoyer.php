@@ -2,52 +2,46 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class ArticleFoyer extends Model
 {
-    use HasFactory;
-
     protected $table = 'articles_foyer';
-
+    
     protected $fillable = [
         'resp_foyer_id',
-    'nom_article',
-    'categorie',
-    'description',
-    'prix',
-    'stock',
-    'photo',
-    'disponible',
-    'date_peremption',
-    'promo_active',
-    'prix_promo',
-    'promo_remarque',
-    'promo_date_fin',
+        'nom_article',
+        'categorie',
+        'description',
+        'prix',
+        'stock',
+        'photo',
+        'disponible',
     ];
-
-   protected $casts = [
-    'disponible'      => 'boolean',
-    'prix'            => 'decimal:2',
-    'promo_active'    => 'boolean',
-    'prix_promo'      => 'decimal:2',
-    'promo_date_fin'  => 'date',        
-    'date_peremption' => 'date',        
-];
-
-    public function responsable()
+    
+    protected $casts = [
+        'disponible' => 'boolean',
+        'prix' => 'decimal:2',
+        'stock' => 'integer',
+    ];
+    
+    // ─── RELATIONS ──────────────────────────────────────
+    
+    /**
+     * Relation vers le responsable du foyer
+     */
+    public function responsable(): BelongsTo
     {
         return $this->belongsTo(User::class, 'resp_foyer_id');
     }
-
-    public function reservations()
+    
+    /**
+     * Relation vers les réservations
+     */
+    public function reservations(): HasMany
     {
-        return $this->hasMany(Reservation::class, 'article_id');
-    }
-
-    public function isEnStock(): bool
-    {
-        return $this->stock > 0 && $this->disponible;
+        return $this->hasMany(Reservation::class);
     }
 }

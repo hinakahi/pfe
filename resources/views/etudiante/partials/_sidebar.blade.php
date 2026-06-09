@@ -18,7 +18,7 @@
     <span>Hébergement</span>
 </a>
 
-<a href="{{ route('etudiante.foyer.reservations') }}" class="nav-link">
+<a href="{{ route('etudiante.foyer.dashboard') }}" class="nav-link">
     <i class="bi bi-shop"></i>
     <span>Foyer</span>
 </a>

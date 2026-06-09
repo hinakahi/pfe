@@ -2,13 +2,13 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Reservation extends Model
 {
-    use HasFactory;
-
+    protected $table = 'reservations';
+    
     protected $fillable = [
         'etudiante_id',
         'article_id',
@@ -17,22 +17,35 @@ class Reservation extends Model
         'statut',
         'date_reservation',
     ];
-
+    
     protected $casts = [
         'date_reservation' => 'datetime',
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime',
     ];
-
-    public function etudiante()
+    
+    // ─── RELATIONS ──────────────────────────────────────
+    
+    /**
+     * Relation vers l'étudiante qui a fait la réservation
+     */
+    public function etudiante(): BelongsTo
     {
         return $this->belongsTo(User::class, 'etudiante_id');
     }
-
-    public function article()
+    
+    /**
+     * Relation vers l'article réservé
+     */
+    public function article(): BelongsTo
     {
-        return $this->belongsTo(ArticleFoyer::class, 'article_id');
+        return $this->belongsTo(ArticleFoyer::class);
     }
-
-    public function responsable()
+    
+    /**
+     * Relation vers le responsable du foyer
+     */
+    public function responsable(): BelongsTo
     {
         return $this->belongsTo(User::class, 'resp_foyer_id');
     }
