@@ -7,11 +7,23 @@ use Illuminate\Http\Request;
 
 class MatriculeController extends Controller
 {
-    public function index()
-    {
-        $matricules = MatriculeAutorise::latest()->paginate(20);
-        return view('admin.matricules.index', compact('matricules'));
+    public function index(Request $request)
+{
+    $query = MatriculeAutorise::latest();
+
+    if ($request->filled('search')) {
+        $query->where('matricule', 'like', '%' . $request->search . '%');
     }
+
+    if ($request->statut === 'utilise') {
+        $query->where('utilise', true);
+    } elseif ($request->statut === 'disponible') {
+        $query->where('utilise', false);
+    }
+
+    $matricules = $query->paginate(20)->withQueryString();
+    return view('admin.matricules.index', compact('matricules'));
+}
 
     public function store(Request $request)
     {

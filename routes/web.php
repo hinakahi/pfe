@@ -7,6 +7,7 @@ use App\Http\Controllers\Admin\UtilisateurController;
 use App\Http\Controllers\Admin\AnnonceController;
 use App\Http\Controllers\Admin\PeriodeController;
 use App\Http\Controllers\Admin\StatistiqueController;
+use App\Http\Controllers\Admin\MessageController;
 use App\Http\Controllers\Etudiante\HebergementController;
 use App\Http\Controllers\Etudiante\MaintenanceController;
 use App\Http\Controllers\Etudiante\FoyerController;
@@ -21,6 +22,7 @@ use App\Http\Controllers\ResponsableFoyer\ReservationController;
 use App\Http\Controllers\InscriptionController;
 use App\Http\Controllers\Etudiante\ProfileController;
 use App\Http\Controllers\Technicien\StockController;
+use App\Http\Controllers\PublicController;
 
 // ─── Page d'accueil ──────────────────────────────────────────
 Route::get('/accueil', function () {
@@ -41,6 +43,7 @@ Route::post('/reset-password', [AuthController::class, 'resetPassword'])->name('
 
 // ─── Admin ────────────────────────────────────────────────────
 Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
+    
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::resource('utilisateurs', UtilisateurController::class);
     Route::resource('annonces', AnnonceController::class);
@@ -49,14 +52,16 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::get('/statistiques', [StatistiqueController::class, 'index'])->name('statistiques');
     Route::get('/statistiques/export-pdf', [StatistiqueController::class, 'exportPdf'])->name('statistiques.pdf');
     Route::get('/statistiques/export-excel', [StatistiqueController::class, 'exportExcel'])->name('statistiques.excel');
-    Route::patch('periodes/{periode}/toggle', [PeriodeController::class, 'toggle'])
-    ->name('admin.periodes.toggle');
-    // ─── Réclamations Admin ─────────────────────────────────
+    Route::patch('periodes/{periode}/toggle', [PeriodeController::class, 'toggle'])->name('periodes.toggle');
     Route::get('reclamations', [ReclamationController::class, 'indexAdmin'])->name('reclamations.index');
     Route::get('reclamations/{reclamation}', [ReclamationController::class, 'showAdmin'])->name('reclamations.show');
     Route::patch('reclamations/{reclamation}', [ReclamationController::class, 'updateAdmin'])->name('reclamations.update');
-});
 
+    // 
+    Route::get('messages', [MessageController::class, 'index'])->name('messages');
+    Route::get('messages/{message}', [MessageController::class, 'show'])->name('messages.show');
+    Route::delete('messages/{message}', [MessageController::class, 'destroy'])->name('messages.destroy');
+});
 // ─── Étudiante ────────────────────────────────────────────────
 Route::middleware(['auth', 'role:etudiante'])->prefix('etudiante')->name('etudiante.')->group(function () {
 
@@ -219,3 +224,5 @@ Route::get('/test-mail', function () {
     });
     return 'Email envoyé avec succès !';
 });
+// ─── visiteur ──────────────────────────────────────────────
+Route::post('/contact', [PublicController::class, 'envoyerMessage'])->name('contact.send');

@@ -58,11 +58,23 @@ class ReclamationController extends Controller
     }
 
     // ─── Admin ──────────────────────
-    public function indexAdmin()
-    {
-        $reclamations = Reclamation::with('etudiante')->latest()->get();
-        return view('admin.reclamations.index', compact('reclamations'));
+    public function indexAdmin(Request $request)
+{
+    $query = Reclamation::with('etudiante')->latest();
+
+    if ($request->filled('search')) {
+        $search = $request->search;
+        $query->where('sujet', 'like', "%$search%")
+              ->orWhereHas('etudiante', fn($q) => $q->where('name', 'like', "%$search%"));
     }
+
+    if ($request->filled('statut')) {
+        $query->where('statut', $request->statut);
+    }
+
+    $reclamations = $query->paginate(15)->withQueryString();
+    return view('admin.reclamations.index', compact('reclamations'));
+}
 
     public function showAdmin(Reclamation $reclamation)
     {

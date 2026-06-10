@@ -24,5 +24,8 @@
    class="nav-link {{ request()->routeIs('admin.annonces.*') ? 'active' : '' }}">
     <i class="bi bi-megaphone"></i> <span>Annonces</span>
 </a>
+<a href="{{ route('admin.messages') }}" class="nav-link">
+    <i class="bi bi-envelope"></i> Messages
+</a>
 
 

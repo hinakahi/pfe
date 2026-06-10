@@ -31,6 +31,44 @@
     </div>
 </div>
 
+{{-- Recherche + Filtre --}}
+<div class="card border-0 shadow-sm mb-4" style="border-radius:12px;">
+    <div class="card-body py-3">
+        <form method="GET" class="d-flex gap-3 align-items-center flex-wrap">
+            <div class="input-group" style="max-width:320px;">
+                <span class="input-group-text bg-white border-end-0">
+                    <i class="bi bi-search text-muted"></i>
+                </span>
+                <input type="text" name="search" class="form-control border-start-0 ps-0"
+                       placeholder="Rechercher un matricule..."
+                       value="{{ request('search') }}">
+            </div>
+
+            <select name="statut" class="form-select" style="max-width:180px;">
+                <option value="">Tous</option>
+                <option value="disponible" {{ request('statut') == 'disponible' ? 'selected' : '' }}>
+                    Disponibles
+                </option>
+                <option value="utilise" {{ request('statut') == 'utilise' ? 'selected' : '' }}>
+                     Utilisés
+                </option>
+            </select>
+
+            <button type="submit" class="btn text-white px-4"
+                    style="background:linear-gradient(135deg,#1a3c5e,#2d6a9f);border-radius:8px;">
+                Filtrer
+            </button>
+
+            @if(request('search') || request('statut'))
+                <a href="{{ route('admin.matricules.index') }}"
+                   class="btn btn-outline-secondary" style="border-radius:8px;">
+                    Réinitialiser
+                </a>
+            @endif
+        </form>
+    </div>
+</div>
+
 {{-- Liste --}}
 <div class="card">
     <div class="card-body">
@@ -41,9 +79,15 @@
                 <span class="badge bg-secondary">{{ $matricules->where('utilise', true)->count() }} utilisés</span>
             </div>
         </div>
+
         <table class="table table-hover align-middle">
             <thead class="table-light">
-                <tr><th>Matricule</th><th>Statut</th><th>Ajouté le</th><th>Action</th></tr>
+                <tr>
+                    <th>Matricule</th>
+                    <th>Statut</th>
+                    <th>Ajouté le</th>
+                    <th>Action</th>
+                </tr>
             </thead>
             <tbody>
             @forelse($matricules as $m)
@@ -70,11 +114,18 @@
                 </td>
             </tr>
             @empty
-            <tr><td colspan="4" class="text-center text-muted">Aucun matricule ajouté.</td></tr>
+            <tr>
+                <td colspan="4" class="text-center py-4">
+                    <div style="font-size:2rem;">🔍</div>
+                    <div class="text-muted mt-1">Aucun matricule trouvé.</div>
+                </td>
+            </tr>
             @endforelse
             </tbody>
         </table>
+
         {{ $matricules->links() }}
     </div>
 </div>
+
 @endsection

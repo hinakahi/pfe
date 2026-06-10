@@ -1,4 +1,4 @@
-@extends('layouts.etudiante')
+@extends('layouts.app')
 
 @section('content')
 <div class="container" style="max-width: 700px;">
@@ -11,11 +11,14 @@
         <div class="card-header d-flex justify-content-between align-items-center">
             <strong>{{ $reclamation->sujet }}</strong>
             @php
-                $badge = match($reclamation->statut) {
+                $statuts = [
                     'en_attente' => ['bg' => 'warning',   'label' => '⏳ En attente'],
+                    'en_cours'   => ['bg' => 'primary',   'label' => '🔵 En cours'],
                     'traitee'    => ['bg' => 'success',   'label' => '✅ Traitée'],
+                    'resolue'    => ['bg' => 'success',   'label' => '✅ Résolue'],
                     'fermee'     => ['bg' => 'secondary', 'label' => '🔒 Fermée'],
-                };
+                ];
+                $badge = $statuts[$reclamation->statut] ?? ['bg' => 'secondary', 'label' => $reclamation->statut];
             @endphp
             <span class="badge bg-{{ $badge['bg'] }}">{{ $badge['label'] }}</span>
         </div>

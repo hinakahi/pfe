@@ -243,32 +243,52 @@
           <p class="section-subtitle">Pour toute demande d'information concernant la résidence Si Oukli ou la plateforme TAMDA 1.</p>
         </div>
         <div class="contact-content">
-          <div class="contact-form reveal-left">
-            <div class="form-group">
-              <label>Votre nom complet</label>
-              <input type="text" placeholder="Ex : Amina Benchikh" />
-            </div>
-            <div class="form-group">
-              <label>Adresse email</label>
-              <input type="email" placeholder="amina@ummto.dz" />
-            </div>
-            <div class="form-group">
-              <label>Objet</label>
-              <select>
-                <option>Information hébergement</option>
-                <option>Problème technique</option>
-                <option>Accès compte</option>
-                <option>Autre</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label>Message</label>
-              <textarea placeholder="Décrivez votre demande…"></textarea>
-            </div>
-            <button type="submit" class="submit-btn">
-              <i class="fas fa-paper-plane" style="margin-right: 8px"></i>Envoyer le message
-            </button>
-          </div>
+         <div class="contact-form reveal-left">
+
+    @if(session('success'))
+        <div style="background:#d1fae5;color:#065f46;padding:14px 18px;border-radius:10px;margin-bottom:20px;font-weight:500;">
+            <i class="fas fa-check-circle"></i> {{ session('success') }}
+        </div>
+    @endif
+
+    <form method="POST" action="{{ route('contact.send') }}">
+        @csrf
+
+        <div class="form-group">
+            <label>Votre nom complet</label>
+            <input type="text" name="nom" placeholder="Ex : Amina Benchikh"
+                   value="{{ old('nom') }}" />
+            @error('nom')<span style="color:#ef4444;font-size:0.85rem;">{{ $message }}</span>@enderror
+        </div>
+
+        <div class="form-group">
+            <label>Adresse email</label>
+            <input type="email" name="email" placeholder="amina@ummto.dz"
+                   value="{{ old('email') }}" />
+            @error('email')<span style="color:#ef4444;font-size:0.85rem;">{{ $message }}</span>@enderror
+        </div>
+
+        <div class="form-group">
+            <label>Objet</label>
+            <select name="objet">
+                <option value="Information hébergement"   {{ old('objet') == 'Information hébergement'   ? 'selected' : '' }}>Information hébergement</option>
+                <option value="Problème technique"        {{ old('objet') == 'Problème technique'        ? 'selected' : '' }}>Problème technique</option>
+                <option value="Accès compte"              {{ old('objet') == 'Accès compte'              ? 'selected' : '' }}>Accès compte</option>
+                <option value="Autre"                     {{ old('objet') == 'Autre'                     ? 'selected' : '' }}>Autre</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label>Message</label>
+            <textarea name="message" placeholder="Décrivez votre demande…">{{ old('message') }}</textarea>
+            @error('message')<span style="color:#ef4444;font-size:0.85rem;">{{ $message }}</span>@enderror
+        </div>
+
+        <button type="submit" class="submit-btn">
+            <i class="fas fa-paper-plane" style="margin-right: 8px"></i>Envoyer le message
+        </button>
+    </form>
+</div>
           <div class="contact-info reveal-right">
             <div class="contact-item">
               <div class="contact-icon"><i class="fas fa-map-marker-alt"></i></div>
@@ -381,7 +401,7 @@
       /* ══════════ IMAGES SLIDER ══════════ */
       const SLIDES = [
         {
-          url: "{{ asset('photo/577790172_821772173946876_8246481439298717551_n.jpg') }}",
+          url: "{{ asset('photo/7.jpg') }}",
           thumb: "{{ asset('photo/577790172_821772173946876_8246481439298717551_n.jpg') }}",
           badge: "Résidence Si Oukli",
           title: "Bienvenue à la Résidence Si Oukli",
