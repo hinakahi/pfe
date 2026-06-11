@@ -10,7 +10,7 @@
 @section('content')
 
 {{-- Formulaire ajout --}}
-<div class="card mb-4" style="max-width:560px">
+<div class="card mb-4">
     <div class="card-body">
         <h6 class="card-title mb-3">
             <i class="bi bi-plus-circle me-2"></i>Ajouter des matricules
@@ -21,9 +21,19 @@
                 <label class="form-label fw-semibold">
                     Matricules <span class="text-muted small">(un par ligne)</span>
                 </label>
-                <textarea name="matricules" rows="5" class="form-control font-monospace"
-                          placeholder="ETU2024001&#10;ETU2024002&#10;ETU2024003" required></textarea>
+                <textarea name="matricules" rows="6" class="form-control font-monospace @error('matricules') is-invalid @enderror"
+                          placeholder="ETU123456&#10;ETU123457&#10;FOY001&#10;TEC002&#10;ADM001"
+                          required>{{ old('matricules') }}</textarea>
+                @error('matricules')
+                    <div class="invalid-feedback">{{ $message }}</div>
+                @enderror
+
+                <small class="text-muted d-block mt-2">
+                    📌 <strong>Préfixes reconnus:</strong>
+                    <br/>• ETU = Étudiant(e) | FOY = Resp. Foyer | TEC = Technicien | ADM = Admin | HEB = Resp. Hébergement
+                </small>
             </div>
+
             <button type="submit" class="btn btn-primary btn-sm">
                 <i class="bi bi-plus-lg me-1"></i>Ajouter
             </button>
@@ -45,13 +55,22 @@
             </div>
 
             <select name="statut" class="form-select" style="max-width:180px;">
-                <option value="">Tous</option>
+                <option value="">Tous les statuts</option>
                 <option value="disponible" {{ request('statut') == 'disponible' ? 'selected' : '' }}>
                     Disponibles
                 </option>
                 <option value="utilise" {{ request('statut') == 'utilise' ? 'selected' : '' }}>
-                     Utilisés
+                    Utilisés
                 </option>
+            </select>
+
+            <select name="role" class="form-select" style="max-width:200px;">
+                <option value="">Tous les rôles</option>
+                <option value="etudiante"       {{ request('role') == 'etudiante'       ? 'selected' : '' }}>👤 Étudiant(e)</option>
+                <option value="technicien"      {{ request('role') == 'technicien'      ? 'selected' : '' }}>🔧 Technicien</option>
+                <option value="resp_foyer"      {{ request('role') == 'resp_foyer'      ? 'selected' : '' }}>🏠 Resp. Foyer</option>
+                <option value="resp_hebergement"{{ request('role') == 'resp_hebergement'? 'selected' : '' }}>🏢 Resp. Hébergement</option>
+                <option value="admin"           {{ request('role') == 'admin'           ? 'selected' : '' }}>👨‍💼 Admin</option>
             </select>
 
             <button type="submit" class="btn text-white px-4"
@@ -59,7 +78,7 @@
                 Filtrer
             </button>
 
-            @if(request('search') || request('statut'))
+            @if(request('search') || request('statut') || request('role'))
                 <a href="{{ route('admin.matricules.index') }}"
                    class="btn btn-outline-secondary" style="border-radius:8px;">
                     Réinitialiser
@@ -84,6 +103,7 @@
             <thead class="table-light">
                 <tr>
                     <th>Matricule</th>
+                    <th>Rôle</th>
                     <th>Statut</th>
                     <th>Ajouté le</th>
                     <th>Action</th>
@@ -93,14 +113,37 @@
             @forelse($matricules as $m)
             <tr>
                 <td><code>{{ $m->matricule }}</code></td>
+
+                {{-- ✅ COLONNE RÔLE --}}
                 <td>
-                    @if($m->utilise)
-                        <span class="badge bg-secondary">Utilisé</span>
+                    @if($m->role == 'etudiante')
+                        <span class="badge bg-info">👤 Étudiant(e)</span>
+                    @elseif($m->role == 'technicien')
+                        <span class="badge bg-warning">🔧 Technicien</span>
+                    @elseif($m->role == 'resp_foyer')
+                        <span class="badge bg-primary">🏠 Resp. Foyer</span>
+                    @elseif($m->role == 'resp_hebergement')
+                        <span class="badge bg-success">🏢 Resp. Hébergement</span>
+                    @elseif($m->role == 'admin')
+                        <span class="badge bg-danger">👨‍💼 Admin</span>
                     @else
-                        <span class="badge bg-success">Disponible</span>
+                        <span class="badge bg-secondary">{{ $m->role }}</span>
                     @endif
                 </td>
+
+                {{-- ✅ COLONNE STATUT --}}
+                <td>
+                    @if($m->utilise)
+                        <span class="badge bg-secondary">✅ Utilisé</span>
+                    @else
+                        <span class="badge bg-success">⏳ Disponible</span>
+                    @endif
+                </td>
+
+                {{-- ✅ COLONNE DATE --}}
                 <td>{{ $m->created_at->format('d/m/Y') }}</td>
+
+                {{-- ✅ COLONNE ACTION --}}
                 <td>
                     @if(!$m->utilise)
                     <form method="POST" action="{{ route('admin.matricules.destroy', $m) }}"
@@ -115,7 +158,7 @@
             </tr>
             @empty
             <tr>
-                <td colspan="4" class="text-center py-4">
+                <td colspan="5" class="text-center py-4">
                     <div style="font-size:2rem;">🔍</div>
                     <div class="text-muted mt-1">Aucun matricule trouvé.</div>
                 </td>

@@ -119,12 +119,15 @@ Route::middleware(['auth', 'role:etudiante'])->prefix('etudiante')->name('etudia
 
     // ─── Hébergement ─────────────────────────────────────────
     Route::prefix('hebergement')->name('hebergement.')->group(function () {
-        Route::get('/renouvellement', [HebergementController::class, 'index'])->name('renouvellement');
+        Route::get('/', [HebergementController::class, 'index'])->name('index');
+        Route::get('/renouvellement', [HebergementController::class, 'showRenouvellement'])->name('renouvellement');
         Route::post('/renouvellement', [HebergementController::class, 'renouveler'])->name('renouveller');
         Route::get('/demandes', [HebergementController::class, 'statut'])->name('demandes');
     });
     Route::get('/hebergement/changement', [HebergementController::class, 'showChangement'])->name('changement');
     Route::post('/hebergement/changement', [HebergementController::class, 'demanderChangement'])->name('changement.store');
+    Route::put('/hebergement/renouvellement/{demande}/modifier', [HebergementController::class, 'modifierRenouvellement'])
+    ->name('hebergement.renouvellement.modifier');
 
   // ─── Etudiante Foyer ──────────────────────────────────────
   Route::prefix('foyer')->name('foyer.')->group(function () {

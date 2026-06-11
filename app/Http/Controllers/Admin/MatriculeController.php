@@ -25,21 +25,44 @@ class MatriculeController extends Controller
     return view('admin.matricules.index', compact('matricules'));
 }
 
-    public function store(Request $request)
-    {
-        $request->validate([
-            'matricules' => 'required|string',
-        ]);
+  public function store(Request $request)
+{
+    $request->validate([
+        'matricules' => 'required|string',
+    ]);
 
-        $liste = array_filter(array_map('trim', explode("\n", $request->matricules)));
-        $count = 0;
-        foreach ($liste as $m) {
-            MatriculeAutorise::firstOrCreate(['matricule' => strtoupper($m)]);
-            $count++;
-        }
+    $liste = array_filter(array_map('trim', explode("\n", $request->matricules)));
+    $count = 0;
 
-        return back()->with('success', "$count matricule(s) ajouté(s).");
+    foreach ($liste as $m) {
+        // ✅ DÉTECTER LE RÔLE AUTOMATIQUEMENT
+        $role = $this->detectRoleFromMatricule($m);
+
+        // ✅ CRÉER AVEC LE RÔLE
+        MatriculeAutorise::firstOrCreate(
+            ['matricule' => strtoupper($m)],
+            ['role' => $role]  // ← AJOUTE LE RÔLE ICI
+        );
+        $count++;
     }
+
+    return back()->with('success', "$count matricule(s) ajouté(s).");
+}
+
+// ✅ AJOUTE CETTE FONCTION (en bas du contrôleur)
+private function detectRoleFromMatricule($matricule)
+{
+    $prefix = strtoupper(substr($matricule, 0, 3));
+    
+    return match($prefix) {
+        'ETU' => 'etudiante',
+        'FOY' => 'resp_foyer',
+        'TEC' => 'technicien',
+        'ADM' => 'admin',
+        'HEB' => 'resp_hebergement',
+        default => 'etudiante',
+    };
+}
 
     public function destroy(MatriculeAutorise $matricule)
     {

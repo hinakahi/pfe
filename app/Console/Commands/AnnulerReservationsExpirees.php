@@ -20,7 +20,7 @@ class AnnulerReservationsExpirees extends Command
 
         // 2️⃣ Annuler les "validee" non récupérées après 4h
         $expirees = Reservation::where('statut', 'validee')
-            ->where('validee_at', '<=', Carbon::now()->subHours(3))
+            ->where('validee_at', '<=', Carbon::now()->subMinutes(3))
             ->get();
 
         foreach ($expirees as $reservation) {

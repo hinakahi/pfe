@@ -16,9 +16,9 @@ class InscriptionController extends Controller
     {
         $request->validate([
             'name'      => 'required|string|max:191',
-            'matricule' => 'required|string|max:191',
+            'matricule' => 'required|string|max:191|unique:users,matricule',
             'email'     => 'required|email|unique:users,email',
-            'phone'     => 'nullable|string|max:20',
+            'phone'     => 'nullable|string|max:10',
             'password'  => 'required|string|min:6|confirmed',
             'photo'     => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
@@ -55,7 +55,7 @@ User::create([
     'email'     => $request->email,
     'phone'     => $request->phone,
     'password'  => Hash::make($request->password),
-    'role'      => 'etudiante',
+    'role' => $matricule->role,
 ]);
 
         // Marquer le matricule comme utilisé

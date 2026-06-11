@@ -9,7 +9,7 @@ class Kernel extends ConsoleKernel
 {
     protected function schedule(Schedule $schedule): void
     {
-        $schedule->command('reservations:annuler-expirees')->everyFifteenMinutes();
+        $schedule->command('reservations:annuler-expirees')->everyMinutes();
     }
 
     protected function commands(): void

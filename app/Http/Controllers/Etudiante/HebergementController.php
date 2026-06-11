@@ -74,51 +74,112 @@ class HebergementController extends Controller
             'demandesChangement'
         ));
     }
+    public function showRenouvellement()
+{
+    $user = auth()->user();
 
-    public function renouveler(Request $request)
-    {
-        // ✅ Vérification période renouvellement
-        $periode = Periode::where('type', 'renouvellement')
-                  ->where('active', true)
-                  ->where('date_debut', '<=', now())
-                  ->where('date_fin', '>=', now())
-                  ->first();
+    $maChambre = Chambre::where('etudiante_1', $user->matricule)
+                 ->orWhere('etudiante_2', $user->matricule)
+                 ->first();
 
-        if (!$periode) {
-            return back()->with('error', 'La période de renouvellement est fermée.');
-        }
+    $periodeRenouvellement = Periode::where('type', 'renouvellement')
+                            ->where('active', true)
+                            ->where('date_debut', '<=', now())
+                            ->where('date_fin', '>=', now())
+                            ->first();
 
-        $request->validate([
-            'chambre_id'             => 'required|exists:chambres,id',
-            'justificatif_scolarite' => 'required|file|mimes:pdf,jpg,png|max:2048',
-            'justificatif_paiement'  => 'required|file|mimes:pdf,jpg,png|max:2048',
-        ]);
+    $demandesRenouvellement = DemandeRenouvellement::where('etudiante_id', $user->id)
+                              ->latest()->get();
 
-        $scolarite = $request->file('justificatif_scolarite')->store('justificatifs', 'public');
-        $paiement  = $request->file('justificatif_paiement')->store('justificatifs', 'public');
+    return view('etudiante.hebergement.renouvellement', compact(
+        'maChambre',
+        'periodeRenouvellement',
+        'demandesRenouvellement'
+    ));
+}
 
-        $chambre = Chambre::find($request->chambre_id);
+   public function renouveler(Request $request)
+{
+    $periode = Periode::where('type', 'renouvellement')
+              ->where('active', true)
+              ->where('date_debut', '<=', now())
+              ->where('date_fin', '>=', now())
+              ->first();
 
-        DemandeRenouvellement::create([
-            'etudiante_id'           => auth()->id(),
-            'chambre_id'             => $request->chambre_id,
-            'justificatif_scolarite' => $scolarite,
-            'justificatif_paiement'  => $paiement,
-            'statut'                 => 'en_attente',
-        ]);
-
-        $responsable = User::where('role', 'resp_hebergement')->first();
-        if ($responsable) {
-            $responsable->notify(new NouvelleDemandeChambre(
-                'renouvellement',
-                auth()->user()->name,
-                $chambre->numero ?? '-'
-            ));
-        }
-
-        return redirect()->route('etudiante.hebergement.renouvellement')
-                         ->with('success', 'Demande de renouvellement envoyée avec succès.');
+    if (!$periode) {
+        return back()->with('error', 'La période de renouvellement est fermée.');
     }
+
+    // ✅ Bloquer les doublons
+    $dejaEnCours = DemandeRenouvellement::where('etudiante_id', auth()->id())
+        ->whereIn('statut', ['en_attente', 'validee'])
+        ->exists();
+
+    if ($dejaEnCours) {
+        return back()->with('error', 'Vous avez déjà une demande en cours.');
+    }
+
+    $request->validate([
+        'chambre_id'             => 'required|exists:chambres,id',
+        'justificatif_scolarite' => 'required|file|mimes:pdf,jpg,png|max:2048',
+        'justificatif_paiement'  => 'required|file|mimes:pdf,jpg,png|max:2048',
+    ]);
+
+    $scolarite = $request->file('justificatif_scolarite')->store('justificatifs', 'public');
+    $paiement  = $request->file('justificatif_paiement')->store('justificatifs', 'public');
+    $chambre   = Chambre::find($request->chambre_id);
+
+    DemandeRenouvellement::create([
+        'etudiante_id'           => auth()->id(),
+        'chambre_id'             => $request->chambre_id,
+        'justificatif_scolarite' => $scolarite,
+        'justificatif_paiement'  => $paiement,
+        'statut'                 => 'en_attente',
+    ]);
+
+    $responsable = User::where('role', 'resp_hebergement')->first();
+    if ($responsable) {
+        $responsable->notify(new NouvelleDemandeChambre(
+            'renouvellement',
+            auth()->user()->name,
+            $chambre->numero ?? '-'
+        ));
+    }
+
+    return redirect()->route('etudiante.hebergement.renouvellement')
+                     ->with('success', 'Demande envoyée avec succès.');
+}
+
+// ✅ Modifier si refusée
+public function modifierRenouvellement(Request $request, DemandeRenouvellement $demande)
+{
+    if ($demande->etudiante_id !== auth()->id()) abort(403);
+
+    if ($demande->statut !== 'refusee') {
+        return back()->with('error', 'Modification impossible.');
+    }
+
+    $request->validate([
+        'justificatif_scolarite' => 'nullable|file|mimes:pdf,jpg,png|max:2048',
+        'justificatif_paiement'  => 'nullable|file|mimes:pdf,jpg,png|max:2048',
+    ]);
+
+    $data = ['statut' => 'en_attente', 'motif_refus' => null];
+
+    if ($request->hasFile('justificatif_scolarite')) {
+        $data['justificatif_scolarite'] = $request->file('justificatif_scolarite')
+            ->store('justificatifs', 'public');
+    }
+
+    if ($request->hasFile('justificatif_paiement')) {
+        $data['justificatif_paiement'] = $request->file('justificatif_paiement')
+            ->store('justificatifs', 'public');
+    }
+
+    $demande->update($data);
+
+    return back()->with('success', 'Demande corrigée et renvoyée.');
+}
 
     public function showChangement()
     {

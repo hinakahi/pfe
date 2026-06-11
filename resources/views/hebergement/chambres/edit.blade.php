@@ -41,7 +41,7 @@
     </label>
     <input type="text" name="etudiante_1" class="form-control"
            value="{{ old('etudiante_1', $chambre->etudiante_1) }}"
-           placeholder="Nom complet (laisser vide = place libre)">
+           placeholder="matricule...">
 </div>
 
 {{-- Étudiante 2 (seulement pour les doubles) --}}
@@ -52,7 +52,7 @@
     </label>
     <input type="text" name="etudiante_2" class="form-control"
            value="{{ old('etudiante_2', $chambre->etudiante_2) }}"
-           placeholder="Nom complet (laisser vide = place libre)">
+           placeholder="matricule..">
 </div>
 @endif
             {{-- Statut calculé affiché en lecture seule --}}
