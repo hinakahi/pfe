@@ -13,7 +13,9 @@ class ReservationController extends Controller
     {
         $filtre = $request->query('statut', 'tous');
 
-        $query = Reservation::with('etudiante', 'article')->latest();
+        $query = Reservation::with('etudiante', 'article')
+                    ->where('statut', '!=', 'panier') // ← cacher les paniers
+                    ->latest();
 
         if ($filtre !== 'tous') {
             $query->where('statut', $filtre);
@@ -25,6 +27,7 @@ class ReservationController extends Controller
             'en_attente' => Reservation::where('statut', 'en_attente')->count(),
             'validee'    => Reservation::where('statut', 'validee')->count(),
             'refusee'    => Reservation::where('statut', 'refusee')->count(),
+            'recuperee'  => Reservation::where('statut', 'recuperee')->count(),
         ];
 
         return view('foyer.reservations.index', compact('reservations', 'filtre', 'compteurs'));
@@ -49,9 +52,9 @@ class ReservationController extends Controller
         $reservation->update([
             'statut'        => 'validee',
             'resp_foyer_id' => auth()->id(),
+            'validee_at'    => now(), // ← heure de validation pour le countdown 4h
         ]);
 
-        // 🔔 Notifier l'étudiant
         $reservation->etudiante->notify(new CommandeTraitee($reservation, 'acceptee'));
 
         return redirect()->route('foyer.reservations')
@@ -73,10 +76,24 @@ class ReservationController extends Controller
             'resp_foyer_id' => auth()->id(),
         ]);
 
-        //  Notifier l'étudiant avec motif
         $reservation->etudiante->notify(new CommandeTraitee($reservation, 'refusee', $request->motif_refus));
 
         return redirect()->route('foyer.reservations')
                          ->with('info', "Réservation #{$reservation->id} refusée.");
+    }
+
+    public function recuperee(Reservation $reservation)
+    {
+        if ($reservation->statut !== 'validee') {
+            return back()->with('error', 'Cette réservation ne peut pas être marquée comme récupérée.');
+        }
+
+        $reservation->update([
+            'statut'     => 'recuperee',
+            'validee_at' => null,
+        ]);
+
+        return redirect()->route('foyer.reservations')
+                         ->with('success', "Commande #{$reservation->id} marquée comme récupérée.");
     }
 }

@@ -39,7 +39,7 @@
         <button class="btn btn-sm btn-outline-secondary rounded-pill dropdown-toggle" type="button" data-bs-toggle="dropdown">
             
             @php
-                $typeLabels = ['tous'=>'Tous les types','electricite'=>'Électricité','plomberie'=>'Plomberie','menuiserie'=>'Menuiserie','climatisation'=>'Climatisation','autre'=>'Autre'];
+                $typeLabels = ['tous'=>'Tous les types','electricite'=>'Électricité','plomberie'=>'Plomberie','menuiserie'=>'Menuiserie','chauffage'=>'chauffage','autre'=>'Autre'];
             @endphp
             {{ $typeLabels[request('type', 'tous')] }}
         </button>
@@ -92,6 +92,20 @@
                         <div class="d-flex flex-wrap gap-3 text-muted" style="font-size:.82rem;">
                             <span><i class="bi bi-person me-1"></i>{{ $d->etudiante->name ?? '-' }}</span>
                             <span><i class="bi bi-door-closed me-1"></i>Chambre {{ $d->chambre->numero ?? '-' }}</span>
+<span><i class="bi bi-building me-1"></i>Bloc {{ $d->chambre->bloc ?? '-' }}</span>
+<span><i class="bi bi-layers me-1"></i>Étage {{ $d->chambre->etage ?? '-' }}</span>
+@if($d->statut === 'en_cours' && $d->technicien)
+    <span class="text-primary">
+        <i class="bi bi-person-gear me-1"></i>{{ $d->technicien->name }}
+    </span>
+@endif
+@if($d->statut === 'en_cours' && $d->commentaire_technicien)
+    <span class="text-warning">
+        <i class="bi bi-exclamation-circle me-1"></i>{{ $d->commentaire_technicien }}
+    </span>
+@endif
+<span><i class="bi bi-building me-1"></i>Bloc {{ $d->chambre->bloc ?? '-' }}</span>
+<span><i class="bi bi-layers me-1"></i>Étage {{ $d->chambre->etage ?? '-' }}</span>
                             <span><i class="bi bi-calendar me-1"></i>{{ $d->date_signalement?->format('d/m/Y') }}</span>
                             @if($d->statut === 'terminee')
                                 <span class="text-success">

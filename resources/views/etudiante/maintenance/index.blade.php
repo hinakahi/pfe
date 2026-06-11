@@ -1,255 +1,260 @@
 @extends('layouts.app')
 
-@section('page-title', 'Mes demandes de maintenance')
-
 @section('content')
-<div class="container-fluid">
+<div class="container py-4">
 
-    {{-- Formulaire nouvelle demande --}}
-    <div class="card shadow-sm border-0 mb-5">
-        <div class="card-header bg-white border-bottom-0 pt-4 pb-3">
-            <h5 class="mb-0 text-dark fw-bold">
-                <i class="bi bi-plus-circle-fill me-2" style="color:#0066cc;"></i>Nouvelle demande
-            </h5>
+    {{-- Header --}}
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h4 class="mb-0 fw-bold">Mes demandes de maintenance</h4>
+        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalCreer">
+            <i class="bi bi-plus-lg me-1"></i> Nouvelle demande
+        </button>
+    </div>
+
+    {{-- Alerts --}}
+    @if(session('success'))
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            {{ session('success') }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
-        <div class="card-body pt-4">
-            <form method="POST" action="{{ route('etudiante.maintenance.store') }}">
-                @csrf
+    @endif
+    @if(session('error'))
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            {{ session('error') }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    @endif
 
-                <div class="row g-4">
-                    {{-- Chambre --}}
-                     <div class="col-md-6">
-    <label class="form-label fw-semibold">Chambre <span class="text-danger">*</span></label>
-    <select name="chambre_id" class="form-select @error('chambre_id') is-invalid @enderror" required>
-        @foreach($chambres as $chambre)
-            <option value="{{ $chambre->id }}" 
-                {{ auth()->user()->chambre_id == $chambre->id ? 'selected' : '' }}>
-                Chambre {{ $chambre->numero }}
-            </option>
-        @endforeach
-    </select>
-    @error('chambre_id')
-        <div class="invalid-feedback">{{ $message }}</div>
-    @enderror
-</div>
-
-                    {{-- Type de panne --}}
-                    <div class="col-md-6">
-                        <label class="form-label fw-600 text-dark mb-2">
-                            Type de panne <span class="text-danger">*</span>
-                        </label>
-                        <select name="type" class="form-select form-select-lg @error('type') is-invalid @enderror" required>
-                            <option value="">Sélectionnez un type</option>
-                            <option value="electricite" {{ old('type') === 'electricite' ? 'selected' : '' }}>⚡ Électricité</option>
-                            <option value="plomberie"   {{ old('type') === 'plomberie'   ? 'selected' : '' }}>💧 Plomberie</option>
-                            <option value="menuiserie"  {{ old('type') === 'menuiserie'  ? 'selected' : '' }}>🚪 Menuiserie</option>
-                            <option value="climatisation" {{ old('type') === 'climatisation' ? 'selected' : '' }}>❄️ Climatisation</option>
-                            <option value="autre"       {{ old('type') === 'autre'       ? 'selected' : '' }}>🔧 Autre</option>
-                        </select>
-                        @error('type')
-                            <div class="invalid-feedback d-block mt-2">{{ $message }}</div>
-                        @enderror
-                    </div>
-
-                    {{-- Description --}}
-                    <div class="col-md-8">
-                        <label class="form-label fw-600 text-dark mb-2">
-                            Description <span class="text-danger">*</span>
-                        </label>
-                        <textarea name="description" rows="4"
-                                  class="form-control form-control-lg @error('description') is-invalid @enderror"
-                                  placeholder="Décrivez le problème en détail..."
-                                  required>{{ old('description') }}</textarea>
-                        @error('description')
-                            <div class="invalid-feedback d-block mt-2">{{ $message }}</div>
-                        @enderror
-                    </div>
-
-                    {{-- Urgence --}}
-                    <div class="col-md-4">
-                        <label class="form-label fw-600 text-dark mb-3">
-                            Urgence <span class="text-danger">*</span>
-                        </label>
-                        <div class="d-flex flex-column gap-3">
-                            <div class="form-check d-flex align-items-center">
-                                <input class="form-check-input" type="radio" name="urgence"
-                                       id="normale" value="normale"
-                                       {{ old('urgence', 'normale') === 'normale' ? 'checked' : '' }}>
-                                <label class="form-check-label ms-2 fw-500" for="normale">
-                                    <span class="badge bg-secondary px-3 py-2">Normale</span>
-                                </label>
-                            </div>
-                            <div class="form-check d-flex align-items-center">
-                                <input class="form-check-input" type="radio" name="urgence"
-                                       id="urgente" value="urgente"
-                                       {{ old('urgence') === 'urgente' ? 'checked' : '' }}>
-                                <label class="form-check-label ms-2 fw-500" for="urgente">
-                                    <span class="badge bg-danger px-3 py-2">Urgente</span>
-                                </label>
-                            </div>
-                        </div>
-                        @error('urgence')
-                            <div class="text-danger small mt-2">{{ $message }}</div>
-                        @enderror
-                    </div>
-
-                    {{-- Bouton submit --}}
-                    <div class="col-12 pt-3">
-                        <button type="submit" class="btn btn-primary btn-lg px-5" style="border-radius:8px;">
-                            <i class="bi bi-send me-2"></i>Envoyer la demande
-                        </button>
-                    </div>
+    {{-- Filtres --}}
+    <div class="card mb-4 border-0 shadow-sm">
+        <div class="card-body">
+            <form method="GET" action="{{ route('etudiante.maintenance.index') }}" class="row g-3 align-items-end">
+                <div class="col-md-3">
+                    <label class="form-label fw-semibold small text-muted">Statut</label>
+                    <select name="statut" class="form-select form-select-sm">
+                        <option value="">Tous les statuts</option>
+                        <option value="en_attente" {{ request('statut') === 'en_attente' ? 'selected' : '' }}>En attente</option>
+                        <option value="en_cours"   {{ request('statut') === 'en_cours'   ? 'selected' : '' }}>En cours</option>
+                        <option value="terminee"   {{ request('statut') === 'terminee'   ? 'selected' : '' }}>Terminée</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label fw-semibold small text-muted">Urgence</label>
+                    <select name="urgence" class="form-select form-select-sm">
+                        <option value="">Toutes</option>
+                        <option value="normale" {{ request('urgence') === 'normale' ? 'selected' : '' }}>Normale</option>
+                        <option value="urgente" {{ request('urgence') === 'urgente' ? 'selected' : '' }}>Urgente</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label fw-semibold small text-muted">Période</label>
+                    <select name="periode" class="form-select form-select-sm">
+                        <option value="">Toutes les dates</option>
+                        <option value="7"  {{ request('periode') === '7'  ? 'selected' : '' }}>7 derniers jours</option>
+                        <option value="30" {{ request('periode') === '30' ? 'selected' : '' }}>30 derniers jours</option>
+                        <option value="90" {{ request('periode') === '90' ? 'selected' : '' }}>90 derniers jours</option>
+                    </select>
+                </div>
+                <div class="col-md-3 d-flex gap-2">
+                    <button type="submit" class="btn btn-outline-primary btn-sm flex-fill">
+                        <i class="bi bi-funnel me-1"></i>Filtrer
+                    </button>
+                    <a href="{{ route('etudiante.maintenance.index') }}" class="btn btn-outline-secondary btn-sm">
+                        <i class="bi bi-x-lg"></i>
+                    </a>
                 </div>
             </form>
         </div>
     </div>
 
-    {{-- Liste des demandes en CARTES --}}
-    <div>
-        <div class="mb-4">
-            <h5 class="text-dark fw-bold mb-1">
-                <i class="bi bi-list-check me-2" style="color:#0066cc;"></i>Mes demandes
-            </h5>
-            <small class="text-muted">{{ $demandes->count() }} demande(s) au total</small>
-        </div>
-
-        @forelse($demandes as $d)
-            <div class="card shadow-sm border-0 mb-4" style="border-left: 4px solid {{ $d->urgence === 'urgente' ? '#dc3545' : '#6c757d' }};">
-                <div class="card-body p-4">
-                    {{-- Header de la carte --}}
-                    <div class="row align-items-start mb-4">
-                        <div class="col">
-                            {{-- Type + Description --}}
-                            <div class="d-flex align-items-center gap-3 mb-2">
-                                <span class="badge" style="background-color: {{ $typeColor = match($d->type) {
-                                    'electricite' => '#FFB81C',
-                                    'plomberie' => '#0066cc',
-                                    'menuiserie' => '#8B4513',
-                                    'climatisation' => '#17A2B8',
-                                    default => '#6c757d'
-                                } }}; color:white; padding:6px 12px; border-radius:6px; font-size:0.9rem;">
-                                    {{ match($d->type) {
-                                        'electricite' => '⚡ Électricité',
-                                        'plomberie' => '💧 Plomberie',
-                                        'menuiserie' => '🚪 Menuiserie',
-                                        'climatisation' => '❄️ Climatisation',
-                                        default => '🔧 ' . ucfirst($d->type)
-                                    } }}
-                                </span>
-                                
-                                {{-- Urgence badge --}}
-                                @if($d->urgence === 'urgente')
-                                    <span class="badge bg-danger px-3 py-2">
-                                        <i class="bi bi-exclamation-triangle-fill me-1"></i>Urgente
-                                    </span>
-                                @else
-                                    <span class="badge bg-secondary px-3 py-2">Normale</span>
-                                @endif
-                            </div>
-
-                            {{-- Description --}}
-                            <p class="text-dark fw-500 mb-0" style="font-size:1.1rem;">
-                                {{ $d->description }}
-                            </p>
-                        </div>
-
-                        {{-- ID petit --}}
-                        <div class="col-auto">
-                            <small class="text-muted">#{{ $d->id }}</small>
-                        </div>
-                    </div>
-
-                    {{-- Détails --}}
-                    <div class="row g-4 mb-4" style="border-top:1px solid #e9ecef; padding-top:1rem;">
-                        <div class="col-auto">
-                            <small class="text-muted d-block">Chambre</small>
-                            <p class="mb-0 fw-600 text-dark">🏠 Chambre {{ $d->chambre->numero ?? '—' }}</p>
-                        </div>
-                        <div class="col-auto">
-                            <small class="text-muted d-block">Signalée le</small>
-                            <p class="mb-0 fw-600 text-dark">{{ $d->date_signalement?->format('d/m/Y') ?? '—' }}</p>
-                        </div>
-                        <div class="col-auto">
-                            <small class="text-muted d-block">Statut</small>
-                            <p class="mb-0">
-                                @if($d->statut === 'en_attente')
-                                    <span class="badge bg-warning text-dark px-3 py-2">
-                                        <i class="bi bi-hourglass-split me-1"></i>En attente
-                                    </span>
-                                @elseif($d->statut === 'en_cours')
-                                    <span class="badge bg-primary px-3 py-2">
-                                        <i class="bi bi-gear me-1"></i>En cours
-                                    </span>
-                                @else
-                                    <span class="badge bg-success px-3 py-2">
-                                        <i class="bi bi-check-circle-fill me-1"></i>Terminée
-                                    </span>
-                                @endif
-                            </p>
-                        </div>
-                    </div>
-
-                    {{-- Actions --}}
-                    <div style="border-top:1px solid #e9ecef; padding-top:1rem;">
-                        @if($d->statut === 'en_attente')
-                            <form method="POST" action="{{ route('etudiante.maintenance.destroy', $d->id) }}"
-                                  onsubmit="return confirm('Êtes-vous sûr de vouloir annuler cette demande ?');"
-                                  style="display:inline;">
-                                @csrf
-                                @method('DELETE')
-                                <button type="submit" class="btn btn-outline-danger btn-sm px-4" style="border-radius:6px;">
-                                    <i class="bi bi-x-circle me-1"></i>Annuler
-                                </button>
-                            </form>
+    {{-- Liste --}}
+    @forelse($demandes as $demande)
+    <div class="card mb-3 border-0 shadow-sm">
+        <div class="card-body">
+            <div class="d-flex justify-content-between align-items-start">
+                <div class="flex-grow-1">
+                    <div class="d-flex align-items-center gap-2 mb-1">
+                        @if($demande->urgence === 'urgente')
+                            <span class="badge bg-danger">
+                                <i class="bi bi-exclamation-triangle-fill me-1"></i>Urgente
+                            </span>
                         @else
-                            <span class="text-muted small">Aucune action possible</span>
+                            <span class="badge bg-secondary">Normale</span>
+                        @endif
+
+                        @php
+                            $statutClass = match($demande->statut) {
+                                'en_attente' => 'warning text-dark',
+                                'en_cours'   => 'info text-dark',
+                                'terminee'   => 'success',
+                                default      => 'secondary',
+                            };
+                            $statutLabel = match($demande->statut) {
+                                'en_attente' => 'En attente',
+                                'en_cours'   => 'En cours',
+                                'terminee'   => 'Terminée',
+                                default      => $demande->statut,
+                            };
+                        @endphp
+                        <span class="badge bg-{{ $statutClass }}">{{ $statutLabel }}</span>
+                        <span class="text-muted small">{{ ucfirst($demande->type) }}</span>
+                    </div>
+
+                    <p class="mb-1 text-truncate" style="max-width: 600px;">
+                        {{ $demande->description }}
+                    </p>
+
+                    <div class="text-muted small">
+                        <i class="bi bi-door-open me-1"></i>Chambre {{ $demande->chambre->numero ?? '—' }}
+                        &nbsp;·&nbsp;
+                        <i class="bi bi-building me-1"></i>Bloc {{ $demande->chambre->bloc ?? '—' }}
+                        &nbsp;·&nbsp;
+                        <i class="bi bi-layers me-1"></i>Étage {{ $demande->chambre->etage ?? '—' }}
+                        &nbsp;·&nbsp;
+                        <i class="bi bi-clock me-1"></i>{{ $demande->created_at->format('d/m/Y') }}
+                        @if($demande->technicien)
+                            &nbsp;·&nbsp;
+                            <i class="bi bi-person-gear me-1"></i>{{ $demande->technicien->name }}
                         @endif
                     </div>
                 </div>
-            </div>
-        @empty
-            <div class="card shadow-sm border-0 text-center py-5" style="background:#f8f9fa;">
-                <div class="card-body">
-                    <i class="bi bi-inbox fs-1 opacity-25"></i>
-                    <p class="mt-3 text-muted mb-0">Aucune demande de maintenance pour le moment.</p>
+
+                <div class="d-flex gap-2 ms-3 flex-shrink-0">
+                    <a href="{{ route('etudiante.maintenance.show', $demande) }}"
+                       class="btn btn-outline-secondary btn-sm">
+                        <i class="bi bi-eye me-1"></i>Détails
+                    </a>
+
+                    @if($demande->statut === 'en_attente')
+                        <a href="{{ route('etudiante.maintenance.edit', $demande) }}"
+                           class="btn btn-outline-primary btn-sm">
+                            <i class="bi bi-pencil me-1"></i>Modifier
+                        </a>
+
+                        <form action="{{ route('etudiante.maintenance.destroy', $demande) }}"
+                              method="POST"
+                              onsubmit="return confirm('Annuler cette demande ?')">
+                            @csrf @method('DELETE')
+                            <button type="submit" class="btn btn-outline-danger btn-sm">
+                                <i class="bi bi-x-circle me-1"></i>Annuler
+                            </button>
+                        </form>
+                    @endif
                 </div>
             </div>
-        @endforelse
+        </div>
     </div>
+    @empty
+        <div class="text-center py-5 text-muted">
+            <i class="bi bi-tools fs-1 d-block mb-3"></i>
+            <p class="mb-0">Aucune demande trouvée.</p>
+            @if(request()->hasAny(['statut','urgence','periode']))
+                <a href="{{ route('etudiante.maintenance.index') }}" class="btn btn-sm btn-outline-secondary mt-3">
+                    Effacer les filtres
+                </a>
+            @endif
+        </div>
+    @endforelse
+
+    {{-- Pagination --}}
+    @if($demandes->hasPages())
+        <div class="d-flex justify-content-center mt-4">
+            {{ $demandes->appends(request()->query())->links() }}
+        </div>
+    @endif
 
 </div>
 
-<style>
-    .form-check-input {
-        width: 1.5rem;
-        height: 1.5rem;
-        border: 2px solid #ddd;
-        border-radius: 4px;
-    }
-    .form-check-input:checked {
-        background-color: #0066cc;
-        border-color: #0066cc;
-    }
-    .form-select-lg, .form-control-lg {
-        padding: 0.75rem 1rem;
-        font-size: 1rem;
-        border-radius: 8px;
-        border: 1px solid #ddd;
-    }
-    .form-select-lg:focus, .form-control-lg:focus {
-        border-color: #0066cc;
-        box-shadow: 0 0 0 0.2rem rgba(0, 102, 204, 0.15);
-    }
-    .badge {
-        font-weight: 500;
-        letter-spacing: 0.3px;
-    }
-    .fw-600 {
-        font-weight: 600;
-    }
-    .fw-500 {
-        font-weight: 500;
-    }
-</style>
+{{-- Modal Créer --}}
+<div class="modal fade" id="modalCreer" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title fw-bold">Nouvelle demande de maintenance</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form action="{{ route('etudiante.maintenance.store') }}" method="POST">
+                @csrf
+                <div class="modal-body">
+                    <div class="row g-3">
+
+                        {{-- Chambre automatique --}}
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">Chambre</label>
+                            @if($chambre)
+                                <input type="hidden" name="chambre_id" value="{{ $chambre->id }}">
+                                <input type="text" class="form-control bg-light"
+                                       value="Chambre {{ $chambre->numero }}" readonly>
+                            @else
+                                <div class="alert alert-warning py-2 mb-0 small">
+                                    Aucune chambre assignée à votre compte.
+                                </div>
+                            @endif
+                            @error('chambre_id') <div class="text-danger small mt-1">{{ $message }}</div> @enderror
+                        </div>
+
+                        {{-- Bloc (automatique depuis la chambre) --}}
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">Bloc</label>
+                            <input type="text" class="form-control bg-light"
+                                   value="{{ $chambre->bloc ?? '—' }}" readonly>
+                        </div>
+
+                        {{-- Étage (automatique depuis la chambre) --}}
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">Étage</label>
+                            <input type="text" class="form-control bg-light"
+                                   value="{{ $chambre->etage ?? '—' }}" readonly>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Type <span class="text-danger">*</span></label>
+                            <select name="type" class="form-select @error('type') is-invalid @enderror" required>
+                                <option value="">Choisir</option>
+                                <option value="electricite" {{ old('type') === 'electricite' ? 'selected' : '' }}>Électricité</option>
+                                <option value="plomberie"   {{ old('type') === 'plomberie'   ? 'selected' : '' }}>Plomberie</option>
+                                <option value="menuiserie"  {{ old('type') === 'menuiserie'  ? 'selected' : '' }}>Menuiserie</option>
+                                <option value="autre"       {{ old('type') === 'autre'       ? 'selected' : '' }}>Autre</option>
+                            </select>
+                            @error('type') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Urgence <span class="text-danger">*</span></label>
+                            <select name="urgence" class="form-select @error('urgence') is-invalid @enderror" required>
+                                <option value="normale" {{ old('urgence') === 'normale' ? 'selected' : '' }}>Normale</option>
+                                <option value="urgente" {{ old('urgence') === 'urgente' ? 'selected' : '' }}>Urgente</option>
+                            </select>
+                            @error('urgence') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                        </div>
+
+                        <div class="col-12">
+                            <label class="form-label fw-semibold">Description <span class="text-danger">*</span></label>
+                            <textarea name="description" rows="4"
+                                      class="form-control @error('description') is-invalid @enderror"
+                                      placeholder="Décrivez le problème en détail..." required>{{ old('description') }}</textarea>
+                            @error('description') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                        </div>
+
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                    <button type="submit" class="btn btn-primary" @unless($chambre) disabled @endunless>
+                        <i class="bi bi-send me-1"></i>Envoyer la demande
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@if($errors->any())
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        new bootstrap.Modal(document.getElementById('modalCreer')).show();
+    });
+</script>
+@endif
 
 @endsection

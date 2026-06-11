@@ -17,6 +17,7 @@ class Maintenance extends Model
         'type',
         'statut',
         'urgence',
+        'commentaire_technicien',
         'date_signalement',
         'date_resolution',
     ];

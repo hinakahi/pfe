@@ -10,13 +10,32 @@ use Illuminate\Http\Request;
 
 class MaintenanceController extends Controller
 {
-    public function index()
-    {
-        $demandes = Maintenance::where('etudiante_id', auth()->id())
-                   ->latest()->get();
-        $chambres = Chambre::whereNotNull('etudiante_1')->get();
-        return view('etudiante.maintenance.index', compact('demandes', 'chambres'));
+public function index(Request $request)
+{
+    $user = auth()->user();
+
+    $chambre = Chambre::where('etudiante_1', $user->matricule)
+                      ->orWhere('etudiante_2', $user->matricule)
+                      ->first();
+
+    $query = Maintenance::with(['chambre', 'technicien'])
+        ->where('etudiante_id', $user->id)
+        ->latest();
+
+    if ($request->filled('statut')) {
+        $query->where('statut', $request->statut);
     }
+    if ($request->filled('urgence')) {
+        $query->where('urgence', $request->urgence);
+    }
+    if ($request->filled('periode')) {
+        $query->where('created_at', '>=', now()->subDays((int) $request->periode));
+    }
+
+    $demandes = $query->paginate(10)->withQueryString();
+
+    return view('etudiante.maintenance.index', compact('demandes', 'chambre'));
+}
 
     public function store(Request $request)
     {
@@ -36,7 +55,6 @@ class MaintenanceController extends Controller
             'statut'       => 'en_attente',
         ]);
 
-        // Notifier tous les techniciens
         $techniciens = User::where('role', 'technicien')->get();
         foreach ($techniciens as $technicien) {
             $technicien->notify(new NouvelleDemainteNotification($maintenance));
@@ -45,41 +63,55 @@ class MaintenanceController extends Controller
         return redirect()->route('etudiante.maintenance.index')
                          ->with('success', 'Demande signalée avec succès.');
     }
+
+    public function show(Maintenance $maintenance)
+    {
+        if ($maintenance->etudiante_id !== auth()->id()) {
+            abort(403);
+        }
+
+        $maintenance->load(['chambre', 'technicien', 'materiels']);
+
+        return view('etudiante.maintenance.show', compact('maintenance'));
+    }
+
     public function edit(Maintenance $maintenance)
-{
-    if ($maintenance->etudiante_id !== auth()->id()) {
-        abort(403);
-    }
-    if ($maintenance->statut !== 'en_attente') {
-        return redirect()->route('etudiante.maintenance.index')
-                         ->with('error', 'Impossible de modifier une demande en cours ou terminée.');
-    }
-    $chambres = Chambre::all();
-    return view('etudiante.maintenance.edit', compact('maintenance', 'chambres'));
-}
+    {
+        if ($maintenance->etudiante_id !== auth()->id()) {
+            abort(403);
+        }
+        if ($maintenance->statut !== 'en_attente') {
+            return redirect()->route('etudiante.maintenance.index')
+                             ->with('error', 'Impossible de modifier une demande en cours ou terminée.');
+        }
 
-public function update(Request $request, Maintenance $maintenance)
-{
-    if ($maintenance->etudiante_id !== auth()->id()) {
-        abort(403);
-    }
-    if ($maintenance->statut !== 'en_attente') {
-        return redirect()->route('etudiante.maintenance.index')
-                         ->with('error', 'Impossible de modifier une demande en cours ou terminée.');
+        $chambres = Chambre::all();
+
+        return view('etudiante.maintenance.edit', compact('maintenance', 'chambres'));
     }
 
-    $request->validate([
-        'chambre_id'  => 'required|exists:chambres,id',
-        'type'        => 'required|in:electricite,plomberie,menuiserie,autre',
-        'description' => 'required|string|max:500',
-        'urgence'     => 'required|in:normale,urgente',
-    ]);
+    public function update(Request $request, Maintenance $maintenance)
+    {
+        if ($maintenance->etudiante_id !== auth()->id()) {
+            abort(403);
+        }
+        if ($maintenance->statut !== 'en_attente') {
+            return redirect()->route('etudiante.maintenance.index')
+                             ->with('error', 'Impossible de modifier une demande en cours ou terminée.');
+        }
 
-    $maintenance->update($request->only('chambre_id', 'type', 'description', 'urgence'));
+        $request->validate([
+            'chambre_id'  => 'required|exists:chambres,id',
+            'type'        => 'required|in:electricite,plomberie,menuiserie,autre',
+            'description' => 'required|string|max:500',
+            'urgence'     => 'required|in:normale,urgente',
+        ]);
 
-    return redirect()->route('etudiante.maintenance.index')
-                     ->with('success', 'Demande modifiée avec succès.');
-}
+        $maintenance->update($request->only('chambre_id', 'type', 'description', 'urgence'));
+
+        return redirect()->route('etudiante.maintenance.show', $maintenance)
+                         ->with('success', 'Demande modifiée avec succès.');
+    }
 
     public function destroy(Maintenance $maintenance)
     {
@@ -89,7 +121,9 @@ public function update(Request $request, Maintenance $maintenance)
         if ($maintenance->statut !== 'en_attente') {
             return back()->with('error', 'Impossible d\'annuler une demande en cours.');
         }
+
         $maintenance->delete();
+
         return redirect()->route('etudiante.maintenance.index')
                          ->with('success', 'Demande annulée avec succès.');
     }

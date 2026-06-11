@@ -39,9 +39,23 @@
                 <span><i class="bi bi-person me-1"></i>{{ $maintenance->etudiante->name ?? '-' }}</span>
                 <span><i class="bi bi-envelope me-1"></i>{{ $maintenance->etudiante->email ?? '-' }}</span>
                 <span><i class="bi bi-door-closed me-1"></i>Chambre {{ $maintenance->chambre->numero ?? '-' }}</span>
+                <span><i class="bi bi-building me-1"></i>Bloc {{ $maintenance->chambre->bloc ?? '-' }}</span>
+                <span><i class="bi bi-layers me-1"></i>Étage {{ $maintenance->chambre->etage ?? '-' }}</span>
                 <span><i class="bi bi-calendar me-1"></i>{{ $maintenance->date_signalement?->format('d/m/Y') }}</span>
                 <span><i class="bi bi-tools me-1"></i>{{ ucfirst($maintenance->type) }}</span>
             </div>
+
+            {{-- Technicien en cours --}}
+            @if($maintenance->statut === 'en_cours' && $maintenance->technicien)
+            <div class="alert alert-primary py-2 mt-3 mb-0" style="font-size:.82rem;">
+                <i class="bi bi-person-gear me-1"></i>
+                <strong>Pris en charge par :</strong> {{ $maintenance->technicien->name }}
+                @if($maintenance->commentaire_technicien)
+                    &nbsp;·&nbsp;
+                    <strong>Blocage :</strong> {{ $maintenance->commentaire_technicien }}
+                @endif
+            </div>
+            @endif
 
             {{-- Matériels déjà utilisés --}}
             @if($maintenance->materiels->count())
@@ -70,7 +84,7 @@
 
         <div class="row g-4">
 
-            {{-- ① Statut --}}
+            {{-- ① Statut + Commentaire --}}
             <div class="col-md-6">
                 <div class="card h-100">
                     <div class="card-header">
@@ -80,18 +94,31 @@
                         <small class="text-muted">Obligatoire lors du traitement</small>
                     </div>
                     <div class="card-body">
+
                         <div class="mb-3">
                             <label class="form-label fw-semibold">Nouveau statut</label>
-                            <select name="statut" class="form-select" required>
+                            <select name="statut" class="form-select" id="selectStatut" required>
                                 <option value="en_attente" {{ $maintenance->statut === 'en_attente' ? 'selected' : '' }}>En attente</option>
                                 <option value="en_cours"   {{ $maintenance->statut === 'en_cours'   ? 'selected' : '' }}>En cours d'intervention</option>
                                 <option value="terminee"   {{ $maintenance->statut === 'terminee'   ? 'selected' : '' }}>Terminée</option>
                             </select>
                         </div>
+
+                        {{-- Commentaire blocage (visible seulement si "En cours") --}}
+                        <div class="mb-3" id="blocCommentaire" style="display:none;">
+                            <label class="form-label fw-semibold text-warning">
+                                <i class="bi bi-exclamation-circle me-1"></i>Problème non résolu / blocage
+                            </label>
+                            <textarea name="commentaire_technicien" class="form-control" rows="3"
+                                      placeholder="Décrivez ce qui bloque...">{{ $maintenance->commentaire_technicien }}</textarea>
+                            <div class="form-text">Visible par tous les techniciens pour qu'ils puissent reprendre la demande.</div>
+                        </div>
+
                         <div class="alert alert-info py-2" style="font-size:.82rem;">
                             <i class="bi bi-bell me-1"></i>
                             Passer à <strong>Terminée</strong> notifie automatiquement l'étudiante.
                         </div>
+
                     </div>
                 </div>
             </div>
@@ -123,7 +150,6 @@
                                 </option>
                                 @endforeach
                             </select>
-                            {{-- Champ caché pour stocker le nom --}}
                             <input type="hidden" name="materiels[0][nom_materiel]" id="nomMateriel">
                         </div>
 
@@ -201,6 +227,16 @@ function syncNom(select) {
     const option = select.options[select.selectedIndex];
     document.getElementById('nomMateriel').value = option.dataset.nom ?? '';
 }
+
+const selectStatut = document.getElementById('selectStatut');
+const blocCommentaire = document.getElementById('blocCommentaire');
+
+function toggleCommentaire() {
+    blocCommentaire.style.display = selectStatut.value === 'en_cours' ? 'block' : 'none';
+}
+
+selectStatut.addEventListener('change', toggleCommentaire);
+toggleCommentaire();
 </script>
 
 @endsection

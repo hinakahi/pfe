@@ -131,6 +131,7 @@
     .status-refusee    { background: #fee2e2; color: #b91c1c; }
     .status-annulee    { background: #f1f5f9; color: #64748b; }
     .status-panier     { background: #dbeafe; color: #1d4ed8; }
+    .status-recuperee  { background: #f3e8ff; color: #7c3aed; }
     .action-btn {
         display: inline-flex; align-items: center; gap: 5px;
         padding: 0.35rem 0.85rem; border-radius: 8px;
@@ -162,7 +163,7 @@
 
 {{-- ── STAT CARDS ── --}}
 <div class="row g-3 mb-4">
-    <div class="col-6 col-md-3">
+    <div class="col">
         <a href="{{ route('foyer.reservations', ['statut' => 'en_attente']) }}"
            class="stat-card {{ $filtre === 'en_attente' ? 'active-filter' : '' }}"
            style="background: linear-gradient(135deg,#b85c00,#f5820d);">
@@ -171,7 +172,7 @@
             <i class="bi bi-hourglass-split stat-icon"></i>
         </a>
     </div>
-    <div class="col-6 col-md-3">
+    <div class="col">
         <a href="{{ route('foyer.reservations', ['statut' => 'validee']) }}"
            class="stat-card {{ $filtre === 'validee' ? 'active-filter' : '' }}"
            style="background: linear-gradient(135deg,#0d7a4e,#1aad72);">
@@ -180,7 +181,7 @@
             <i class="bi bi-check-circle stat-icon"></i>
         </a>
     </div>
-    <div class="col-6 col-md-3">
+    <div class="col">
         <a href="{{ route('foyer.reservations', ['statut' => 'refusee']) }}"
            class="stat-card {{ $filtre === 'refusee' ? 'active-filter' : '' }}"
            style="background: linear-gradient(135deg,#9b1c1c,#e53e3e);">
@@ -189,13 +190,22 @@
             <i class="bi bi-x-circle stat-icon"></i>
         </a>
     </div>
-    <div class="col-6 col-md-3">
+    <div class="col">
+        <a href="{{ route('foyer.reservations', ['statut' => 'recuperee']) }}"
+           class="stat-card {{ $filtre === 'recuperee' ? 'active-filter' : '' }}"
+           style="background: linear-gradient(135deg,#5b21b6,#7c3aed);">
+            <div class="stat-label"><i class="bi bi-bag-check"></i> Récupérées</div>
+            <div class="stat-value">{{ $compteurs['recuperee'] }}</div>
+            <i class="bi bi-bag-check stat-icon"></i>
+        </a>
+    </div>
+    <div class="col">
         <a href="{{ route('foyer.reservations') }}"
            class="stat-card {{ $filtre === 'tous' ? 'active-filter' : '' }}"
            style="background: linear-gradient(135deg,#1a4fa0,#2979d8);">
             <div class="stat-label"><i class="bi bi-list-ul"></i> Total</div>
             <div class="stat-value">
-                {{ $compteurs['en_attente'] + $compteurs['validee'] + $compteurs['refusee'] }}
+                {{ $compteurs['en_attente'] + $compteurs['validee'] + $compteurs['refusee'] + $compteurs['recuperee'] }}
             </div>
             <i class="bi bi-list-ul stat-icon"></i>
         </a>
@@ -211,9 +221,10 @@
         <div class="active-filter-banner" style="margin-bottom:0;">
             <span>
                 <i class="bi bi-funnel-fill"></i> Filtré par :
-                @if($filtre === 'en_attente') <span style="color:#b45309;">En attente</span>
-                @elseif($filtre === 'validee') <span style="color:#15803d;">Validées</span>
-                @elseif($filtre === 'refusee') <span style="color:#b91c1c;">Refusées</span>
+                @if($filtre === 'en_attente')    <span style="color:#b45309;">En attente</span>
+                @elseif($filtre === 'validee')   <span style="color:#15803d;">Validées</span>
+                @elseif($filtre === 'refusee')   <span style="color:#b91c1c;">Refusées</span>
+                @elseif($filtre === 'recuperee') <span style="color:#7c3aed;">Récupérées</span>
                 @endif
             </span>
             <a href="{{ route('foyer.reservations') }}">
@@ -245,7 +256,7 @@
                         <span class="ref-badge">#{{ str_pad($r->id, 4, '0', STR_PAD_LEFT) }}</span>
                     </td>
 
-                    {{-- Article --}}  {{-- ✅ CORRIGÉ : $r->article->nom_article --}}
+                    {{-- Article --}}
                     <td>
                         <div style="display:flex; align-items:center; gap:10px;">
                             @if($r->article && $r->article->photo)
@@ -283,7 +294,7 @@
                     {{-- Quantité --}}
                     <td><span class="qty-badge">{{ $r->quantite }}</span></td>
 
-                    {{-- Date --}}  {{-- ✅ CORRIGÉ : Carbon::parse() pour éviter l'erreur --}}
+                    {{-- Date --}}
                     <td>
                         @php $date = \Carbon\Carbon::parse($r->date_reservation); @endphp
                         <div style="font-size:0.88rem; font-weight:500;">
@@ -302,8 +313,9 @@
                                 'validee'    => ['bi-check-circle',    'Validée'],
                                 'refusee'    => ['bi-x-circle',        'Refusée'],
                                 'annulee'    => ['bi-slash-circle',    'Annulée'],
+                                'recuperee'  => ['bi-bag-check',       'Récupérée'],
                                 'panier'     => ['bi-cart',            'Panier'],
-                                default      => ['bi-question',         $r->statut],
+                                default      => ['bi-question',        $r->statut],
                             };
                         @endphp
                         <span class="status-badge status-{{ $r->statut }}">
@@ -328,7 +340,38 @@
                                     <i class="bi bi-x-lg"></i> Refuser
                                 </button>
                             </div>
+
+                        @elseif($r->statut === 'validee')
+                            <div style="display:flex; flex-direction:column; gap:4px;">
+                                <form method="POST"
+                                      action="{{ route('foyer.reservations.recuperee', $r) }}"
+                                      onsubmit="return confirm('Confirmer la récupération ?')">
+                                    @csrf
+                                    <button type="submit" class="action-btn"
+                                            style="border-color:#7c3aed; color:#7c3aed; background:#f5f3ff;">
+                                        <i class="bi bi-bag-check"></i> Récupérée
+                                    </button>
+                                </form>
+                                {{-- Countdown 4h --}}
+                                @if($r->validee_at)
+                                    @php
+                                        $expireAt = \Carbon\Carbon::parse($r->validee_at)->addHours(4);
+                                        $restant  = now()->diffInMinutes($expireAt, false);
+                                    @endphp
+                                    @if($restant > 0)
+                                        <span style="font-size:0.75rem; color:#b45309;">
+                                            <i class="bi bi-clock me-1"></i>Expire dans {{ gmdate('H\hi', $restant * 60) }}
+                                        </span>
+                                    @else
+                                        <span style="font-size:0.75rem; color:#b91c1c;">
+                                            <i class="bi bi-clock me-1"></i>Expirée
+                                        </span>
+                                    @endif
+                                @endif
+                            </div>
+
                         @else
+                            {{-- recuperee, refusee, annulee → juste la date --}}
                             <span style="font-size:0.8rem; color:#94a3b8;
                                          display:flex; align-items:center; gap:5px;">
                                 <i class="bi bi-clock-history"></i>

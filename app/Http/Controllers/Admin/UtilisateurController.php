@@ -48,27 +48,38 @@ class UtilisateurController extends Controller
         return view('admin.utilisateurs.edit', compact('utilisateur'));
     }
 
-    public function update(Request $request, User $utilisateur)
-    {
-        $request->validate([
-            'name'      => 'required|string|max:191',
-            'matricule' => 'required|string|max:191|unique:users,matricule,' . $utilisateur->id,
-            'email'     => 'required|email|max:191|unique:users,email,' . $utilisateur->id,
-            'role'      => 'required|in:admin,etudiante,resp_hebergement,technicien,resp_foyer',
-            'phone'     => 'nullable|string|max:20',
-            'password'  => 'nullable|string|min:6|confirmed',
-        ]);
+   public function update(Request $request, User $utilisateur)
+{
+    $request->validate([
+        'name'      => 'required|string|max:191',
+        'matricule' => 'required|string|max:191|unique:users,matricule,' . $utilisateur->id,
+        'email'     => 'required|email|max:191|unique:users,email,' . $utilisateur->id,
+        'role'      => 'required|in:admin,etudiante,resp_hebergement,technicien,resp_foyer',
+        'phone'     => 'nullable|string|max:20',
+        'password'  => 'nullable|string|min:6|confirmed',
+        'photo'     => 'nullable|image|mimes:jpg,jpeg,png|max:2048', // ← ajouté
+    ]);
 
-        $data = $request->only('name', 'matricule', 'email', 'role', 'phone');
-        if ($request->filled('password')) {
-            $data['password'] = Hash::make($request->password);
-        }
+    $data = $request->only('name', 'matricule', 'email', 'role', 'phone');
 
-        $utilisateur->update($data);
-
-        return redirect()->route('admin.utilisateurs.index')
-            ->with('success', 'Utilisateur modifié avec succès.');
+    if ($request->filled('password')) {
+        $data['password'] = Hash::make($request->password);
     }
+
+    // 
+    if ($request->hasFile('photo')) {
+        // Supprimer l'ancienne photo
+        if ($utilisateur->photo) {
+            \Storage::disk('public')->delete($utilisateur->photo);
+        }
+        $data['photo'] = $request->file('photo')->store('photos', 'public');
+    }
+
+    $utilisateur->update($data);
+
+    return redirect()->route('admin.utilisateurs.index')
+        ->with('success', 'Utilisateur modifié avec succès.');
+}
 
     public function destroy(User $utilisateur)
     {

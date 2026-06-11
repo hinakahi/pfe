@@ -2,9 +2,26 @@
 
 @section('content')
 <div class="container" style="max-width: 700px;">
-    <a href="{{ route('etudiante.reclamations.index') }}" class="btn btn-outline-secondary mb-4">
-        <i class="bi bi-arrow-left"></i> Retour
-    </a>
+    {{-- Boutons d'action --}}
+    <div class="d-flex gap-2 mb-4 flex-wrap">
+        <a href="{{ route('etudiante.reclamations.index') }}" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left"></i> Retour
+        </a>
+        
+        {{-- Bouton Modifier --}}
+        <a href="{{ route('etudiante.reclamations.edit', $reclamation) }}" class="btn btn-primary">
+            <i class="bi bi-pencil me-1"></i> Modifier
+        </a>
+        
+        {{-- Bouton Supprimer --}}
+        <form action="{{ route('etudiante.reclamations.destroy', $reclamation) }}" method="POST" style="display:inline;" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cette réclamation ?');">
+            @csrf
+            @method('DELETE')
+            <button type="submit" class="btn btn-danger">
+                <i class="bi bi-trash me-1"></i> Supprimer
+            </button>
+        </form>
+    </div>
 
     {{-- Réclamation --}}
     <div class="card shadow-sm mb-4">
@@ -14,7 +31,6 @@
                 $statuts = [
                     'en_attente' => ['bg' => 'warning',   'label' => '⏳ En attente'],
                     'en_cours'   => ['bg' => 'primary',   'label' => '🔵 En cours'],
-                    'traitee'    => ['bg' => 'success',   'label' => '✅ Traitée'],
                     'resolue'    => ['bg' => 'success',   'label' => '✅ Résolue'],
                     'fermee'     => ['bg' => 'secondary', 'label' => '🔒 Fermée'],
                 ];

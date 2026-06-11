@@ -60,59 +60,62 @@ class DemandeMaintController extends Controller
     }
 
     public function traiter(Request $request, Maintenance $maintenance)
-    {
-        $request->validate([
-            'statut'                   => 'required|in:en_attente,en_cours,terminee',
-            'materiels'                => 'nullable|array',
-            'materiels.*.stock_id'     => 'nullable|exists:stocks,id',
-            'materiels.*.nom_materiel' => 'nullable|string|max:191',
-            'materiels.*.quantite'     => 'nullable|integer|min:1',
-            'stock_epuise'             => 'nullable|boolean',
-        ]);
+{
+    $request->validate([
+        'statut'                   => 'required|in:en_attente,en_cours,terminee',
+        'commentaire_technicien'   => 'nullable|string|max:500',
+        'materiels'                => 'nullable|array',
+        'materiels.*.stock_id'     => 'nullable|exists:stocks,id',
+        'materiels.*.nom_materiel' => 'nullable|string|max:191',
+        'materiels.*.quantite'     => 'nullable|integer|min:1',
+        'stock_epuise'             => 'nullable|boolean',
+    ]);
 
-        // Mettre à jour le statut
+    // Assigner le technicien automatiquement + statut + commentaire
+    $maintenance->update([
+        'statut'                 => $request->statut,
+        'technicien_id'          => auth()->id(),
+        'commentaire_technicien' => $request->statut === 'en_cours'
+                                    ? $request->commentaire_technicien
+                                    : $maintenance->commentaire_technicien,
+    ]);
+
+    // Si terminée : date de résolution + notification
+    if ($request->statut === 'terminee') {
         $maintenance->update([
-            'statut'        => $request->statut,
-            'technicien_id' => auth()->id(),
+            'date_resolution'        => now(),
+            'commentaire_technicien' => null, // on efface le blocage car c'est résolu
         ]);
+        $maintenance->etudiante->notify(new MaintenanceTermineeNotification($maintenance));
+    }
 
-        // Si terminée : date de résolution + notification
-        if ($request->statut === 'terminee') {
-            $maintenance->update(['date_resolution' => now()]);
-            $maintenance->etudiante->notify(new MaintenanceTermineeNotification($maintenance));
-        }
+    // Enregistrer le matériel utilisé + décrémenter le stock
+    if ($request->filled('materiels')) {
+        foreach ($request->materiels as $mat) {
+            if (empty($mat['nom_materiel'])) continue;
 
-        // Enregistrer le matériel utilisé + décrémenter le stock
-        if ($request->filled('materiels')) {
-            foreach ($request->materiels as $mat) {
+            $quantite = $mat['quantite'] ?? 1;
 
-                // Skip si nom vide
-                if (empty($mat['nom_materiel'])) continue;
+            $stock = isset($mat['stock_id'])
+                ? Stock::find($mat['stock_id'])
+                : Stock::where('designation', $mat['nom_materiel'])->first();
 
-                $quantite = $mat['quantite'] ?? 1;
+            Materiel::create([
+                'maintenance_id'       => $maintenance->id,
+                'nom_materiel'         => $mat['nom_materiel'],
+                'quantite'             => $quantite,
+                'stock_epuise'         => $request->boolean('stock_epuise'),
+                'description_incident' => null,
+            ]);
 
-                // Chercher le stock correspondant
-                $stock = isset($mat['stock_id'])
-                    ? Stock::find($mat['stock_id'])
-                    : Stock::where('designation', $mat['nom_materiel'])->first();
-
-                Materiel::create([
-                    'maintenance_id'       => $maintenance->id,
-                    'nom_materiel'         => $mat['nom_materiel'],
-                    'quantite'             => $quantite,
-                    'stock_epuise'         => $request->boolean('stock_epuise'),
-                    'description_incident' => null,
-                ]);
-
-                // Décrémenter le stock si trouvé
-                if ($stock) {
-                    $stock->quantite = max(0, $stock->quantite - $quantite);
-                    $stock->save();
-                }
+            if ($stock) {
+                $stock->quantite = max(0, $stock->quantite - $quantite);
+                $stock->save();
             }
         }
-
-        return redirect()->route('technicien.demandes')
-                         ->with('success', 'Demande mise à jour avec succès.');
     }
+
+    return redirect()->route('technicien.demandes')
+                     ->with('success', 'Demande mise à jour avec succès.');
+}
 }

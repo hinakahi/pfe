@@ -139,21 +139,20 @@ Route::middleware(['auth', 'role:etudiante'])->prefix('etudiante')->name('etudia
 });
 
     // ─── Maintenance ─────────────────────────────────────────
-    Route::prefix('maintenance')->name('maintenance.')->group(function () {
-        Route::get('/', [MaintenanceController::class, 'index'])->name('index');
-        Route::get('/signaler', [MaintenanceController::class, 'create'])->name('signaler');
-        Route::post('/', [MaintenanceController::class, 'store'])->name('store');
-        Route::get('/{maintenance}/edit', [MaintenanceController::class, 'edit'])->name('edit');
-        Route::put('/{maintenance}', [MaintenanceController::class, 'update'])->name('update');
-        Route::delete('/{maintenance}', [MaintenanceController::class, 'destroy'])->name('destroy');
-    });
-
+Route::prefix('maintenance')->name('maintenance.')->group(function () {
+    Route::get('/',                      [MaintenanceController::class, 'index'])->name('index');
+    Route::get('/signaler',              [MaintenanceController::class, 'create'])->name('signaler');
+    Route::post('/',                     [MaintenanceController::class, 'store'])->name('store');
+    Route::get('/{maintenance}',         [MaintenanceController::class, 'show'])->name('show');   // ← ajouté
+    Route::get('/{maintenance}/edit',    [MaintenanceController::class, 'edit'])->name('edit');
+    Route::put('/{maintenance}',         [MaintenanceController::class, 'update'])->name('update');
+    Route::delete('/{maintenance}',      [MaintenanceController::class, 'destroy'])->name('destroy');
+});
     // ─── Réclamations ────────────────────────────────────────
     
-    Route::resource('reclamations', ReclamationController::class)
+   Route::resource('reclamations', ReclamationController::class)
     ->names('reclamations')
-    ->only(['index', 'create', 'store', 'show']);
-    
+    ->only(['index', 'create', 'store', 'show', 'edit', 'update', 'destroy']);
 
     // ─── Profil ──────────────────────────────────────────────
     Route::prefix('profil')->name('profile.')->group(function () {
@@ -206,6 +205,8 @@ Route::prefix('foyer')->middleware(['auth', 'role:resp_foyer'])->group(function 
     Route::delete('/annonces/{annonce}', [\App\Http\Controllers\ResponsableFoyer\AnnonceController::class, 'destroy'])->name('foyer.annonces.destroy');
     Route::get('/annonces/{annonce}/edit', [\App\Http\Controllers\ResponsableFoyer\AnnonceController::class, 'edit'])->name('foyer.annonces.edit');
     Route::post('/annonces/{annonce}/update', [\App\Http\Controllers\ResponsableFoyer\AnnonceController::class, 'update'])->name('foyer.annonces.update');
+    Route::post('reservations/{reservation}/recuperee', [ReservationController::class, 'recuperee'])
+     ->name('foyer.reservations.recuperee');
     Route::post('foyer/notifications/mark-all-read', function () {
     auth()->user()->unreadNotifications->markAsRead();
     return back();

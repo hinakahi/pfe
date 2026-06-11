@@ -256,14 +256,14 @@
 
         <div class="form-group">
             <label>Votre nom complet</label>
-            <input type="text" name="nom" placeholder="Ex : Amina Benchikh"
+            <input type="text" name="nom" placeholder=" saisir votre nom svp .."
                    value="{{ old('nom') }}" />
             @error('nom')<span style="color:#ef4444;font-size:0.85rem;">{{ $message }}</span>@enderror
         </div>
 
         <div class="form-group">
             <label>Adresse email</label>
-            <input type="email" name="email" placeholder="amina@ummto.dz"
+            <input type="email" name="email" placeholder="saisir votre email svp..."
                    value="{{ old('email') }}" />
             @error('email')<span style="color:#ef4444;font-size:0.85rem;">{{ $message }}</span>@enderror
         </div>
@@ -309,7 +309,7 @@
               <div class="contact-icon"><i class="fas fa-clock"></i></div>
               <div class="contact-details">
                 <h4>Horaires d'accueil</h4>
-                <p>Dimanche – Jeudi : 8h00 – 16h30<br />Samedi : 8h00 – 12h00</p>
+                <p>Dimanche – Jeudi : 8h00 – 15h30
               </div>
             </div>
             <div class="contact-item">

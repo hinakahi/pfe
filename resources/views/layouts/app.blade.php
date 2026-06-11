@@ -42,11 +42,31 @@
             transition: width 0.3s ease, transform 0.3s ease;
             overflow: hidden;
         }
-        .sidebar.collapsed { width: 70px; }
-        .sidebar.collapsed span { display: none; }
-        .sidebar.collapsed .sidebar-brand { justify-content: center; padding: 0 10px 20px; }
-        .sidebar.collapsed .nav-link { padding: 10px; text-align: center; }
-        .sidebar.collapsed .nav-link i { margin-right: 0; }
+        .sidebar.collapsed { 
+            width: 80px; 
+        }
+        .sidebar.collapsed span { 
+            display: none; 
+        }
+        .sidebar.collapsed .sidebar-brand { 
+            justify-content: center; 
+            padding: 0 8px 20px;
+            gap: 0;
+        }
+        .sidebar.collapsed .nav-link { 
+            padding: 10px 8px !important;
+            justify-content: center;
+            overflow: hidden;
+        }
+        .sidebar.collapsed .nav-link i { 
+            margin-right: 0 !important;
+            font-size: 1.3rem;
+            width: 100%;
+            text-align: center;
+        }
+        .sidebar.collapsed hr {
+            margin: 8px 5px;
+        }
         .sidebar .nav-link {
             color: rgba(255,255,255,0.8);
             padding: 10px 20px;
@@ -54,13 +74,20 @@
             margin: 2px 10px;
             transition: all 0.2s;
             white-space: nowrap;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
         .sidebar .nav-link:hover,
         .sidebar .nav-link.active {
             background: rgba(255,255,255,0.2);
             color: #fff;
         }
-        .sidebar .nav-link i { margin-right: 8px; }
+        .sidebar .nav-link i { 
+            margin-right: 8px;
+            min-width: 20px;
+            text-align: center;
+        }
         .sidebar-brand {
             color: #fff;
             font-size: 1.1rem;
@@ -78,7 +105,9 @@
             padding: 20px 20px 20px 50px;
             transition: margin-left 0.3s;
         }
-        .main-content.expanded { margin-left: 0px; }
+        .main-content.expanded { 
+            margin-left: 80px; 
+        }
         .topbar {
             background: var(--bg-topbar);
             padding: 12px 20px;
@@ -96,37 +125,61 @@
             box-shadow: var(--shadow);
             color: var(--text-main);
         }
-        .table { color: var(--text-main); }
+        .table { 
+            color: var(--text-main); 
+        }
         .stat-card {
             border-radius: 12px;
             padding: 20px;
             color: #fff;
             margin-bottom: 20px;
         }
-        .stat-card .number { font-size: 2rem; font-weight: 700; }
-        .stat-card .label { font-size: 0.85rem; opacity: 0.85; }
+        .stat-card .number { 
+            font-size: 2rem; 
+            font-weight: 700; 
+        }
+        .stat-card .label { 
+            font-size: 0.85rem; 
+            opacity: 0.85; 
+        }
         .theme-toggle {
             background: rgba(255,255,255,0.15);
             border: none;
             color: #fff;
             border-radius: 50%;
-            width: 30px; height: 30px;
-            display: flex; align-items: center; justify-content: center;
+            width: 40px;
+            height: 40px;
+            display: flex; 
+            align-items: center; 
+            justify-content: center;
             cursor: pointer;
             transition: background 0.2s;
             flex-shrink: 0;
         }
-        .theme-toggle:hover { background: rgba(255,255,255,0.3); }
+        .theme-toggle:hover { 
+            background: rgba(255,255,255,0.3); 
+        }
         .collapse-btn {
             background: rgba(255,255,255,0.15);
-            border: none; color: #fff;
+            border: none; 
+            color: #fff;
             border-radius: 50%;
-            width: 28px; height: 28px;
-            display: flex; align-items: center; justify-content: center;
-            cursor: pointer; font-size: 0.8rem;
+            width: 40px;
+            height: 40px;
+            display: flex; 
+            align-items: center; 
+            justify-content: center;
+            cursor: pointer; 
+            font-size: 1.2rem;
             flex-shrink: 0;
+            transition: background 0.2s;
         }
-        .collapse-btn:hover { background: rgba(255,255,255,0.3); }
+        .collapse-btn:hover { 
+            background: rgba(255,255,255,0.3); 
+        }
+        .collapse-btn i {
+            font-size: 1.2rem;
+        }
         .hamburger {
             display: none;
             background: none;
@@ -148,10 +201,22 @@
                 z-index: 200;
                 width: 250px !important;
             }
-            .sidebar.open { transform: translateX(0); }
-            .sidebar-overlay.open { display: block; }
-            .main-content { margin-left: 0 !important; }
-            .hamburger { display: block; }
+            .sidebar.open { 
+                transform: translateX(0); 
+            }
+            .sidebar.collapsed {
+                width: 80px !important;
+                transform: translateX(0);
+            }
+            .sidebar-overlay.open { 
+                display: block; 
+            }
+            .main-content { 
+                margin-left: 0 !important; 
+            }
+            .hamburger { 
+                display: block; 
+            }
         }
         [data-theme="dark"] .table-light {
             --bs-table-bg: #2d3139;
@@ -190,23 +255,21 @@
         </div>
     </div>
     <nav class="nav flex-column">
-       <nav class="nav flex-column">
-    @php
-        $role = auth()->user()?->role;
-    @endphp
+        @php
+            $role = auth()->user()?->role;
+        @endphp
 
-    @if($role === 'admin')
-        @include('admin.partials._sidebar')
-    @elseif($role === 'etudiante')
-        @include('etudiante.partials._sidebar')
-    @elseif($role === 'resp_hebergement')
-        @include('hebergement.partials._sidebar')
-    @elseif($role === 'technicien')
-        @include('technicien.partials._sidebar')
-    @elseif($role === 'resp_foyer')
-        @include('foyer.partials._sidebar')
-    @endif
-</nav>
+        @if($role === 'admin')
+            @include('admin.partials._sidebar')
+        @elseif($role === 'etudiante')
+            @include('etudiante.partials._sidebar')
+        @elseif($role === 'resp_hebergement')
+            @include('hebergement.partials._sidebar')
+        @elseif($role === 'technicien')
+            @include('technicien.partials._sidebar')
+        @elseif($role === 'resp_foyer')
+            @include('foyer.partials._sidebar')
+        @endif
     </nav>
     <div style="position:absolute; bottom:20px; width:100%; padding:0 10px;">
         <form method="POST" action="{{ route('logout') }}">
@@ -234,17 +297,16 @@
             </span>
             @endif
             @if(auth()->user()->photo)
-    <img src="{{ asset('storage/' . auth()->user()->photo) }}" 
-         alt="Photo" 
-         width="35" 
-         height="35" 
-         class="rounded-circle me-1" 
-         style="object-fit:cover; border: 1px solid #ccc;">
-@else
-    <i class="bi bi-person-circle me-1 fs-4"></i>
-@endif
-
-<strong>{{ auth()->user()->name }}</strong>
+                <img src="{{ asset('storage/' . auth()->user()->photo) }}" 
+                     alt="Photo" 
+                     width="35" 
+                     height="35" 
+                     class="rounded-circle me-1" 
+                     style="object-fit:cover; border: 1px solid #ccc;">
+            @else
+                <i class="bi bi-person-circle me-1 fs-4"></i>
+            @endif
+            <strong>{{ auth()->user()->name }}</strong>
             <span class="badge bg-secondary ms-1">{{ auth()->user()->role }}</span>
         </div>
     </div>
@@ -285,6 +347,7 @@
         localStorage.setItem('theme', next);
         updateThemeIcon(next);
     });
+    
     function updateThemeIcon(theme) {
         themeIcon.className = theme === 'dark' ? 'bi bi-sun-fill' : 'bi bi-moon-fill';
     }
@@ -315,6 +378,7 @@
         sidebar.classList.toggle('open');
         overlay.classList.toggle('open');
     });
+    
     overlay.addEventListener('click', () => {
         sidebar.classList.remove('open');
         overlay.classList.remove('open');
