@@ -37,10 +37,14 @@ class DemandeMaintController extends Controller
                ->orderByRaw("FIELD(statut, 'en_attente', 'en_cours', 'terminee')")
                ->latest();
 
-    // Filtre par statut
-    if ($request->statut && $request->statut !== 'tous') {
+     // Filtre par statut
+if ($request->statut && $request->statut !== 'tous') {
+    if ($request->statut === 'non_traitees') {
+        $query->whereIn('statut', ['en_attente', 'en_cours']);
+    } else {
         $query->where('statut', $request->statut);
     }
+}
 
     // Filtre par type
     if ($request->type && $request->type !== 'tous') {

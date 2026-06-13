@@ -171,12 +171,15 @@
                     </td>
 
                     <td>
-                        @if($chambre->publiee)
-                            <span class="badge bg-primary">Oui</span>
-                        @else
-                            <span class="badge bg-secondary">Non</span>
-                        @endif
-                    </td>
+    @if($chambre->publiee)
+        <form method="POST" action="{{ route('hebergement.chambres.depublier', $chambre) }}">
+            @csrf @method('PATCH')
+            <button class="badge bg-primary border-0" title="Cliquer pour dépublier">Oui</button>
+        </form>
+    @else
+        <span class="badge bg-secondary">Non</span>
+    @endif
+</td>
 
                     <td>
                         <div class="d-flex gap-1">

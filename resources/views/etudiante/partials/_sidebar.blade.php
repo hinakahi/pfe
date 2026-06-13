@@ -6,6 +6,11 @@
 <a href="{{ route('etudiante.notifications') }}" class="nav-link">
     <i class="bi bi-bell"></i>
     <span>Notifications</span>
+    @if(auth()->user()->unreadNotifications->count() > 0)
+        <span class="badge bg-danger rounded-pill ms-auto">
+            {{ auth()->user()->unreadNotifications->count() }}
+        </span>
+    @endif
 </a>
 
 <a href="{{ route('etudiante.annonces') }}" class="nav-link">

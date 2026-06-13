@@ -19,12 +19,21 @@ class ArticleFoyer extends Model
         'stock',
         'photo',
         'disponible',
+        'promo_active',
+        'prix_promo',
+        'promo_remarque',
+        'promo_date_fin',
+        'date_peremption',
     ];
     
     protected $casts = [
         'disponible' => 'boolean',
-        'prix' => 'decimal:2',
+        'promo_active' => 'boolean',  
+        'prix'   => 'decimal:2',
+        'prix_promo' => 'decimal:2',
         'stock' => 'integer',
+        'date_peremption'=> 'date',     
+         'promo_date_fin' => 'date',
     ];
     
     // ─── RELATIONS ──────────────────────────────────────
@@ -41,7 +50,7 @@ class ArticleFoyer extends Model
      * Relation vers les réservations
      */
     public function reservations(): HasMany
-    {
-        return $this->hasMany(Reservation::class);
+   {
+       return $this->hasMany(Reservation::class, 'article_id');
     }
 }

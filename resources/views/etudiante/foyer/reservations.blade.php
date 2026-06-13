@@ -155,73 +155,75 @@
 @else
     <div id="reservationsList">
         @foreach($reservations as $resa)
-        <div class="card resa-card mb-3 resa-item" data-statut="{{ $resa->statut }}">
-            <div class="card-body p-3">
-                <div class="d-flex align-items-center gap-3">
+            @if($resa->article)
+            <div class="card resa-card mb-3 resa-item" data-statut="{{ $resa->statut }}">
+                <div class="card-body p-3">
+                    <div class="d-flex align-items-center gap-3">
 
-                    {{-- Image article --}}
-                    @if($resa->article->photo)
-                        <img src="{{ asset('storage/' . $resa->article->photo) }}"
-                             alt="{{ $resa->article->nom_article }}"
-                             class="article-thumb">
-                    @else
-                        <div class="article-thumb-placeholder">
-                            <i class="bi bi-box-seam"></i>
-                        </div>
-                    @endif
+                        {{-- Image article --}}
+                        @if($resa->article->photo)
+                            <img src="{{ asset('storage/' . $resa->article->photo) }}"
+                                 alt="{{ $resa->article->nom_article }}"
+                                 class="article-thumb">
+                        @else
+                            <div class="article-thumb-placeholder">
+                                <i class="bi bi-box-seam"></i>
+                            </div>
+                        @endif
 
-                    {{-- Info --}}
-                    <div class="flex-grow-1 min-width-0">
-                        <div class="d-flex justify-content-between align-items-start flex-wrap gap-2">
-                            <div>
-                                <h6 class="fw-semibold mb-0">{{ $resa->article->nom_article }}</h6>
-                                <div class="small text-muted mt-1">
-                                    <i class="bi bi-calendar3 me-1"></i>
-                                    {{ $resa->date_reservation->format('d/m/Y à H:i') }}
+                        {{-- Info --}}
+                        <div class="flex-grow-1 min-width-0">
+                            <div class="d-flex justify-content-between align-items-start flex-wrap gap-2">
+                                <div>
+                                    <h6 class="fw-semibold mb-0">{{ $resa->article->nom_article }}</h6>
+                                    <div class="small text-muted mt-1">
+                                        <i class="bi bi-calendar3 me-1"></i>
+                                        {{ $resa->date_reservation->format('d/m/Y à H:i') }}
+                                    </div>
+                                </div>
+                                <span class="statut-pill statut-{{ $resa->statut }}">
+                                    @switch($resa->statut)
+                                        @case('en_attente') <i class="bi bi-clock me-1"></i>En attente @break
+                                        @case('validee')    <i class="bi bi-check-circle me-1"></i>Validée @break
+                                        @case('refusee')    <i class="bi bi-x-circle me-1"></i>Refusée @break
+                                        @case('annulee')    <i class="bi bi-slash-circle me-1"></i>Annulée @break
+                                    @endswitch
+                                </span>
+                            </div>
+
+                            <div class="d-flex align-items-center justify-content-between mt-2 flex-wrap gap-2">
+                                <div class="small text-muted">
+                                    Quantité :
+                                    <span class="fw-semibold">{{ $resa->quantite }}</span>
+                                    &nbsp;•&nbsp;
+                                    Prix unitaire :
+                                    <span class="fw-semibold">{{ number_format($resa->article->prix, 2) }} DA</span>
+                                </div>
+                                <div class="prix-total">
+                                    Total : {{ number_format($resa->article->prix * $resa->quantite, 2) }} DA
                                 </div>
                             </div>
-                            <span class="statut-pill statut-{{ $resa->statut }}">
-                                @switch($resa->statut)
-                                    @case('en_attente') <i class="bi bi-clock me-1"></i>En attente @break
-                                    @case('validee')    <i class="bi bi-check-circle me-1"></i>Validée @break
-                                    @case('refusee')    <i class="bi bi-x-circle me-1"></i>Refusée @break
-                                    @case('annulee')    <i class="bi bi-slash-circle me-1"></i>Annulée @break
-                                @endswitch
-                            </span>
                         </div>
 
-                        <div class="d-flex align-items-center justify-content-between mt-2 flex-wrap gap-2">
-                            <div class="small text-muted">
-                                Quantité :
-                                <span class="fw-semibold">{{ $resa->quantite }}</span>
-                                &nbsp;•&nbsp;
-                                Prix unitaire :
-                                <span class="fw-semibold">{{ number_format($resa->article->prix, 2) }} DA</span>
-                            </div>
-                            <div class="prix-total">
-                                Total : {{ number_format($resa->article->prix * $resa->quantite, 2) }} DA
-                            </div>
+                        {{-- Bouton annuler --}}
+                        @if($resa->statut === 'en_attente')
+                        <div class="ms-2">
+                            <button type="button"
+                                    class="btn btn-outline-danger btn-sm"
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#modalAnnuler"
+                                    data-id="{{ $resa->id }}"
+                                    data-nom="{{ $resa->article->nom_article }}"
+                                    title="Annuler">
+                                <i class="bi bi-x-lg"></i>
+                            </button>
                         </div>
-                    </div>
+                        @endif
 
-                    {{-- Bouton annuler --}}
-                    @if($resa->statut === 'en_attente')
-                    <div class="ms-2">
-                        <button type="button"
-                                class="btn btn-outline-danger btn-sm"
-                                data-bs-toggle="modal"
-                                data-bs-target="#modalAnnuler"
-                                data-id="{{ $resa->id }}"
-                                data-nom="{{ $resa->article->nom_article }}"
-                                title="Annuler">
-                            <i class="bi bi-x-lg"></i>
-                        </button>
                     </div>
-                    @endif
-
                 </div>
             </div>
-        </div>
+            @endif
         @endforeach
     </div>
 @endif
@@ -255,19 +257,20 @@
         </div>
     </div>
 </div>
+
 @if(auth()->check())
     @php
-        $panierCount = \App\Models\Reservation::where('etudiante_id', auth()->id())
-            ->where('statut', 'panier')->count();
-        $panierTotal = \App\Models\Reservation::where('etudiante_id', auth()->id())
-    ->where('statut', 'panier')->get()->sum(fn($r) => $r->article->prix * $r->quantite);
+        $panierCount    = \App\Models\Reservation::where('etudiante_id', auth()->id())
+                            ->where('statut', 'panier')->count();
         $panierArticles = \App\Models\Reservation::where('etudiante_id', auth()->id())
-            ->where('statut', 'panier')->get();
+                            ->where('statut', 'panier')->with('article')->get()
+                            ->filter(fn($r) => $r->article);
+        $panierTotal    = $panierArticles->sum(fn($r) => $r->article->prix * $r->quantite);
     @endphp
-    
+
     @if($panierCount > 0)
     <!-- Bouton panier sticky -->
-    <button type="button" 
+    <button type="button"
             style="position: fixed; bottom: 30px; right: 30px; width: 60px; height: 60px; border-radius: 50%; background: linear-gradient(135deg,#1a3c5e,#2d6a9f); color: #fff; border: none; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.3); z-index: 999; display: flex; align-items: center; justify-content: center; font-size: 1.8rem;"
             data-bs-toggle="modal" data-bs-target="#modalPanier">
         <i class="bi bi-cart3"></i>
@@ -285,35 +288,35 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
-                      @forelse($panierArticles as $item)
-                <div style="display: flex; align-items: center; gap: 12px; padding: 12px 0; border-bottom: 1px solid #dee2e6;">
-                    @if($item->article->photo)
-                        <img src="{{ asset('storage/' . $item->article->photo) }}" 
-                             alt="{{ $item->article->nom_article }}"
-                             style="width: 60px; height: 60px; object-fit: cover; border-radius: 8px;">
-                    @else
-                        <div style="width: 60px; height: 60px; background: linear-gradient(135deg,#e8f0fe,#d2e3fc); border-radius: 8px; display: flex; align-items: center; justify-content: center;">
-                            <i class="bi bi-box-seam" style="color: #4a90d9;"></i>
+                    @forelse($panierArticles as $item)
+                    <div style="display: flex; align-items: center; gap: 12px; padding: 12px 0; border-bottom: 1px solid #dee2e6;">
+                        @if($item->article->photo)
+                            <img src="{{ asset('storage/' . $item->article->photo) }}"
+                                 alt="{{ $item->article->nom_article }}"
+                                 style="width: 60px; height: 60px; object-fit: cover; border-radius: 8px;">
+                        @else
+                            <div style="width: 60px; height: 60px; background: linear-gradient(135deg,#e8f0fe,#d2e3fc); border-radius: 8px; display: flex; align-items: center; justify-content: center;">
+                                <i class="bi bi-box-seam" style="color: #4a90d9;"></i>
+                            </div>
+                        @endif
+                        <div style="flex: 1;">
+                            <strong>{{ $item->article->nom_article }}</strong><br>
+                            <span style="color: #666; font-size: 0.9rem;">Qté: {{ $item->quantite }} × {{ number_format($item->article->prix, 2) }} DA</span>
                         </div>
-                    @endif
-                    <div style="flex: 1;">
-                        <strong>{{ $item->article->nom_article }}</strong><br>
-                        <span style="color: #666; font-size: 0.9rem;">Qté: {{ $item->quantite }} × {{ number_format($item->article->prix, 2) }} DA</span>
+                        <div style="text-align: right;">
+                            <strong style="color: #1a3c5e; font-size: 1.1rem;">{{ number_format($item->article->prix * $item->quantite, 2) }} DA</strong>
+                        </div>
+                        <form method="POST" action="{{ route('etudiante.foyer.annuler', $item->id) }}" style="display: inline;">
+                            @csrf
+                            @method('DELETE')
+                            <button type="submit" class="btn btn-outline-danger btn-sm" title="Supprimer" onclick="return confirm('Supprimer cet article ?')">
+                                <i class="bi bi-x-lg"></i>
+                            </button>
+                        </form>
                     </div>
-                    <div style="text-align: right;">
-                        <strong style="color: #1a3c5e; font-size: 1.1rem;">{{ number_format($item->article->prix * $item->quantite, 2) }} DA</strong>
-                    </div>
-                    <form method="POST" action="{{ route('etudiante.foyer.annuler', $item->id) }}" style="display: inline;">
-                        @csrf
-                        @method('DELETE')
-                        <button type="submit" class="btn btn-outline-danger btn-sm" title="Supprimer" onclick="return confirm('Supprimer cet article ?')">
-                            <i class="bi bi-x-lg"></i>
-                        </button>
-                    </form>
-                </div>
-                @empty
-                <p class="text-center text-muted">Panier vide</p>
-                @endforelse
+                    @empty
+                    <p class="text-center text-muted">Panier vide</p>
+                    @endforelse
                 </div>
                 <div class="modal-footer" style="border-top: 2px solid #dee2e6;">
                     <div style="flex: 1; text-align: left;">

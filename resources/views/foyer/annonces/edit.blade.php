@@ -1,4 +1,3 @@
-{{-- resources/views/foyer/annonces/edit.blade.php --}}
 @extends('layouts.app')
 
 @section('title', 'Modifier Annonce')
@@ -41,7 +40,6 @@
     .invalid-feedback { color: #ef4444; font-size: 0.85rem; margin-top: 0.4rem; display: block; }
     .is-invalid { border-color: #ef4444 !important; }
 
-    /* Cartes catégorie */
     .cat-options-container { display: flex; gap: 10px; margin-top: 0.75rem; flex-wrap: wrap; }
     .cat-option {
         flex: 1; min-width: 100px;
@@ -55,10 +53,8 @@
     .cat-option input[type="radio"] { display: none; }
     .cat-option:hover { border-color: #94a3b8; }
     .cat-option.selected { border-color: #2979d8; background: #eff6ff; }
-    .cat-icon  { font-size: 1.5rem; display: block; margin-bottom: 0.3rem; }
     .cat-label { font-size: 0.8rem; font-weight: 600; color: #334155; }
 
-    /* Cartes urgence */
     .urg-options-container { display: flex; gap: 10px; margin-top: 0.75rem; }
     .urg-option {
         flex: 1;
@@ -71,13 +67,11 @@
     }
     .urg-option input[type="radio"] { display: none; }
     .urg-option:hover { border-color: #94a3b8; }
-    .urg-option.selected-general        { border-color: #6c757d; background: #f8f9fa; }
-    .urg-option.selected-urgent         { border-color: #dc3545; background: #fef2f2; }
-    .urg-option.selected-administration { border-color: #212529; background: #f1f3f5; }
+    .urg-option.selected-general { border-color: #6c757d; background: #f8f9fa; }
+    .urg-option.selected-urgent  { border-color: #dc3545; background: #fef2f2; }
     .urg-icon  { font-size: 1.5rem; display: block; margin-bottom: 0.3rem; }
     .urg-label { font-size: 0.8rem; font-weight: 600; color: #334155; }
 
-    /* Boutons */
     .form-buttons { display: flex; gap: 1rem; margin-top: 2rem; }
     .btn-submit {
         display: inline-flex; align-items: center; gap: 6px;
@@ -101,6 +95,7 @@
     <div class="card-body">
         <form method="POST" action="{{ route('foyer.annonces.update', $annonce) }}">
             @csrf
+            @method('PUT')
 
             {{-- Titre --}}
             <div class="mb-4">
@@ -118,20 +113,16 @@
                 <div class="cat-options-container" id="catOptions">
                     @php
                         $cats = [
-                            'generale'    => ['icon' => '📢', 'label' => 'Générale'],
-                            'hebergement' => ['icon' => '🏠', 'label' => 'Hébergement'],
-                            'foyer'       => ['icon' => '🏘️', 'label' => 'Foyer'],
-                            'maintenance' => ['icon' => '🔧', 'label' => 'Maintenance'],
-                            'promotion'   => ['icon' => '🎉', 'label' => 'Promotion'],
+                            'generale'  => 'Générale',
+                            'promotion' => 'Promotion',
                         ];
                         $currentCat = old('categorie', $annonce->categorie);
                     @endphp
-                    @foreach($cats as $val => $info)
+                    @foreach($cats as $val => $label)
                     <label class="cat-option {{ $currentCat === $val ? 'selected' : '' }}">
                         <input type="radio" name="categorie" value="{{ $val }}"
                                {{ $currentCat === $val ? 'checked' : '' }}>
-                        <span class="cat-icon">{{ $info['icon'] }}</span>
-                        <span class="cat-label">{{ $info['label'] }}</span>
+                        <span class="cat-label">{{ $label }}</span>
                     </label>
                     @endforeach
                 </div>
@@ -155,12 +146,6 @@
                         <span class="urg-icon">🔴</span>
                         <span class="urg-label">Urgent</span>
                     </label>
-                    <label class="urg-option {{ $currentUrg === 'administration' ? 'selected-administration' : '' }}">
-                        <input type="radio" name="urgence" value="administration"
-                               {{ $currentUrg === 'administration' ? 'checked' : '' }}>
-                        <span class="urg-icon">👔</span>
-                        <span class="urg-label">Administration</span>
-                    </label>
                 </div>
                 @error('urgence')<div class="invalid-feedback">{{ $message }}</div>@enderror
             </div>
@@ -175,7 +160,6 @@
                 @error('contenu')<div class="invalid-feedback">{{ $message }}</div>@enderror
             </div>
 
-            {{-- Destinataire caché --}}
             <input type="hidden" name="destinataire" value="etudiantes">
 
             {{-- Boutons --}}
@@ -191,7 +175,6 @@
 
 @section('scripts')
 <script>
-// Catégorie
 document.querySelectorAll('#catOptions .cat-option input').forEach(radio => {
     radio.addEventListener('change', function () {
         document.querySelectorAll('#catOptions .cat-option').forEach(opt => opt.className = 'cat-option');
@@ -199,7 +182,6 @@ document.querySelectorAll('#catOptions .cat-option input').forEach(radio => {
     });
 });
 
-// Urgence
 document.querySelectorAll('#urgOptions .urg-option input').forEach(radio => {
     radio.addEventListener('change', function () {
         document.querySelectorAll('#urgOptions .urg-option').forEach(opt => opt.className = 'urg-option');

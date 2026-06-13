@@ -151,10 +151,8 @@
 
 @php
     $panierCount = $reservations->where('statut','panier')->count();
-    $panierTotal = $reservations->where('statut','panier')->sum(fn($r) => $r->article->prix * $r->quantite);
+    $panierTotal = $reservations->where('statut','panier')->sum(fn($r) => $r->article ? $r->article->prix * $r->quantite : 0);
 @endphp
-
-
 
 {{-- Stats cliquables --}}
 <div class="row g-3 mb-4">
@@ -187,7 +185,6 @@
     </div>
 </div>
 
-
 <div class="row g-4">
 
     {{-- Promotions en cours --}}
@@ -217,7 +214,7 @@
                             {{ Str::limit($promo->nom_article, 28) }}
                         </div>
                         <div class="fw-bold mt-1" style="font-size:.9rem; color:#1a3c5e;">
-                            {{ number_format($promo->prix, 2) }} DA
+                            {{ number_format($promo->prix_promo ?? $promo->prix, 2) }} DA
                         </div>
                     </div>
                 </div>
@@ -260,55 +257,57 @@
 
         <div class="card p-3">
             @forelse($reservations->take(6) as $resa)
-            <div class="resa-row">
-                {{-- Image --}}
-                @if($resa->article->photo)
-                    <img src="{{ asset('storage/'.$resa->article->photo) }}"
-                         alt="{{ $resa->article->nom_article }}"
-                         class="resa-thumb">
-                @else
-                    <div class="resa-thumb-ph">
-                        <i class="bi bi-box-seam"></i>
-                    </div>
-                @endif
+                @if($resa->article)
+                <div class="resa-row">
+                    {{-- Image --}}
+                    @if($resa->article->photo)
+                        <img src="{{ asset('storage/'.$resa->article->photo) }}"
+                             alt="{{ $resa->article->nom_article }}"
+                             class="resa-thumb">
+                    @else
+                        <div class="resa-thumb-ph">
+                            <i class="bi bi-box-seam"></i>
+                        </div>
+                    @endif
 
-                {{-- Info --}}
-                <div class="flex-grow-1 min-width-0">
-                    <div class="fw-semibold" style="font-size:.88rem;">
-                        {{ Str::limit($resa->article->nom_article, 32) }}
+                    {{-- Info --}}
+                    <div class="flex-grow-1 min-width-0">
+                        <div class="fw-semibold" style="font-size:.88rem;">
+                            {{ Str::limit($resa->article->nom_article, 32) }}
+                        </div>
+                        <div class="text-muted" style="font-size:.78rem;">
+                            Qté : {{ $resa->quantite }}
+                            &nbsp;•&nbsp;
+                            {{ number_format($resa->article->prix * $resa->quantite, 2) }} DA
+                        </div>
                     </div>
-                    <div class="text-muted" style="font-size:.78rem;">
-                        Qté : {{ $resa->quantite }}
-                        &nbsp;•&nbsp;
-                        {{ number_format($resa->article->prix * $resa->quantite, 2) }} DA
-                    </div>
+
+                    {{-- Statut --}}
+                    <span class="statut-pill statut-{{ $resa->statut }}">
+                        @switch($resa->statut)
+                            @case('panier')     <i class="bi bi-cart me-1"></i>Panier @break
+                            @case('en_attente') <i class="bi bi-clock me-1"></i>En attente @break
+                            @case('validee')    <i class="bi bi-check-circle me-1"></i>Validée @break
+                            @case('refusee')    <i class="bi bi-x-circle me-1"></i>Refusée @break
+                            @case('annulee')    <i class="bi bi-slash-circle me-1"></i>Annulée @break
+                        @endswitch
+                    </span>
+
+                    {{-- Annuler --}}
+                    @if(in_array($resa->statut, ['panier','en_attente']))
+                    <form method="POST"
+                          action="{{ route('etudiante.foyer.annuler', $resa->id) }}"
+                          onsubmit="return confirm('Annuler cette réservation ?')">
+                        @csrf
+                        @method('DELETE')
+                        <button type="submit" class="btn btn-outline-danger btn-sm p-1 px-2"
+                                title="Annuler">
+                            <i class="bi bi-x-lg" style="font-size:.75rem;"></i>
+                        </button>
+                    </form>
+                    @endif
                 </div>
-
-                {{-- Statut --}}
-                <span class="statut-pill statut-{{ $resa->statut }}">
-                    @switch($resa->statut)
-                        @case('panier')     <i class="bi bi-cart me-1"></i>Panier @break
-                        @case('en_attente') <i class="bi bi-clock me-1"></i>En attente @break
-                        @case('validee')    <i class="bi bi-check-circle me-1"></i>Validée @break
-                        @case('refusee')    <i class="bi bi-x-circle me-1"></i>Refusée @break
-                        @case('annulee')    <i class="bi bi-slash-circle me-1"></i>Annulée @break
-                    @endswitch
-                </span>
-
-                {{-- Annuler --}}
-                @if(in_array($resa->statut, ['panier','en_attente']))
-                <form method="POST"
-                      action="{{ route('etudiante.foyer.annuler', $resa->id) }}"
-                      onsubmit="return confirm('Annuler cette réservation ?')">
-                    @csrf
-                    @method('DELETE')
-                    <button type="submit" class="btn btn-outline-danger btn-sm p-1 px-2"
-                            title="Annuler">
-                        <i class="bi bi-x-lg" style="font-size:.75rem;"></i>
-                    </button>
-                </form>
                 @endif
-            </div>
             @empty
             <div class="text-center py-4 text-muted">
                 <i class="bi bi-cart-x" style="font-size:2rem; display:block; margin-bottom:8px;"></i>

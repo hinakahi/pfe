@@ -8,15 +8,9 @@
     <span>Liste des chambres</span>
 </a>
 
-<a href="{{ route('hebergement.chambres.create') }}" class="nav-link {{ request()->routeIs('hebergement.chambres.create') ? 'active' : '' }}">
-    <i class="bi bi-plus-circle"></i>
-    <span>Ajouter une chambre</span>
-</a>
 
-<a href="{{ route('hebergement.chambres.vides') }}" class="nav-link {{ request()->routeIs('hebergement.chambres.vides') ? 'active' : '' }}">
-    <i class="bi bi-eye"></i>
-    <span>Chambres vides</span>
-</a>
+
+
 
 <a href="{{ route('hebergement.renouvellements.index') }}" class="nav-link {{ request()->routeIs('hebergement.renouvellements.*') ? 'active' : '' }}">
     <i class="bi bi-arrow-repeat"></i>

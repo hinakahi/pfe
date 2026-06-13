@@ -4,10 +4,19 @@
     <span>Dashboard</span>
 </a>
 
+@php
+    $demandesEnAttente = \App\Models\Maintenance::where('statut', 'en_attente')->count();
+@endphp
+
 <a href="{{ route('technicien.demandes') }}"
    class="nav-link {{ request()->routeIs('technicien.demandes*') ? 'active' : '' }}">
     <i class="bi bi-tools"></i>
     <span>Demandes</span>
+    @if($demandesEnAttente > 0)
+        <span class="badge bg-danger rounded-pill ms-auto">
+            {{ $demandesEnAttente }}
+        </span>
+    @endif
 </a>
 
 <a href="{{ route('technicien.stock.index') }}"

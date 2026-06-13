@@ -219,8 +219,18 @@
                 @forelse($demandesChangement as $d)
                 <tr>
                     <td><small>{{ $d->created_at->format('d/m/Y') }}</small></td>
-                    <td>{{ $d->chambreActuelle->numero ?? '-' }}</td>
-                    <td>{{ $d->chambreDemandee->numero ?? '-' }}</td>
+                    <td>
+    {{ $d->chambreActuelle->numero ?? '-' }}
+    @if($d->chambreActuelle)
+        <small class="text-muted">— Bloc {{ $d->chambreActuelle->bloc }} Ét.{{ $d->chambreActuelle->etage }}</small>
+    @endif
+</td>
+<td>
+    {{ $d->chambreDemandee->numero ?? '-' }}
+    @if($d->chambreDemandee)
+        <small class="text-muted">— Bloc {{ $d->chambreDemandee->bloc }} Ét.{{ $d->chambreDemandee->etage }}</small>
+    @endif
+</td>
                     <td>
                         @if($d->statut === 'en_attente')
                             <span class="badge bg-warning text-dark">En attente</span>

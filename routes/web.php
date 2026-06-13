@@ -128,7 +128,7 @@ Route::middleware(['auth', 'role:etudiante'])->prefix('etudiante')->name('etudia
     Route::post('/hebergement/changement', [HebergementController::class, 'demanderChangement'])->name('changement.store');
     Route::put('/hebergement/renouvellement/{demande}/modifier', [HebergementController::class, 'modifierRenouvellement'])
     ->name('hebergement.renouvellement.modifier');
-
+   
   // ─── Etudiante Foyer ──────────────────────────────────────
   Route::prefix('foyer')->name('foyer.')->group(function () {
     Route::get('/', [FoyerController::class, 'dashboard'])->name('dashboard');
@@ -181,6 +181,9 @@ Route::prefix('hebergement')->middleware(['auth', 'role:resp_hebergement'])->gro
     Route::get('/changements', [ChangementController::class, 'index'])->name('hebergement.changements.index');
     Route::post('/changements/{demande}/accepter', [ChangementController::class, 'accepter'])->name('hebergement.changements.accepter');
     Route::post('/changements/{demande}/refuser', [ChangementController::class, 'refuser'])->name('hebergement.changements.refuser');
+     Route::patch('chambres/{chambre}/depublier', [ChambreController::class, 'depublier'])
+     ->name('hebergement.chambres.depublier');
+
 });
 
 // ─── Technicien ───────────────────────────────────────────────

@@ -28,22 +28,44 @@
     </div>
 </div>
 
-{{-- Barre de recherche globale --}}
-<div class="row g-2 mb-4">
-    <div class="col-md-6">
-        <div class="input-group">
-            <span class="input-group-text"><i class="bi bi-search"></i></span>
-            <input type="text" id="searchInput" class="form-control"
-                   placeholder="Rechercher par nom ou matricule...">
+{{-- Barre de recherche --}}
+<div class="card mb-4 border-0 shadow-sm">
+    <div class="card-body">
+        <div class="row g-2 align-items-center">
+            <div class="col-md-4">
+                <div class="input-group">
+                    <span class="input-group-text"><i class="bi bi-person"></i></span>
+                    <input type="text" id="searchInput" class="form-control"
+                           placeholder="Nom ou matricule...">
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="input-group">
+                    <span class="input-group-text"><i class="bi bi-hash"></i></span>
+                    <input type="text" id="filterChambre" class="form-control"
+                           placeholder="N° chambre...">
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="input-group">
+                    <span class="input-group-text"><i class="bi bi-building"></i></span>
+                    <input type="text" id="filterBloc" class="form-control"
+                           placeholder="Bloc...">
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="input-group">
+                    <span class="input-group-text"><i class="bi bi-layers"></i></span>
+                    <input type="text" id="filterEtage" class="form-control"
+                           placeholder="Étage...">
+                </div>
+            </div>
+            <div class="col-md-2">
+                <button class="btn btn-outline-secondary w-100" onclick="resetFilters()">
+                    <i class="bi bi-x-circle me-1"></i> Réinitialiser
+                </button>
+            </div>
         </div>
-    </div>
-    <div class="col-md-3">
-        <input type="date" id="filterDate" class="form-control">
-    </div>
-    <div class="col-md-3">
-        <button class="btn btn-outline-secondary w-100" onclick="resetFilters()">
-            <i class="bi bi-x-circle me-1"></i> Réinitialiser
-        </button>
     </div>
 </div>
 
@@ -55,7 +77,7 @@
             <thead class="table-light">
                 <tr>
                     <th>Étudiante</th>
-                    <th>Chambre / Bloc</th>
+                    <th>Chambre </th>
                     <th>Justif. Scolarité</th>
                     <th>Justif. Paiement</th>
                     <th>Date</th>
@@ -64,14 +86,21 @@
             </thead>
             <tbody id="tbodyAttente">
                 @forelse($enAttente as $demande)
-                <tr>
+                <tr
+                    data-nom="{{ strtolower($demande->etudiante->name) }}"
+                    data-matricule="{{ strtolower($demande->etudiante->matricule ?? '') }}"
+                    data-chambre="{{ strtolower($demande->chambre->numero ?? '') }}"
+                    data-bloc="{{ strtolower($demande->chambre->bloc ?? '') }}"
+                    data-etage="{{ strtolower($demande->chambre->etage ?? '') }}"
+                >
                     <td>
                         <strong>{{ $demande->etudiante->name }}</strong><br>
                         <small class="text-muted">{{ $demande->etudiante->matricule }}</small>
                     </td>
                     <td>
-                        <strong>{{ $demande->chambre->numero ?? '-' }}</strong><br>
-                        <small class="text-muted">Bloc {{ $demande->chambre->bloc ?? '-' }}</small>
+                        <strong>{{ $demande->chambre->numero ?? '-' }}</strong>
+                        — Bloc {{ $demande->chambre->bloc ?? '-' }}<br>
+                        <small class="text-muted">Étage {{ $demande->chambre->etage ?? '-' }}</small>
                     </td>
                     <td>
                         @if($demande->justificatif_scolarite)
@@ -153,7 +182,9 @@
             <thead class="table-light">
                 <tr>
                     <th>Étudiante</th>
-                    <th>Chambre / Bloc</th>
+                    <th>Chambre</th>
+                    <th>Justif. Scolarité</th>
+                    <th>Justif. Paiement</th>
                     <th>Statut</th>
                     <th>Motif refus</th>
                     <th>Date</th>
@@ -161,14 +192,41 @@
             </thead>
             <tbody id="tbodyTraitees">
                 @forelse($traitees as $demande)
-                <tr>
+                <tr
+                    data-nom="{{ strtolower($demande->etudiante->name) }}"
+                    data-matricule="{{ strtolower($demande->etudiante->matricule ?? '') }}"
+                    data-chambre="{{ strtolower($demande->chambre->numero ?? '') }}"
+                    data-bloc="{{ strtolower($demande->chambre->bloc ?? '') }}"
+                    data-etage="{{ strtolower($demande->chambre->etage ?? '') }}"
+                >
                     <td>
                         <strong>{{ $demande->etudiante->name }}</strong><br>
                         <small class="text-muted">{{ $demande->etudiante->matricule }}</small>
                     </td>
                     <td>
-                        <strong>{{ $demande->chambre->numero ?? '-' }}</strong><br>
-                        <small class="text-muted">Bloc {{ $demande->chambre->bloc ?? '-' }}</small>
+                        <strong>{{ $demande->chambre->numero ?? '-' }}</strong>
+                        — Bloc {{ $demande->chambre->bloc ?? '-' }}<br>
+                        <small class="text-muted">Étage {{ $demande->chambre->etage ?? '-' }}</small>
+                    </td>
+                    <td>
+                        @if($demande->justificatif_scolarite)
+                            <a href="{{ asset('storage/'.$demande->justificatif_scolarite) }}"
+                               target="_blank" class="btn btn-sm btn-outline-primary">
+                                <i class="bi bi-file-earmark me-1"></i>Voir
+                            </a>
+                        @else
+                            <span class="text-muted">Aucun</span>
+                        @endif
+                    </td>
+                    <td>
+                        @if($demande->justificatif_paiement)
+                            <a href="{{ asset('storage/'.$demande->justificatif_paiement) }}"
+                               target="_blank" class="btn btn-sm btn-outline-primary">
+                                <i class="bi bi-file-earmark me-1"></i>Voir
+                            </a>
+                        @else
+                            <span class="text-muted">Aucun</span>
+                        @endif
                     </td>
                     <td>
                         @if($demande->statut === 'validee')
@@ -182,7 +240,7 @@
                 </tr>
                 @empty
                 <tr id="emptyTraitees">
-                    <td colspan="5" class="text-center text-muted py-4">Aucune demande traitée.</td>
+                    <td colspan="7" class="text-center text-muted py-4">Aucune demande traitée.</td>
                 </tr>
                 @endforelse
             </tbody>
@@ -192,35 +250,39 @@
 
 <script>
 document.getElementById('searchInput').addEventListener('input', filterTables);
-document.getElementById('filterDate').addEventListener('change', filterTables);
+document.getElementById('filterChambre').addEventListener('input', filterTables);
+document.getElementById('filterBloc').addEventListener('input', filterTables);
+document.getElementById('filterEtage').addEventListener('input', filterTables);
 
 function filterTables() {
-    const search = document.getElementById('searchInput').value.toLowerCase();
-    const date = document.getElementById('filterDate').value;
+    const search  = document.getElementById('searchInput').value.toLowerCase();
+    const chambre = document.getElementById('filterChambre').value.toLowerCase();
+    const bloc    = document.getElementById('filterBloc').value.toLowerCase();
+    const etage   = document.getElementById('filterEtage').value.toLowerCase();
 
-    filterRows('tbodyAttente', search, date, 5);
-    filterRows('tbodyTraitees', search, date, 5);
+    filterRows('tbodyAttente', search, chambre, bloc, etage);
+    filterRows('tbodyTraitees', search, chambre, bloc, etage);
 }
 
-function filterRows(tbodyId, search, date, dateColIndex) {
+function filterRows(tbodyId, search, chambre, bloc, etage) {
     const rows = document.querySelectorAll('#' + tbodyId + ' tr');
     rows.forEach(row => {
         if (row.id && row.id.startsWith('empty')) return;
-        const text = row.innerText.toLowerCase();
-        const dateCell = row.querySelector('td:nth-child(' + dateColIndex + ')')?.innerText.trim() ?? '';
-        const parts = dateCell.split('/');
-        const rowDate = parts.length === 3 ? `${parts[2]}-${parts[1]}-${parts[0]}` : '';
 
-        const matchSearch = search === '' || text.includes(search);
-        const matchDate = date === '' || rowDate === date;
+        const matchSearch  = search  === '' || row.dataset.nom.includes(search) || row.dataset.matricule.includes(search);
+        const matchChambre = chambre === '' || row.dataset.chambre.includes(chambre);
+        const matchBloc    = bloc    === '' || row.dataset.bloc.includes(bloc);
+        const matchEtage   = etage   === '' || row.dataset.etage.includes(etage);
 
-        row.style.display = matchSearch && matchDate ? '' : 'none';
+        row.style.display = (matchSearch && matchChambre && matchBloc && matchEtage) ? '' : 'none';
     });
 }
 
 function resetFilters() {
-    document.getElementById('searchInput').value = '';
-    document.getElementById('filterDate').value = '';
+    document.getElementById('searchInput').value   = '';
+    document.getElementById('filterChambre').value = '';
+    document.getElementById('filterBloc').value    = '';
+    document.getElementById('filterEtage').value   = '';
     filterTables();
 }
 </script>

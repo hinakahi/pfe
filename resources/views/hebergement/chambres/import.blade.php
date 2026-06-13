@@ -40,7 +40,7 @@
                 <br>
                 <small class="text-muted">
                     — <code>type</code> : <code>individuelle</code> ou <code>double</code><br>
-                    — <code>etudiante_1</code> et <code>etudiante_2</code> : nom complet ou laisser vide<br>
+                    — <code>etudiante_1</code> et <code>etudiante_2</code> : matricules<br>
                     — <code>etudiante_2</code> uniquement pour les chambres double
                 </small>
             </div>
@@ -57,59 +57,5 @@
     </div>
 </div>
 
-{{-- Format attendu --}}
-<div class="card mt-4">
-    <div class="card-body">
-        <h6 class="fw-bold mb-3"><i class="bi bi-table me-1"></i> Format attendu du fichier</h6>
-        <div class="table-responsive">
-            <table class="table table-bordered table-sm text-center">
-                <thead class="table-light">
-                    <tr>
-                        <th>numero</th>
-                        <th>type</th>
-                        <th>bloc</th>
-                        <th>etage</th>
-                        <th>capacite</th>
-                        <th>etudiante_1</th>
-                        <th>etudiante_2</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td>101</td>
-                        <td>individuelle</td>
-                        <td>A</td>
-                        <td>1</td>
-                        <td>1</td>
-                        <td>Amira Benali</td>
-                        <td class="text-muted fst-italic">—</td>
-                    </tr>
-                    <tr>
-                        <td>102</td>
-                        <td>double</td>
-                        <td>A</td>
-                        <td>1</td>
-                        <td>2</td>
-                        <td>Sara Khelifi</td>
-                        <td>Yasmine Merabet</td>
-                    </tr>
-                    <tr>
-                        <td>103</td>
-                        <td>double</td>
-                        <td>B</td>
-                        <td>2</td>
-                        <td>2</td>
-                        <td>Nadia Hamdi</td>
-                        <td class="text-muted fst-italic">(vide)</td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-        <small class="text-muted">
-            <i class="bi bi-lightbulb me-1"></i>
-            Une chambre double avec une seule étudiante = 1 place libre. Les deux colonnes vides = chambre disponible.
-        </small>
-    </div>
-</div>
 
 @endsection

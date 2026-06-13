@@ -130,13 +130,17 @@ public function update(Request $request, ArticleFoyer $catalogue)
 }
 
     public function destroy(ArticleFoyer $catalogue)
-    {
-        $catalogue->delete();
-
-        return redirect()
-            ->route('foyer.catalogue.index')
-            ->with('success', 'Article supprimé avec succès.');
+{
+    if ($catalogue->reservations()->exists()) {
+        return redirect()->route('foyer.catalogue.index')
+            ->with('error', '⚠️ Impossible de supprimer cet article car il a des réservations en cours.');
     }
+
+    $catalogue->delete();
+
+    return redirect()->route('foyer.catalogue.index')
+        ->with('success', 'Article supprimé avec succès.');
+}
     public function updatePromo(Request $request, ArticleFoyer $article)
 {
     $request->validate([

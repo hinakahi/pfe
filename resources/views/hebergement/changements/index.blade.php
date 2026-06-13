@@ -28,26 +28,68 @@
     </div>
 </div>
 
+{{-- Filtres --}}
+<div class="card mb-4">
+    <div class="card-body">
+        <div class="row g-2 align-items-center">
+            <div class="col-md-3">
+                <div class="input-group input-group-sm">
+                    <span class="input-group-text"><i class="bi bi-person"></i></span>
+                    <input type="text" id="filterEtudiante" class="form-control" placeholder="Nom ou matricule...">
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="input-group input-group-sm">
+                    <span class="input-group-text"><i class="bi bi-hash"></i></span>
+                    <input type="text" id="filterNumero" class="form-control" placeholder="N° chambre...">
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="input-group input-group-sm">
+                    <span class="input-group-text"><i class="bi bi-building"></i></span>
+                    <input type="text" id="filterBloc" class="form-control" placeholder="Bloc...">
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="input-group input-group-sm">
+                    <span class="input-group-text"><i class="bi bi-layers"></i></span>
+                    <input type="text" id="filterEtage" class="form-control" placeholder="Étage...">
+                </div>
+            </div>
+            <div class="col-md-3">
+                <button class="btn btn-sm btn-outline-secondary w-100" id="resetFilters">
+                    <i class="bi bi-x-circle me-1"></i> Réinitialiser
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
 {{-- En attente --}}
 <div class="card mb-4" id="section-attente">
     <div class="card-body">
         <h6 class="fw-bold mb-3">
             <i class="bi bi-hourglass-split me-2 text-warning"></i>En attente
         </h6>
-        <table class="table table-hover mb-0">
+        <table class="table table-hover mb-0" id="tableAttente">
             <thead class="table-light">
                 <tr>
                     <th>Étudiante</th>
                     <th>Chambre actuelle</th>
                     <th>Chambre demandée</th>
                     <th>Motif</th>
+                    <th>Justificatif</th>
                     <th>Date</th>
                     <th>Actions</th>
                 </tr>
             </thead>
             <tbody>
                 @forelse($enAttente as $demande)
-                <tr>
+                <tr class="demande-row"
+                    data-etudiante="{{ strtolower($demande->etudiante->name . ' ' . $demande->etudiante->matricule) }}"
+                    data-numero="{{ strtolower($demande->chambreActuelle->numero ?? '') . ' ' . strtolower($demande->chambreDemandee->numero ?? '') }}"
+                    data-bloc="{{ strtolower($demande->chambreActuelle->bloc ?? '') . ' ' . strtolower($demande->chambreDemandee->bloc ?? '') }}"
+                    data-etage="{{ ($demande->chambreActuelle->etage ?? '') . ' ' . ($demande->chambreDemandee->etage ?? '') }}">
                     <td>
                         <strong>{{ $demande->etudiante->name }}</strong><br>
                         <small class="text-muted">{{ $demande->etudiante->matricule }}</small>
@@ -55,6 +97,7 @@
                     <td>
                         @if($demande->chambreActuelle)
                             <span class="badge bg-secondary">{{ $demande->chambreActuelle->numero }}</span>
+                            <br><small class="text-muted">Bloc {{ $demande->chambreActuelle->bloc }} — Ét.{{ $demande->chambreActuelle->etage }}</small>
                         @else
                             <span class="text-muted">-</span>
                         @endif
@@ -62,33 +105,33 @@
                     <td>
                         @if($demande->chambreDemandee)
                             <span class="badge bg-primary">{{ $demande->chambreDemandee->numero }}</span>
-                            <br><small class="text-muted">{{ $demande->chambreDemandee->statut }}</small>
+                            <br><small class="text-muted">Bloc {{ $demande->chambreDemandee->bloc }} — Ét.{{ $demande->chambreDemandee->etage }}</small>
                         @else
                             <span class="text-muted">Non précisée</span>
                         @endif
                     </td>
                     <td><small>{{ Str::limit($demande->motif, 50) }}</small></td>
+                    <td>
+                        @if($demande->justificatif)
+                            <a href="{{ asset('storage/'.$demande->justificatif) }}"
+                               target="_blank" class="btn btn-sm btn-outline-primary">
+                                <i class="bi bi-file-earmark me-1"></i>Voir
+                            </a>
+                        @else
+                            <span class="text-muted">Aucun</span>
+                        @endif
+                    </td>
                     <td><small>{{ $demande->created_at->format('d/m/Y') }}</small></td>
                     <td>
-                        {{-- Accepter --}}
-                        <form method="POST"
-                              action="{{ route('hebergement.changements.accepter', $demande) }}"
-                              class="d-inline">
+                        <form method="POST" action="{{ route('hebergement.changements.accepter', $demande) }}" class="d-inline">
                             @csrf
-                            <button class="btn btn-sm btn-success"
-                                    onclick="return confirm('Accepter ce changement ?')">
+                            <button class="btn btn-sm btn-success" onclick="return confirm('Accepter ce changement ?')">
                                 <i class="bi bi-check-lg"></i> Accepter
                             </button>
                         </form>
-
-                        {{-- Refuser --}}
-                        <button class="btn btn-sm btn-danger"
-                                data-bs-toggle="modal"
-                                data-bs-target="#refusModal{{ $demande->id }}">
+                        <button class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#refusModal{{ $demande->id }}">
                             <i class="bi bi-x-lg"></i> Refuser
                         </button>
-
-                        {{-- Modal refus --}}
                         <div class="modal fade" id="refusModal{{ $demande->id }}" tabindex="-1">
                             <div class="modal-dialog">
                                 <div class="modal-content">
@@ -96,8 +139,7 @@
                                         <h5 class="modal-title">Motif du refus</h5>
                                         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                                     </div>
-                                    <form method="POST"
-                                          action="{{ route('hebergement.changements.refuser', $demande) }}">
+                                    <form method="POST" action="{{ route('hebergement.changements.refuser', $demande) }}">
                                         @csrf
                                         <div class="modal-body">
                                             <label class="form-label">Raison du refus</label>
@@ -106,11 +148,8 @@
                                                       required minlength="10"></textarea>
                                         </div>
                                         <div class="modal-footer">
-                                            <button type="button" class="btn btn-secondary"
-                                                    data-bs-dismiss="modal">Annuler</button>
-                                            <button type="submit" class="btn btn-danger">
-                                                Confirmer le refus
-                                            </button>
+                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                                            <button type="submit" class="btn btn-danger">Confirmer le refus</button>
                                         </div>
                                     </form>
                                 </div>
@@ -120,13 +159,14 @@
                 </tr>
                 @empty
                 <tr>
-                    <td colspan="6" class="text-center text-muted py-4">
-                        Aucune demande en attente.
-                    </td>
+                    <td colspan="7" class="text-center text-muted py-4">Aucune demande en attente.</td>
                 </tr>
                 @endforelse
             </tbody>
         </table>
+        <div id="noResultAttente" class="text-center text-muted py-3" style="display:none;">
+            <i class="bi bi-search me-1"></i> Aucun résultat trouvé.
+        </div>
     </div>
 </div>
 
@@ -136,12 +176,14 @@
         <h6 class="fw-bold mb-3">
             <i class="bi bi-clock-history me-2 text-secondary"></i>Traitées récemment
         </h6>
-        <table class="table table-hover mb-0">
+        <table class="table table-hover mb-0" id="tableTraitees">
             <thead class="table-light">
                 <tr>
                     <th>Étudiante</th>
                     <th>Chambre actuelle</th>
                     <th>Chambre demandée</th>
+                    <th>Motif</th>
+                    <th>Justificatif</th>
                     <th>Statut</th>
                     <th>Motif refus</th>
                     <th>Date</th>
@@ -149,13 +191,38 @@
             </thead>
             <tbody>
                 @forelse($traitees as $demande)
-                <tr>
+                <tr class="traitee-row"
+                    data-etudiante="{{ strtolower($demande->etudiante->name . ' ' . $demande->etudiante->matricule) }}"
+                    data-numero="{{ strtolower($demande->chambreActuelle->numero ?? '') . ' ' . strtolower($demande->chambreDemandee->numero ?? '') }}"
+                    data-bloc="{{ strtolower($demande->chambreActuelle->bloc ?? '') . ' ' . strtolower($demande->chambreDemandee->bloc ?? '') }}"
+                    data-etage="{{ ($demande->chambreActuelle->etage ?? '') . ' ' . ($demande->chambreDemandee->etage ?? '') }}">
                     <td>
                         <strong>{{ $demande->etudiante->name }}</strong><br>
                         <small class="text-muted">{{ $demande->etudiante->matricule }}</small>
                     </td>
-                    <td>{{ $demande->chambreActuelle->numero ?? '-' }}</td>
-                    <td>{{ $demande->chambreDemandee->numero ?? '-' }}</td>
+                    <td>
+                        {{ $demande->chambreActuelle->numero ?? '-' }}
+                        @if($demande->chambreActuelle)
+                            <br><small class="text-muted">Bloc {{ $demande->chambreActuelle->bloc }} — Ét.{{ $demande->chambreActuelle->etage }}</small>
+                        @endif
+                    </td>
+                    <td>
+                        {{ $demande->chambreDemandee->numero ?? '-' }}
+                        @if($demande->chambreDemandee)
+                            <br><small class="text-muted">Bloc {{ $demande->chambreDemandee->bloc }} — Ét.{{ $demande->chambreDemandee->etage }}</small>
+                        @endif
+                    </td>
+                    <td><small>{{ Str::limit($demande->motif, 50) }}</small></td>
+                    <td>
+                        @if($demande->justificatif)
+                            <a href="{{ asset('storage/'.$demande->justificatif) }}"
+                               target="_blank" class="btn btn-sm btn-outline-primary">
+                                <i class="bi bi-file-earmark me-1"></i>Voir
+                            </a>
+                        @else
+                            <span class="text-muted">Aucun</span>
+                        @endif
+                    </td>
                     <td>
                         @if($demande->statut === 'acceptee')
                             <span class="badge bg-success">Acceptée</span>
@@ -168,14 +235,56 @@
                 </tr>
                 @empty
                 <tr>
-                    <td colspan="6" class="text-center text-muted py-4">
-                        Aucune demande traitée.
-                    </td>
+                    <td colspan="8" class="text-center text-muted py-4">Aucune demande traitée.</td>
                 </tr>
                 @endforelse
             </tbody>
         </table>
+        <div id="noResultTraitees" class="text-center text-muted py-3" style="display:none;">
+            <i class="bi bi-search me-1"></i> Aucun résultat trouvé.
+        </div>
     </div>
 </div>
+
+<script>
+const inputs = ['filterEtudiante', 'filterNumero', 'filterBloc', 'filterEtage'];
+
+function filtrer() {
+    const etudiante = document.getElementById('filterEtudiante').value.toLowerCase().trim();
+    const numero    = document.getElementById('filterNumero').value.toLowerCase().trim();
+    const bloc      = document.getElementById('filterBloc').value.toLowerCase().trim();
+    const etage     = document.getElementById('filterEtage').value.toLowerCase().trim();
+
+    ['demande-row', 'traitee-row'].forEach(cls => {
+        const rows = document.querySelectorAll('.' + cls);
+        const noResult = cls === 'demande-row'
+            ? document.getElementById('noResultAttente')
+            : document.getElementById('noResultTraitees');
+        let visible = 0;
+
+        rows.forEach(row => {
+            const match =
+                row.dataset.etudiante.includes(etudiante) &&
+                row.dataset.numero.includes(numero) &&
+                row.dataset.bloc.includes(bloc) &&
+                row.dataset.etage.includes(etage);
+
+            row.style.display = match ? '' : 'none';
+            if (match) visible++;
+        });
+
+        noResult.style.display = visible === 0 ? 'block' : 'none';
+    });
+}
+
+inputs.forEach(id => {
+    document.getElementById(id).addEventListener('input', filtrer);
+});
+
+document.getElementById('resetFilters').addEventListener('click', function () {
+    inputs.forEach(id => document.getElementById(id).value = '');
+    filtrer();
+});
+</script>
 
 @endsection
