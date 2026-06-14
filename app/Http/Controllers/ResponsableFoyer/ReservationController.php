@@ -14,7 +14,7 @@ class ReservationController extends Controller
         $filtre = $request->query('statut', 'tous');
 
         $query = Reservation::with('etudiante', 'article')
-                    ->where('statut', '!=', 'panier') // ← cacher les paniers
+                    ->where('statut', '!=', 'panier') //  cacher les paniers
                     ->latest();
 
         if ($filtre !== 'tous') {
@@ -52,7 +52,7 @@ class ReservationController extends Controller
         $reservation->update([
             'statut'        => 'validee',
             'resp_foyer_id' => auth()->id(),
-            'validee_at'    => now(), // ← heure de validation pour le countdown 4h
+            'validee_at'    => now(), //  heure de validation pour le countdown 3h
         ]);
 
         $reservation->etudiante->notify(new CommandeTraitee($reservation, 'acceptee'));

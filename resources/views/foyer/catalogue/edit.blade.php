@@ -294,7 +294,7 @@ document.addEventListener('DOMContentLoaded', function () {
         } else {
             toggleDisponible.disabled = false;
             togglePromo.disabled      = false;
-            // ✅ Ne pas toucher promoFields ici, togglePromoFields() s'en charge
+            
         }
     }
 

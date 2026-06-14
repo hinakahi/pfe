@@ -23,7 +23,7 @@ class Chambre extends Model
         'publiee' => 'boolean',
     ];
 
-    // Statut calculé automatiquement — pas stocké en base
+    // Statut calculé automatiquement 
     public function getStatutAttribute(): string
     {
         if ($this->type === 'individuelle') {

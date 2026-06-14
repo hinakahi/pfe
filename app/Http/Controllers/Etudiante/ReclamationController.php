@@ -19,19 +19,19 @@ class ReclamationController extends Controller
     {
         $query = $this->myReclamations();
 
-        // 🔍 FILTRE 1 : Par statut
+        //  FILTRE 1 : Par statut
         if ($request->filled('statut')) {
             $query->where('statut', $request->statut);
         }
 
-        // 📅 FILTRE 2 : Par période (7, 30, 90, 365 jours)
+        //  FILTRE 2 : Par période (7, 30, 90, 365 jours)
         if ($request->filled('periode')) {
             $days = (int) $request->periode;
             $startDate = Carbon::now()->subDays($days);
             $query->where('date_reclamation', '>=', $startDate);
         }
 
-        // 💬 FILTRE 3 : Par réponse (avec/sans)
+        //  FILTRE 3 : Par réponse (avec/sans)
         if ($request->filled('reponse')) {
             if ($request->reponse === 'avec') {
                 $query->whereNotNull('reponse');

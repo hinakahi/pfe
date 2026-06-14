@@ -344,7 +344,7 @@
 document.getElementById('modalAnnuler').addEventListener('show.bs.modal', e => {
     const btn = e.relatedTarget;
     document.getElementById('modalNomAnnuler').textContent = btn.dataset.nom;
-    document.getElementById('formAnnuler').action = `/etudiante/foyer/reservations/${btn.dataset.id}`;
+    document.getElementById('formAnnuler').action = `/etudiante/foyer/annuler/${btn.dataset.id}`;
 });
 
 // ── Filtre par statut ──

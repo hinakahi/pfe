@@ -110,7 +110,7 @@ class HebergementController extends Controller
         return back()->with('error', 'La période de renouvellement est fermée.');
     }
 
-    // ✅ Bloquer les doublons
+    //  Bloquer les doublons
     $dejaEnCours = DemandeRenouvellement::where('etudiante_id', auth()->id())
         ->whereIn('statut', ['en_attente', 'validee'])
         ->exists();
@@ -150,7 +150,7 @@ class HebergementController extends Controller
                      ->with('success', 'Demande envoyée avec succès.');
 }
 
-// ✅ Modifier si refusée
+//  Modifier si refusée
 public function modifierRenouvellement(Request $request, DemandeRenouvellement $demande)
 {
     if ($demande->etudiante_id !== auth()->id()) abort(403);
@@ -189,7 +189,7 @@ public function modifierRenouvellement(Request $request, DemandeRenouvellement $
                      ->orWhere('etudiante_2', $user->matricule)
                      ->first();
 
-        // ✅ Vérification période pour afficher ou bloquer la page
+        //  Vérification période pour afficher ou bloquer la page
         $periodeChangement = Periode::where('type', 'changement')
                             ->where('active', true)
                             ->where('date_debut', '<=', now())
@@ -205,7 +205,7 @@ public function modifierRenouvellement(Request $request, DemandeRenouvellement $
 
         return view('etudiante.hebergement.changement', compact(
             'maChambre',
-            'periodeChangement',        // ✅ ajouté
+            'periodeChangement',        
             'chambresDisponibles',
             'demandesChangement'
         ));
@@ -213,7 +213,7 @@ public function modifierRenouvellement(Request $request, DemandeRenouvellement $
 
     public function demanderChangement(Request $request)
     {
-        // ✅ Vérification période changement
+        //  Vérification période changement
         $periode = Periode::where('type', 'changement')
                   ->where('active', true)
                   ->where('date_debut', '<=', now())

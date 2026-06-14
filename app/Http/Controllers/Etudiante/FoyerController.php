@@ -27,10 +27,16 @@ class FoyerController extends Controller
         
         $reservations = $query->latest()->get();
         
-        $totalReservations = Reservation::where('etudiante_id', $user->id)->count();
+        $totalReservations = Reservation::where('etudiante_id', $user->id)
+         ->where('statut', 'en_attente')
+         ->count();
         $totalArticles = ArticleFoyer::where('disponible', true)->count();
-        $totalPromotions = ArticleFoyer::where('promo_active', true)->count();
-        $promotions = ArticleFoyer::where('promo_active', true)->latest()->limit(5)->get();
+        $totalPromotions = ArticleFoyer::where('promo_active', true)
+        ->where('stock', '>', 0)
+        ->count();
+        $promotions = ArticleFoyer::where('promo_active', true)
+        ->where('stock', '>', 0)
+        ->latest()->limit(5)->get();
         
         return view('etudiante.foyer.dashboard', compact(
             'reservations', 'promotions',
@@ -69,7 +75,9 @@ class FoyerController extends Controller
 
     public function promotions()
     {
-        $promotions = ArticleFoyer::where('promo_active', true)->paginate(12);
+        $promotions = ArticleFoyer::where('promo_active', true)
+        ->where('stock', '>', 0)
+        ->paginate(12);
         return view('etudiante.foyer.promotions', compact('promotions'));
     }
 

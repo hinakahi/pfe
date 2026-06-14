@@ -16,8 +16,8 @@ class NouvelleAnnonceNotification extends Notification
   public function toDatabase($notifiable): array
 {
     return [
-        'title'    => $this->annonce->titre,      // ← 'title' pas 'titre'
-        'message'  => $this->annonce->contenu,    // ← 'message' pas 'contenu'
+        'title'    => $this->annonce->titre,      
+        'message'  => $this->annonce->contenu,    
         'categorie'  => $this->annonce->categorie,
         'annonce_id' => $this->annonce->id,
     ];

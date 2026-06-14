@@ -37,7 +37,7 @@ class PeriodeController extends Controller
             'libelle'    => $request->libelle,
             'date_debut' => $request->date_debut,
             'date_fin'   => $request->date_fin,
-            'active'     => $request->boolean('active', true), // true par défaut
+            'active'     => $request->boolean('active', true), 
         ]);
 
         $etudiantes = User::where('role', 'etudiante')->get();

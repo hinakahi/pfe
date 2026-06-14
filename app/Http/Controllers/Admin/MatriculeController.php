@@ -25,7 +25,7 @@ class MatriculeController extends Controller
     return view('admin.matricules.index', compact('matricules'));
 }
 
-  public function store(Request $request)
+public function store(Request $request)
 {
     $request->validate([
         'matricules' => 'required|string',
@@ -33,23 +33,31 @@ class MatriculeController extends Controller
 
     $liste = array_filter(array_map('trim', explode("\n", $request->matricules)));
     $count = 0;
+    $doublons = 0;
 
     foreach ($liste as $m) {
-        // ✅ DÉTECTER LE RÔLE AUTOMATIQUEMENT
         $role = $this->detectRoleFromMatricule($m);
 
-        // ✅ CRÉER AVEC LE RÔLE
-        MatriculeAutorise::firstOrCreate(
+        $result = MatriculeAutorise::firstOrCreate(
             ['matricule' => strtoupper($m)],
-            ['role' => $role]  // ← AJOUTE LE RÔLE ICI
+            ['role' => $role]
         );
-        $count++;
+
+        if ($result->wasRecentlyCreated) {
+            $count++;
+        } else {
+            $doublons++;
+        }
     }
 
-    return back()->with('success', "$count matricule(s) ajouté(s).");
-}
+    $msg = "$count matricule(s) ajouté(s).";
+    if ($doublons > 0) {
+        $msg .= " $doublons déjà existant(s) ignoré(s).";
+    }
 
-// ✅ AJOUTE CETTE FONCTION (en bas du contrôleur)
+    return back()->with('success', $msg);
+}
+// AJOUTE CETTE FONCTION (en bas du contrôleur)
 private function detectRoleFromMatricule($matricule)
 {
     $prefix = strtoupper(substr($matricule, 0, 3));

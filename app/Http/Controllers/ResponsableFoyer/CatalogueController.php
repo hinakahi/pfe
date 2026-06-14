@@ -57,6 +57,11 @@ public function index(Request $request)
             'prix'        => 'required|numeric|min:0',
             'stock'       => 'required|integer|min:0',
             'photo'       => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
+            'date_peremption' => 'nullable|date',        
+        'promo_active'    => 'nullable|boolean',     
+        'prix_promo'      => 'nullable|numeric|min:0', 
+        'promo_remarque'  => 'nullable|string|max:255', 
+        'promo_date_fin'  => 'nullable|date',     
             'disponible'  => 'boolean',
         ]);
 
@@ -75,6 +80,11 @@ public function index(Request $request)
             'stock'         => $request->stock,
             'photo'         => $photo,
             'disponible'    => $request->boolean('disponible', true),
+             'date_peremption' => $request->date_peremption ?: null,  
+        'promo_active'    => $request->boolean('promo_active'),  
+        'prix_promo'      => $request->prix_promo,               
+        'promo_remarque'  => $request->promo_remarque,          
+        'promo_date_fin'  => $request->promo_date_fin ?: null,   
         ]);
 
         return redirect()
@@ -133,7 +143,7 @@ public function update(Request $request, ArticleFoyer $catalogue)
 {
     if ($catalogue->reservations()->exists()) {
         return redirect()->route('foyer.catalogue.index')
-            ->with('error', '⚠️ Impossible de supprimer cet article car il a des réservations en cours.');
+            ->with('error', 'Impossible de supprimer cet article car il a des réservations en cours.');
     }
 
     $catalogue->delete();
@@ -150,12 +160,12 @@ public function update(Request $request, ArticleFoyer $catalogue)
     ]);
 
     $article->update([
-        'promo_active'   => $request->boolean('promo_active'),  // false si absent
+        'promo_active'   => $request->boolean('promo_active'),  
         'prix_promo'     => $request->prix_promo,
         'promo_remarque' => $request->promo_remarque,
     ]);
 
     return redirect()->route('foyer.catalogue.index')
-        ->with('success', '✅ Promotion mise à jour avec succès');
+        ->with('success', ' Promotion mise à jour avec succès');
 }
 }

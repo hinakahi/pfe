@@ -23,7 +23,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('users', function (Blueprint $table) {
-            // Supprime la colonne en cas de rollback
+            
             $table->dropColumn('photo');
         });
     }

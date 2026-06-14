@@ -66,11 +66,11 @@
 
             <select name="role" class="form-select" style="max-width:200px;">
                 <option value="">Tous les rôles</option>
-                <option value="etudiante"       {{ request('role') == 'etudiante'       ? 'selected' : '' }}>👤 Étudiant(e)</option>
-                <option value="technicien"      {{ request('role') == 'technicien'      ? 'selected' : '' }}>🔧 Technicien</option>
-                <option value="resp_foyer"      {{ request('role') == 'resp_foyer'      ? 'selected' : '' }}>🏠 Resp. Foyer</option>
-                <option value="resp_hebergement"{{ request('role') == 'resp_hebergement'? 'selected' : '' }}>🏢 Resp. Hébergement</option>
-                <option value="admin"           {{ request('role') == 'admin'           ? 'selected' : '' }}>👨‍💼 Admin</option>
+                <option value="etudiante"       {{ request('role') == 'etudiante'       ? 'selected' : '' }}> Étudiant(e)</option>
+                <option value="technicien"      {{ request('role') == 'technicien'      ? 'selected' : '' }}> Technicien</option>
+                <option value="resp_foyer"      {{ request('role') == 'resp_foyer'      ? 'selected' : '' }}> Resp. Foyer</option>
+                <option value="resp_hebergement"{{ request('role') == 'resp_hebergement'? 'selected' : '' }}> Resp. Hébergement</option>
+                <option value="admin"           {{ request('role') == 'admin'           ? 'selected' : '' }}> Admin</option>
             </select>
 
             <button type="submit" class="btn text-white px-4"
@@ -117,15 +117,15 @@
                 {{-- ✅ COLONNE RÔLE --}}
                 <td>
                     @if($m->role == 'etudiante')
-                        <span class="badge bg-info">👤 Étudiant(e)</span>
+                        <span class="badge bg-info"> Étudiant(e)</span>
                     @elseif($m->role == 'technicien')
-                        <span class="badge bg-warning">🔧 Technicien</span>
+                        <span class="badge bg-warning"> Technicien</span>
                     @elseif($m->role == 'resp_foyer')
-                        <span class="badge bg-primary">🏠 Resp. Foyer</span>
+                        <span class="badge bg-primary"> Resp. Foyer</span>
                     @elseif($m->role == 'resp_hebergement')
-                        <span class="badge bg-success">🏢 Resp. Hébergement</span>
+                        <span class="badge bg-success"> Resp. Hébergement</span>
                     @elseif($m->role == 'admin')
-                        <span class="badge bg-danger">👨‍💼 Admin</span>
+                        <span class="badge bg-danger"> Admin</span>
                     @else
                         <span class="badge bg-secondary">{{ $m->role }}</span>
                     @endif

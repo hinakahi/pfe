@@ -13,12 +13,12 @@ class AnnulerReservationsExpirees extends Command
 
     public function handle()
     {
-        // 1️⃣ Annuler les "en_attente" après 3h (ancien comportement)
+        // 1️⃣ Annuler les "en_attente" après 3h 
         $count1 = Reservation::where('statut', 'en_attente')
             ->where('created_at', '<=', Carbon::now()->subHours(3))
             ->update(['statut' => 'annulee']);
 
-        // 2️⃣ Annuler les "validee" non récupérées après 4h
+        // 2️⃣ Annuler les "validee" non récupérées après 3h
         $expirees = Reservation::where('statut', 'validee')
             ->where('validee_at', '<=', Carbon::now()->subMinutes(3))
             ->get();

@@ -15,11 +15,11 @@
 </head>
 <body>
 
-    <h1>📊 Statistiques Maintenance</h1>
+    <h1> Statistiques Maintenance</h1>
     <p>Période : {{ ucfirst($periode) }} — Exporté le {{ now()->format('d/m/Y à H:i') }}</p>
 
     {{-- 1. Pannes par type --}}
-    <h2>🔧 Taux de pannes par type</h2>
+    <h2> Taux de pannes par type</h2>
     <table>
         <thead><tr><th>Type de panne</th><th>Nombre</th></tr></thead>
         <tbody>
@@ -30,7 +30,7 @@
     </table>
 
     {{-- 2. Délai moyen --}}
-    <h2>⏱️ Délai moyen de résolution (heures)</h2>
+    <h2> Délai moyen de résolution (heures)</h2>
     <table>
         <thead><tr><th>Type de panne</th><th>Délai moyen (h)</th></tr></thead>
         <tbody>
@@ -41,7 +41,7 @@
     </table>
 
     {{-- 3. Chambres problématiques --}}
-    <h2>🏠 Chambres les plus problématiques (Top 5)</h2>
+    <h2> Chambres les plus problématiques (Top 5)</h2>
     <table>
         <thead><tr><th>Chambre</th><th>Nombre de pannes</th></tr></thead>
         <tbody>
@@ -52,7 +52,7 @@
     </table>
 
     {{-- 4. Évolution mensuelle --}}
-    <h2>📈 Évolution des pannes par mois</h2>
+    <h2> Évolution des pannes par mois</h2>
     <table>
         <thead><tr><th>Mois</th><th>Nombre de pannes</th></tr></thead>
         <tbody>

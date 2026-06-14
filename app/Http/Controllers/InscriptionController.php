@@ -51,7 +51,7 @@ if ($request->hasFile('photo')) {
 User::create([
     'name'      => $request->name,
     'matricule' => $request->matricule,
-    'photo'     => $photoPath, // <--- On met ici la variable qui contient le chemin
+    'photo'     => $photoPath, 
     'email'     => $request->email,
     'phone'     => $request->phone,
     'password'  => Hash::make($request->password),

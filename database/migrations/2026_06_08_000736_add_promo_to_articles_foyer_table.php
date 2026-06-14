@@ -25,7 +25,6 @@ public function down(): void
 {
     Schema::table('articles_foyer', function (Blueprint $table) {
         $table->dropColumn([
-            // 'categorie' retiré ici aussi
             'promo_active', 'prix_promo',
             'promo_date_fin', 'promo_remarque', 'date_peremption'
         ]);

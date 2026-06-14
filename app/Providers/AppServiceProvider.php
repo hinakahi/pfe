@@ -8,6 +8,6 @@ class AppServiceProvider extends ServiceProvider
 {
     public function boot(): void
     {
-        Paginator::useBootstrapFive(); // ou useBootstrapFour() selon votre version Bootstrap
+        Paginator::useBootstrapFive(); 
     }
 }

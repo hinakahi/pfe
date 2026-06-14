@@ -5,7 +5,7 @@
 
 <div class="d-flex justify-content-between align-items-center mb-4">
     <div>
-        <h4 class="mb-1 fw-bold">📬 Boîte de réception</h4>
+        <h4 class="mb-1 fw-bold"> Boîte de réception</h4>
         <p class="mb-0 small" style="opacity:0.6;">Messages envoyés depuis la page publique</p>
     </div>
     <span class="badge rounded-pill px-3 py-2 fs-6"

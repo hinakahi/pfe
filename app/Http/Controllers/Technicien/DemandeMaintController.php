@@ -88,7 +88,7 @@ if ($request->statut && $request->statut !== 'tous') {
     if ($request->statut === 'terminee') {
         $maintenance->update([
             'date_resolution'        => now(),
-            'commentaire_technicien' => null, // on efface le blocage car c'est résolu
+            'commentaire_technicien' => null, 
         ]);
         $maintenance->etudiante->notify(new MaintenanceTermineeNotification($maintenance));
     }

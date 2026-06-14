@@ -30,7 +30,7 @@ class ChangementController extends Controller
 
         $etudiante = $demande->etudiante;
 
-        // ✅ Libérer l'ancienne chambre
+        //  Libérer l'ancienne chambre
         if ($demande->chambreActuelle) {
             $chambreActuelle = $demande->chambreActuelle;
 
@@ -47,7 +47,7 @@ class ChangementController extends Controller
             }
         }
 
-        // ✅ Affecter la nouvelle chambre
+        //  Affecter la nouvelle chambre
         if ($demande->chambreDemandee) {
             $chambreNouvelle = $demande->chambreDemandee;
 

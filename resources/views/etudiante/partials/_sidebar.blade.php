@@ -18,7 +18,7 @@
     <span>Annonces</span>
 </a>
 
-<a href="{{ route('etudiante.hebergement.renouvellement') }}" class="nav-link">
+<a href="{{ route('etudiante.hebergement.index') }}" class="nav-link">
     <i class="bi bi-house-door"></i>
     <span>Hébergement</span>
 </a>
