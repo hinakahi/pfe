@@ -265,7 +265,7 @@
         @foreach($articles as $article)
         <div class="col-6 col-md-4 col-xl-3 art-item"
              data-nom="{{ strtolower($article->nom_article) }}"
-             data-prix="{{ $article->prix }}"
+             data-prix="{{ $article->prix_actuel }}"
              data-stock="{{ $article->stock }}">
             <div class="card art-card">
 
@@ -320,7 +320,7 @@
 
                     {{-- Prix --}}
                     <div class="d-flex justify-content-between align-items-center mt-auto">
-                        <span class="prix-art">{{ number_format($article->prix, 2) }} DA</span>
+                        <span class="prix-art">{{ number_format($article->prix_actuel, 2) }} DA</span>
                         <span class="text-muted" style="font-size:.78rem;">
                             {{ $article->stock }} restant(s)
                         </span>
@@ -334,7 +334,7 @@
                             data-bs-target="#modalPanier"
                             data-id="{{ $article->id }}"
                             data-nom="{{ $article->nom_article }}"
-                            data-prix="{{ $article->prix }}"
+                            data-prix="{{ $article->prix_actuel }}"
                             data-stock="{{ $article->stock }}">
                         <i class="bi bi-cart-plus me-1"></i>Ajouter au panier
                     </button>
@@ -357,7 +357,7 @@
         @foreach($articles as $article)
         <div class="list-art-row art-item"
              data-nom="{{ strtolower($article->nom_article) }}"
-             data-prix="{{ $article->prix }}"
+             data-prix="{{ $article->prix_actuel }}"
              data-stock="{{ $article->stock }}">
 
             @if($article->photo)
@@ -383,7 +383,7 @@
             </div>
 
             <div class="text-end" style="min-width:90px;">
-                <div class="prix-art">{{ number_format($article->prix, 2) }} DA</div>
+                <div class="prix-art">{{ number_format($article->prix_actuel, 2) }} DA</div>
                 <div class="text-muted" style="font-size:.75rem;">
                     Stock : {{ $article->stock }}
                 </div>
@@ -396,7 +396,7 @@
                     data-bs-target="#modalPanier"
                     data-id="{{ $article->id }}"
                     data-nom="{{ $article->nom_article }}"
-                    data-prix="{{ $article->prix }}"
+                    data-prix="{{ $article->prix_actuel }}"
                     data-stock="{{ $article->stock }}"
                     style="white-space:nowrap;">
                 <i class="bi bi-cart-plus me-1"></i>Ajouter

@@ -7,13 +7,20 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
     <style>
+        html, body {
+            height: 100%;
+            margin: 0;
+        }
+
         body {
-    background: url("/photo/7.jpg") center center / cover no-repeat fixed;
-    min-height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
+            background: url("/photo/7.jpg") center center / cover no-repeat;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+            box-sizing: border-box;
+        }
 
 body::before {
     content: '';
@@ -33,6 +40,11 @@ body::before {
     position: relative;
     z-index: 1;
 }
+   @media (max-width: 400px) {
+            .login-card {
+                padding: 24px;
+            }
+        }
         .login-logo {
             text-align: center;
             margin-bottom: 30px;
@@ -62,7 +74,7 @@ body::before {
     <div class="login-card">
         <div class="login-logo">
            <img src="{{ asset('photo/mon_logo.jpg') }}" alt="Logo" style="width:100px; height:auto; border-radius:10px;">
-<h4>Résidence Si Oukli</h4>
+           <h4>Résidence Si Oukli</h4>
         </div>
 
         @if($errors->any())

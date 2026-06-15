@@ -39,38 +39,50 @@
         color: #4a90d9; font-size: 1.4rem;
         flex-shrink: 0;
     }
-    .filter-tabs {
-        display: flex;
-        gap: 8px;
-        flex-wrap: wrap;
-        margin-bottom: 20px;
-    }
-    .filter-tabs button {
-        border: none;
-        border-radius: 20px;
-        padding: 5px 16px;
-        font-size: 0.85rem;
-        font-weight: 500;
-        cursor: pointer;
-        transition: all 0.2s;
-        background: var(--bg-card);
-        color: var(--text-muted);
-        box-shadow: var(--shadow);
-    }
-    .filter-tabs button.active {
-        background: linear-gradient(135deg,#1a3c5e,#2d6a9f);
+   .stat-foyer {
+        border-radius: 14px;
+        padding: 20px;
         color: #fff;
+        position: relative;
+        overflow: hidden;
+        cursor: pointer;
+        transition: transform 0.15s, box-shadow 0.15s, opacity 0.15s;
     }
-    .empty-state {
-        text-align: center;
-        padding: 60px 20px;
-        color: var(--text-muted);
+    .stat-foyer::after {
+        content: '';
+        position: absolute;
+        right: -15px; bottom: -15px;
+        width: 80px; height: 80px;
+        border-radius: 50%;
+        background: rgba(255,255,255,0.12);
     }
-    .empty-state i { font-size: 3rem; margin-bottom: 12px; display: block; }
-    .prix-total {
-        font-size: 0.95rem;
-        font-weight: 700;
-        color: #1a3c5e;
+    .stat-foyer .big-num {
+        font-size: 2.2rem;
+        font-weight: 800;
+        line-height: 1;
+    }
+    .stat-foyer .lbl {
+        font-size: 0.82rem;
+        opacity: 0.88;
+        margin-top: 4px;
+    }
+    .stat-foyer i.bg-icon {
+        position: absolute;
+        right: 16px; top: 50%;
+        transform: translateY(-50%);
+        font-size: 2.8rem;
+        opacity: 0.18;
+    }
+    .stat-foyer:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+    }
+    .filter-card .stat-foyer {
+        opacity: 0.55;
+    }
+    .filter-card.active .stat-foyer {
+        opacity: 1;
+        box-shadow: 0 6px 16px rgba(0,0,0,0.15);
     }
     [data-theme="dark"] .prix-total { color: #7eb3e8; }
 </style>
@@ -91,55 +103,50 @@
     </a>
 </div>
 
-{{-- Statistiques rapides --}}
-<div class="row g-3 mb-4">
-    @php
-        $total      = $reservations->count();
-        $enAttente  = $reservations->where('statut','en_attente')->count();
-        $validees   = $reservations->where('statut','validee')->count();
-        $refusees   = $reservations->where('statut','refusee')->count();
-    @endphp
-    <div class="col-6 col-md-3">
-        <div class="card text-center p-3">
-            <div style="font-size:1.6rem; font-weight:700; color:#1a3c5e;">{{ $total }}</div>
-            <div class="small text-muted">Total</div>
-        </div>
-    </div>
-    <div class="col-6 col-md-3">
-        <div class="card text-center p-3">
-            <div style="font-size:1.6rem; font-weight:700; color:#856404;">{{ $enAttente }}</div>
-            <div class="small text-muted">En attente</div>
-        </div>
-    </div>
-    <div class="col-6 col-md-3">
-        <div class="card text-center p-3">
-            <div style="font-size:1.6rem; font-weight:700; color:#0a3622;">{{ $validees }}</div>
-            <div class="small text-muted">Validées</div>
-        </div>
-    </div>
-    <div class="col-6 col-md-3">
-        <div class="card text-center p-3">
-            <div style="font-size:1.6rem; font-weight:700; color:#58151c;">{{ $refusees }}</div>
-            <div class="small text-muted">Refusées</div>
-        </div>
-    </div>
-</div>
+@php
+    $total      = $reservations->count();
+    $enAttente  = $reservations->where('statut','en_attente')->count();
+    $validees   = $reservations->where('statut','validee')->count();
+    $refusees   = $reservations->where('statut','refusee')->count();
+    $annulees   = $reservations->where('statut','annulee')->count();
+@endphp
 
-{{-- Onglets filtre --}}
-<div class="filter-tabs">
-    <button class="active" data-filter="all">Toutes ({{ $total }})</button>
-    <button data-filter="en_attente">
-        <i class="bi bi-clock me-1"></i>En attente ({{ $enAttente }})
-    </button>
-    <button data-filter="validee">
-        <i class="bi bi-check-circle me-1"></i>Validées ({{ $validees }})
-    </button>
-    <button data-filter="refusee">
-        <i class="bi bi-x-circle me-1"></i>Refusées ({{ $refusees }})
-    </button>
-    <button data-filter="annulee">
-        <i class="bi bi-slash-circle me-1"></i>Annulées
-    </button>
+<div class="row g-3 mb-4">
+    <div class="col-6 col-md filter-card active" data-filter="all">
+        <div class="stat-foyer" style="background: linear-gradient(135deg,#1a3c5e,#2d6a9f);">
+            <div class="big-num">{{ $total }}</div>
+            <div class="lbl">Toutes</div>
+            <i class="bi bi-cart-check bg-icon"></i>
+        </div>
+    </div>
+    <div class="col-6 col-md filter-card" data-filter="en_attente">
+        <div class="stat-foyer" style="background: linear-gradient(135deg,#b45309,#d97706);">
+            <div class="big-num">{{ $enAttente }}</div>
+            <div class="lbl">En attente</div>
+            <i class="bi bi-clock bg-icon"></i>
+        </div>
+    </div>
+    <div class="col-6 col-md filter-card" data-filter="validee">
+        <div class="stat-foyer" style="background: linear-gradient(135deg,#0f6e40,#198754);">
+            <div class="big-num">{{ $validees }}</div>
+            <div class="lbl">Validées</div>
+            <i class="bi bi-check-circle bg-icon"></i>
+        </div>
+    </div>
+    <div class="col-6 col-md filter-card" data-filter="refusee">
+        <div class="stat-foyer" style="background: linear-gradient(135deg,#842029,#dc3545);">
+            <div class="big-num">{{ $refusees }}</div>
+            <div class="lbl">Refusées</div>
+            <i class="bi bi-x-circle bg-icon"></i>
+        </div>
+    </div>
+    <div class="col-6 col-md filter-card" data-filter="annulee">
+        <div class="stat-foyer" style="background: linear-gradient(135deg,#41464b,#6c757d);">
+            <div class="big-num">{{ $annulees }}</div>
+            <div class="lbl">Annulées</div>
+            <i class="bi bi-slash-circle bg-icon"></i>
+        </div>
+    </div>
 </div>
 
 {{-- Liste des réservations --}}
@@ -348,9 +355,9 @@ document.getElementById('modalAnnuler').addEventListener('show.bs.modal', e => {
 });
 
 // ── Filtre par statut ──
-document.querySelectorAll('.filter-tabs button').forEach(btn => {
-    btn.addEventListener('click', function() {
-        document.querySelectorAll('.filter-tabs button').forEach(b => b.classList.remove('active'));
+document.querySelectorAll('.filter-card').forEach(card => {
+    card.addEventListener('click', function() {
+        document.querySelectorAll('.filter-card').forEach(c => c.classList.remove('active'));
         this.classList.add('active');
         const filter = this.dataset.filter;
         document.querySelectorAll('.resa-item').forEach(item => {

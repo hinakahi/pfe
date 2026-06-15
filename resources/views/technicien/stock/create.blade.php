@@ -14,7 +14,7 @@
             <h6 class="mb-0"><i class="bi bi-plus-circle me-2 text-primary"></i>Nouveau matériel</h6>
         </div>
         <div class="card-body">
-            <form method="POST" action="{{ route('technicien.stock.store') }}">
+            <form method="POST" action="{{ route('technicien.stock.store') }}" enctype="multipart/form-data">
                 @csrf
 
                 <div class="mb-3">
@@ -71,7 +71,6 @@
                         <option value="electricite"   {{ old('categorie') === 'electricite'   ? 'selected' : '' }}>Électricité</option>
                         <option value="plomberie"     {{ old('categorie') === 'plomberie'     ? 'selected' : '' }}>Plomberie</option>
                         <option value="menuiserie"    {{ old('categorie') === 'menuiserie'    ? 'selected' : '' }}>Menuiserie</option>
-                        <option value="climatisation" {{ old('categorie') === 'climatisation' ? 'selected' : '' }}>Climatisation</option>
                         <option value="autre"         {{ old('categorie') === 'autre'         ? 'selected' : '' }}>Autre</option>
                     </select>
                     @error('categorie')
@@ -84,6 +83,23 @@
                     <textarea name="description" class="form-control" rows="2"
                               placeholder="Description optionnelle…">{{ old('description') }}</textarea>
                 </div>
+                <div class="mb-4">
+    <label class="form-label fw-semibold">Photo</label>
+
+    <div class="mb-2" id="previewBox" style="display:none;">
+        <img id="previewImg" src="" alt="preview"
+             style="width:100%; height:200px; object-fit:cover; border-radius:8px;">
+    </div>
+
+    <input type="file" name="photo" id="photoInput"
+           class="form-control @error('photo') is-invalid @enderror"
+           accept="image/*"
+           onchange="previewPhoto(this)">
+    <div class="form-text">Formats acceptés : JPG, PNG, WEBP — max 2 Mo.</div>
+    @error('photo')
+        <div class="invalid-feedback">{{ $message }}</div>
+    @enderror
+</div>
 
                 <button type="submit" class="btn btn-primary w-100">
                     <i class="bi bi-floppy me-1"></i>Enregistrer
@@ -94,4 +110,20 @@
     </div>
 
 </div>
+<script>
+function previewPhoto(input) {
+    const box = document.getElementById('previewBox');
+    const img = document.getElementById('previewImg');
+    if (input.files && input.files[0]) {
+        const reader = new FileReader();
+        reader.onload = e => {
+            img.src = e.target.result;
+            box.style.display = 'block';
+        };
+        reader.readAsDataURL(input.files[0]);
+    } else {
+        box.style.display = 'none';
+    }
+}
+</script>
 @endsection

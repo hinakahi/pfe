@@ -14,7 +14,7 @@
             <h6 class="mb-0"><i class="bi bi-pencil me-2 text-primary"></i>Modifier — {{ $stock->designation }}</h6>
         </div>
         <div class="card-body">
-            <form method="POST" action="{{ route('technicien.stock.update', $stock->id) }}">
+            <form method="POST" action="{{ route('technicien.stock.update', $stock->id) }}" enctype="multipart/form-data">
                 @csrf
                 @method('PUT')
 
@@ -71,7 +71,6 @@
                         <option value="electricite"   {{ old('categorie', $stock->categorie) === 'electricite'   ? 'selected' : '' }}>Électricité</option>
                         <option value="plomberie"     {{ old('categorie', $stock->categorie) === 'plomberie'     ? 'selected' : '' }}>Plomberie</option>
                         <option value="menuiserie"    {{ old('categorie', $stock->categorie) === 'menuiserie'    ? 'selected' : '' }}>Menuiserie</option>
-                        <option value="climatisation" {{ old('categorie', $stock->categorie) === 'climatisation' ? 'selected' : '' }}>Climatisation</option>
                         <option value="autre"         {{ old('categorie', $stock->categorie) === 'autre'         ? 'selected' : '' }}>Autre</option>
                     </select>
                     @error('categorie')
@@ -83,6 +82,29 @@
                     <label class="form-label fw-semibold">Description</label>
                     <textarea name="description" class="form-control" rows="2">{{ old('description', $stock->description) }}</textarea>
                 </div>
+                <div class="mb-4">
+                    <label class="form-label fw-semibold">Photo</label>
+
+                    {{-- Afficher la photo actuelle si elle existe --}}
+                    @if ($stock->photo)
+                        <div class="mb-2">
+                            <img src="{{ Storage::url($stock->photo) }}"
+                                 alt="photo actuelle"
+                                 class="img-thumbnail"
+                                  style="max-height: 250px; width:100%; object-fit:cover;">
+                            <div class="form-text">Photo actuelle — choisir une nouvelle photo pour la remplacer.</div>
+                        </div>
+                    @endif
+
+                    <input type="file" name="photo"
+                           class="form-control @error('photo') is-invalid @enderror"
+                           accept="image/*">
+                    <div class="form-text">Formats acceptés : JPG, PNG, WEBP — max 2 Mo.</div>
+                    @error('photo')
+                        <div class="invalid-feedback">{{ $message }}</div>
+                    @enderror
+                </div>
+
 
                 <div class="d-flex gap-2">
                     <button type="submit" class="btn btn-primary w-100">

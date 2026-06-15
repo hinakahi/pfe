@@ -11,6 +11,7 @@ class Stock extends Model
 
     protected $fillable = [
         'designation',
+        'photo',
         'quantite',
         'unite',
         'seuil_minimum',

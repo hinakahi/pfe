@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Technicien;
 use App\Http\Controllers\Controller;
 use App\Models\Stock;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class StockController extends Controller
 {
@@ -20,21 +21,26 @@ class StockController extends Controller
     }
 
     public function store(Request $request)
-    {
-        $request->validate([
-            'designation'   => 'required|string|max:191',
-            'quantite'      => 'required|integer|min:0',
-            'unite'         => 'required|string|max:50',
-            'seuil_minimum' => 'required|integer|min:0',
-            'categorie'     => 'required|in:electricite,plomberie,menuiserie,climatisation,autre',
-            'description'   => 'nullable|string|max:500',
-        ]);
+{
+    $data = $request->validate([
+        'designation'   => 'required|string|max:255',
+        'quantite'      => 'required|integer|min:0',
+        'unite'         => 'required|in:pcs,m,kg,litre,boite,flacon',
+        'seuil_minimum' => 'required|integer|min:0',
+        'categorie'     => 'required|in:electricite,plomberie,menuiserie,autre',
+        'description'   => 'nullable|string',
+        'photo'         => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
+    ]);
 
-        Stock::create($request->all());
-
-        return redirect()->route('technicien.stock.index')
-                         ->with('success', 'Matériel ajouté au stock avec succès.');
+    if ($request->hasFile('photo')) {
+        $data['photo'] = $request->file('photo')->store('stock/photos', 'public');
     }
+
+    Stock::create($data);
+
+    return redirect()->route('technicien.stock.index')
+                     ->with('success', 'Matériel ajouté avec succès.');
+}
 
     public function edit(Stock $stock)
     {
@@ -42,21 +48,30 @@ class StockController extends Controller
     }
 
     public function update(Request $request, Stock $stock)
-    {
-        $request->validate([
-            'designation'   => 'required|string|max:191',
-            'quantite'      => 'required|integer|min:0',
-            'unite'         => 'required|string|max:50',
-            'seuil_minimum' => 'required|integer|min:0',
-            'categorie'     => 'required|in:electricite,plomberie,menuiserie,climatisation,autre',
-            'description'   => 'nullable|string|max:500',
-        ]);
+{
+    $data = $request->validate([
+        'designation'   => 'required|string|max:255',
+        'quantite'      => 'required|integer|min:0',
+        'unite'         => 'required|in:pcs,m,kg,litre,boite,flacon',
+        'seuil_minimum' => 'required|integer|min:0',
+        'categorie'     => 'required|in:electricite,plomberie,menuiserie,autre',
+        'description'   => 'nullable|string',
+        'photo'         => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
+    ]);
 
-        $stock->update($request->all());
-
-        return redirect()->route('technicien.stock.index')
-                         ->with('success', 'Stock mis à jour avec succès.');
+    if ($request->hasFile('photo')) {
+        // Supprimer l'ancienne photo si elle existe
+        if ($stock->photo) {
+            Storage::disk('public')->delete($stock->photo);
+        }
+        $data['photo'] = $request->file('photo')->store('stock/photos', 'public');
     }
+
+    $stock->update($data);
+
+    return redirect()->route('technicien.stock.index')
+                     ->with('success', 'Matériel modifié avec succès.');
+}
 
     public function destroy(Stock $stock)
     {

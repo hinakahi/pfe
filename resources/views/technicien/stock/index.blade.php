@@ -53,7 +53,6 @@
                         <option value="electricite">Électricité</option>
                         <option value="plomberie">Plomberie</option>
                         <option value="menuiserie">Menuiserie</option>
-                        <option value="climatisation">Climatisation</option>
                         <option value="autre">Autre</option>
                     </select>
                 </div>
@@ -102,7 +101,18 @@
              data-categorie="{{ $stock->categorie }}"
              data-statut="{{ $stock->est_epuise ? 'epuise' : ($stock->est_faible ? 'faible' : 'disponible') }}">
             <div class="card h-100 {{ $stock->est_epuise ? 'border-danger' : ($stock->est_faible ? 'border-warning' : '') }}">
-                <div class="card-body">
+            @if($stock->photo)
+    <img src="{{ Storage::url($stock->photo) }}"
+         class="card-img-top"
+         alt="{{ $stock->designation }}"
+         style="height:160px; object-fit:cover;">
+@else
+    <div class="card-img-top bg-light d-flex align-items-center justify-content-center"
+         style="height:160px;">
+        <i class="bi bi-image text-muted" style="font-size:2.5rem; opacity:.3;"></i>
+    </div>
+@endif
+            <div class="card-body">
                     <div class="d-flex justify-content-between align-items-start mb-2">
                         <div>
                             <h6 class="fw-bold mb-0">{{ $stock->designation }}</h6>

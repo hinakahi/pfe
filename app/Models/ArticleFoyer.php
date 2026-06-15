@@ -53,4 +53,17 @@ class ArticleFoyer extends Model
    {
        return $this->hasMany(Reservation::class, 'article_id');
     }
+    // ─── ACCESSEURS ─────────────────────────────────────
+
+    /**
+     * Retourne le prix actuel : prix promo si promo active, sinon prix normal.
+     * Utilisation : $article->prix_actuel
+     */
+    public function getPrixActuelAttribute()
+    {
+        if ($this->promo_active && !is_null($this->prix_promo) && $this->prix_promo < $this->prix) {
+            return $this->prix_promo;
+        }
+        return $this->prix;
+    }
 }
