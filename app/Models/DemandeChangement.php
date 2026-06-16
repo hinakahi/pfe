@@ -19,7 +19,12 @@ class DemandeChangement extends Model
         'motif',
         'statut',
         'motif_refus',
-        'justificatif'
+        'justificatif',
+        'decision_pdf',
+        'prise_en_charge_pdf',
+       'decision_remise',
+       'prise_en_charge_remise',
+       'date_remise',
     ];
 
     public function etudiante()

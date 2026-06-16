@@ -15,6 +15,11 @@ class DemandeRenouvellement extends Model
         'justificatif_scolarite',
         'justificatif_paiement',
         'motif_refus',
+        'decision_pdf',
+        'prise_en_charge_pdf',
+        'decision_remise',
+        'prise_en_charge_remise',
+        'date_remise',
     ];
 
     public function etudiante()

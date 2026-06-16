@@ -124,15 +124,93 @@
                     </td>
                     <td><small>{{ $demande->created_at->format('d/m/Y') }}</small></td>
                     <td>
-                        <form method="POST"
-                              action="{{ route('hebergement.renouvellements.valider', $demande) }}"
-                              class="d-inline">
-                            @csrf
-                            <button class="btn btn-sm btn-success"
-                                    onclick="return confirm('Valider ce renouvellement ?')">
-                                <i class="bi bi-check-lg"></i> Valider
-                            </button>
-                        </form>
+                        <button class="btn btn-sm btn-success"
+        data-bs-toggle="modal"
+        data-bs-target="#validerModal{{ $demande->id }}">
+    <i class="bi bi-check-lg"></i> Valider
+</button>
+
+<div class="modal fade" id="validerModal{{ $demande->id }}" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title">
+                    <i class="bi bi-clipboard-check me-2"></i>Prise en charge — {{ $demande->etudiante->name }}
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="POST" action="{{ route('hebergement.renouvellements.valider', $demande) }}">
+                @csrf
+                <div class="modal-body">
+                    <p class="text-muted small">Vérifiez et ajustez les quantités avant validation.</p>
+
+                    <h6 class="fw-bold mt-3">Matériel individuel</h6>
+                    <table class="table table-sm table-bordered">
+                        <thead class="table-light">
+                            <tr><th>N°</th><th>Désignation</th><th style="width:100px">Quantité</th></tr>
+                        </thead>
+                        <tbody>
+                            @php
+                                $defautIndividuel = [
+                                    'Clé', 'Couette', 'Couverture', 'Draps', 'Oreiller', 'Couvre Oreiller',
+                                    'Matelas', 'Couvre matelas', 'Sommier', 'Chaise', 'Barquette', 'Cuillère + Fourchette'
+                                ];
+                            @endphp
+                            @foreach($defautIndividuel as $i => $designation)
+                            <tr>
+                                <td>{{ sprintf('%02d', $i+1) }}</td>
+                                <td>
+                                    <input type="text" name="individuel[{{ $i }}][designation]"
+                                           value="{{ $designation }}" class="form-control form-control-sm">
+                                </td>
+                                <td>
+                                    <input type="text" name="individuel[{{ $i }}][quantite]"
+                                           value="01" class="form-control form-control-sm">
+                                </td>
+                            </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+
+                    <h6 class="fw-bold mt-3">Matériel collectif</h6>
+                    <table class="table table-sm table-bordered">
+                        <thead class="table-light">
+                            <tr><th>N°</th><th>Désignation</th><th style="width:100px">Quantité</th></tr>
+                        </thead>
+                        <tbody>
+                            @php
+                                $defautCollectif = [
+                                    'Corbeille', 'Interrupteur', 'Mélangeur douche', 'Mélangeur lavabo',
+                                    'Prise courant', 'Rideaux', 'Table scolaire', 'Vachette',
+                                    'Vitre fenêtre chambre', 'Vitre fenêtre salle d\'eau'
+                                ];
+                            @endphp
+                            @foreach($defautCollectif as $i => $designation)
+                            <tr>
+                                <td>{{ sprintf('%02d', $i+1) }}</td>
+                                <td>
+                                    <input type="text" name="collectif[{{ $i }}][designation]"
+                                           value="{{ $designation }}" class="form-control form-control-sm">
+                                </td>
+                                <td>
+                                    <input type="text" name="collectif[{{ $i }}][quantite]"
+                                           value="01" class="form-control form-control-sm">
+                                </td>
+                            </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                    <button type="submit" class="btn btn-success">
+                        <i class="bi bi-check-lg me-1"></i> Valider et générer les documents
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
 
                         <button class="btn btn-sm btn-danger"
                                 data-bs-toggle="modal"
@@ -180,16 +258,17 @@
         <h6 class="fw-bold mb-3"><i class="bi bi-clock-history me-2 text-secondary"></i>Traitées récemment</h6>
         <table class="table table-hover mb-0">
             <thead class="table-light">
-                <tr>
-                    <th>Étudiante</th>
-                    <th>Chambre</th>
-                    <th>Justif. Scolarité</th>
-                    <th>Justif. Paiement</th>
-                    <th>Statut</th>
-                    <th>Motif refus</th>
-                    <th>Date</th>
-                </tr>
-            </thead>
+    <tr>
+        <th>Étudiante</th>
+        <th>Chambre</th>
+        <th>Justif. Scolarité</th>
+        <th>Justif. Paiement</th>
+        <th>Statut</th>
+        <th>Motif refus</th>
+        <th>Documents</th>
+        <th>Date</th>
+    </tr>
+</thead>
             <tbody id="tbodyTraitees">
                 @forelse($traitees as $demande)
                 <tr
@@ -236,11 +315,29 @@
                         @endif
                     </td>
                     <td><small>{{ $demande->motif_refus ?? '-' }}</small></td>
+                    <td>
+                        @if($demande->statut === 'validee')
+                            @if($demande->decision_pdf)
+                            <a href="{{ asset('storage/'.$demande->decision_pdf) }}" target="_blank"
+                               class="btn btn-sm btn-outline-success mb-1" title="Décision de réadmission">
+                                <i class="bi bi-file-earmark-pdf"></i> Décision
+                            </a>
+                            @endif
+                            @if($demande->prise_en_charge_pdf)
+                            <a href="{{ asset('storage/'.$demande->prise_en_charge_pdf) }}" target="_blank"
+                               class="btn btn-sm btn-outline-success mb-1" title="Prise en charge">
+                                <i class="bi bi-file-earmark-pdf"></i> P.E.C
+                            </a>
+                            @endif
+                        @else
+                            <span class="text-muted">-</span>
+                        @endif
+                    </td>
                     <td><small>{{ $demande->updated_at->format('d/m/Y') }}</small></td>
                 </tr>
                 @empty
                 <tr id="emptyTraitees">
-                    <td colspan="7" class="text-center text-muted py-4">Aucune demande traitée.</td>
+                    <td colspan="8" class="text-center text-muted py-4">Aucune demande traitée.</td>
                 </tr>
                 @endforelse
             </tbody>

@@ -4,11 +4,12 @@ namespace App\Http\Controllers\ResponsableHebergement;
 use App\Http\Controllers\Controller;
 use App\Models\DemandeRenouvellement;
 use App\Notifications\RenouvellementTraite;
+use App\Traits\GenerePdfDemande;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class RenouvellementController extends Controller
-{
+{   use GenerePdfDemande;
     public function index()
     {
         $enAttente = DemandeRenouvellement::with(['etudiante', 'chambre'])
@@ -23,17 +24,22 @@ class RenouvellementController extends Controller
     }
 
     public function valider(Request $request, DemandeRenouvellement $demande)
-    {
-        $demande->update([
-            'statut'              => 'validee',
-            'resp_hebergement_id' => Auth::id(),
-        ]);
+{   
+    $demande->update([
+        'statut'              => 'validee',
+        'resp_hebergement_id' => Auth::id(),
+    ]);
 
-        // Notifier l'étudiante
-        $demande->etudiante->notify(new RenouvellementTraite('validee'));
+    $materielIndividuel = $request->input('individuel', []);
+    $materielCollectif = $request->input('collectif', []);
 
-        return back()->with('success', 'Renouvellement validé avec succès.');
-    }
+    $this->genererDocumentsDemande($demande, 'renouvellement', $materielIndividuel, $materielCollectif);
+
+    // Notifier l'étudiante
+    $demande->etudiante->notify(new RenouvellementTraite('validee'));
+
+    return back()->with('success', 'Renouvellement validé avec succès. Documents générés.');
+}
 
     public function refuser(Request $request, DemandeRenouvellement $demande)
     {

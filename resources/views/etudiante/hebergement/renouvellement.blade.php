@@ -120,7 +120,30 @@
                 <strong>Motif du refus :</strong> {{ $derniereDemande->motif_refus }}
             </div>
         @endif
-
+         {{-- Documents générés après validation --}}
+@if($derniereDemande->statut === 'validee' && ($derniereDemande->decision_pdf || $derniereDemande->prise_en_charge_pdf))
+<div class="alert alert-success py-2 mb-3">
+    <div class="fw-semibold small mb-2"><i class="bi bi-check-circle me-1"></i> Documents disponibles</div>
+    <div class="row g-2">
+        @if($derniereDemande->decision_pdf)
+        <div class="col-md-6">
+            <a href="{{ asset('storage/' . $derniereDemande->decision_pdf) }}" target="_blank"
+               class="btn btn-sm btn-outline-success w-100">
+                <i class="bi bi-file-earmark-pdf me-1"></i> Décision de réadmission
+            </a>
+        </div>
+        @endif
+        @if($derniereDemande->prise_en_charge_pdf)
+        <div class="col-md-6">
+            <a href="{{ asset('storage/' . $derniereDemande->prise_en_charge_pdf) }}" target="_blank"
+               class="btn btn-sm btn-outline-success w-100">
+                <i class="bi bi-file-earmark-pdf me-1"></i> Prise en charge
+            </a>
+        </div>
+        @endif
+    </div>
+</div>
+@endif
         {{-- Fichiers envoyés --}}
         <div class="row g-2 mb-3">
             <div class="col-md-6">
