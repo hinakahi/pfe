@@ -40,7 +40,15 @@ class RenouvellementController extends Controller
 
     return back()->with('success', 'Renouvellement validé avec succès. Documents générés.');
 }
+    public function modifierPriseEnCharge(Request $request, DemandeRenouvellement $demande)
+{
+    $materielIndividuel = $request->input('individuel', []);
+    $materielCollectif = $request->input('collectif', []);
 
+    $this->regenererPriseEnCharge($demande, 'renouvellement', $materielIndividuel, $materielCollectif);
+
+    return back()->with('success', 'Prise en charge mise à jour avec succès.');
+}
     public function refuser(Request $request, DemandeRenouvellement $demande)
     {
         $request->validate([

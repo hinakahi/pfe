@@ -20,7 +20,14 @@ class DemandeRenouvellement extends Model
         'decision_remise',
         'prise_en_charge_remise',
         'date_remise',
+        'materiel_json',
     ];
+    protected function casts(): array
+{
+    return [
+        'materiel_json' => 'array',
+    ];
+}
 
     public function etudiante()
     {

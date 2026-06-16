@@ -13,7 +13,11 @@
 </head>
 <body>
     <div class="header">
-        <p>N° de chambre : {{ $demande->chambre->numero ?? '___' }}</p>
+        @if(isset($demande->chambreDemandee))
+<p>N° de chambre : {{ $demande->chambreDemandee->numero ?? '___' }}</p>
+@else
+<p>N° de chambre : {{ $demande->chambre->numero ?? '___' }}</p>
+@endif
         <p>{{ $demande->etudiante->name }}</p>
         <p style="font-weight: bold; margin-top: 10px;">
             Je soussigné(e), Melle {{ $demande->etudiante->name }},

@@ -4,11 +4,13 @@ namespace App\Http\Controllers\ResponsableHebergement;
 use App\Http\Controllers\Controller;
 use App\Models\DemandeChangement;
 use App\Notifications\ChangementTraite;
+use App\Traits\GenerePdfDemande;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class ChangementController extends Controller
 {
+    use GenerePdfDemande;
     public function index()
     {
         $enAttente = DemandeChangement::with(['etudiante', 'chambreActuelle', 'chambreDemandee'])
@@ -68,12 +70,24 @@ class ChangementController extends Controller
             'statut'              => 'acceptee',
             'resp_hebergement_id' => Auth::id(),
         ]);
+        $materielIndividuel = $request->input('individuel', []);
+$materielCollectif = $request->input('collectif', []);
+
+$this->genererDocumentsDemande($demande, 'changement', $materielIndividuel, $materielCollectif);
 
         $demande->etudiante->notify(new ChangementTraite('acceptee'));
 
         return back()->with('success', 'Changement de chambre accepté avec succès.');
     }
+     public function modifierPriseEnCharge(Request $request, DemandeChangement $demande)
+{
+    $materielIndividuel = $request->input('individuel', []);
+    $materielCollectif = $request->input('collectif', []);
 
+    $this->regenererPriseEnCharge($demande, 'changement', $materielIndividuel, $materielCollectif);
+
+    return back()->with('success', 'Prise en charge mise à jour avec succès.');
+}
     public function refuser(Request $request, DemandeChangement $demande)
     {
         $request->validate([

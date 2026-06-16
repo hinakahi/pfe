@@ -177,9 +177,13 @@ Route::prefix('hebergement')->middleware(['auth', 'role:resp_hebergement'])->gro
     Route::resource('chambres', ChambreController::class)->names('hebergement.chambres');
     Route::get('/renouvellements', [RenouvellementController::class, 'index'])->name('hebergement.renouvellements.index');
     Route::post('/renouvellements/{demande}/valider', [RenouvellementController::class, 'valider'])->name('hebergement.renouvellements.valider');
+    Route::put('/hebergement/renouvellements/{demande}/modifier-pec', [RenouvellementController::class, 'modifierPriseEnCharge'])
+    ->name('hebergement.renouvellements.modifier-pec');
     Route::post('/renouvellements/{demande}/refuser', [RenouvellementController::class, 'refuser'])->name('hebergement.renouvellements.refuser');
     Route::get('/changements', [ChangementController::class, 'index'])->name('hebergement.changements.index');
     Route::post('/changements/{demande}/accepter', [ChangementController::class, 'accepter'])->name('hebergement.changements.accepter');
+    Route::put('/hebergement/changements/{demande}/modifier-pec', [ChangementController::class, 'modifierPriseEnCharge'])
+    ->name('hebergement.changements.modifier-pec');
     Route::post('/changements/{demande}/refuser', [ChangementController::class, 'refuser'])->name('hebergement.changements.refuser');
      Route::patch('chambres/{chambre}/depublier', [ChambreController::class, 'depublier'])
      ->name('hebergement.chambres.depublier');

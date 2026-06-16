@@ -18,9 +18,18 @@
     <div class="content">
          <p>Nom : {{ $demande->etudiante->name }}</p>
          <p>Matricule : {{ $demande->etudiante->matricule }}</p>
-         <p>Bloc : {{ $demande->chambre->bloc ?? '-' }}</p>
+         @if($type === 'changement')
+<p>Bloc : {{ $demande->chambreDemandee->bloc ?? '-' }}</p>
+@else
+<p>Bloc : {{ $demande->chambre->bloc ?? '-' }}</p>
+@endif
         <p>Type de demande : {{ $type === 'renouvellement' ? 'Renouvellement' : 'Changement' }}</p>
-        <p>Chambre attribuée : {{ $demande->chambre->numero ?? $demande->chambre_id }}</p>
+        @if($type === 'changement')
+<p>Ancienne chambre : {{ $demande->chambreActuelle->numero ?? '-' }}</p>
+<p>Nouvelle chambre attribuée : {{ $demande->chambreDemandee->numero ?? '-' }}</p>
+@else
+<p>Chambre attribuée : {{ $demande->chambre->numero ?? $demande->chambre_id }}</p>
+@endif
         <p>Décision : <strong>Admis(e)</strong></p>
         <p>Date d'effet : {{ $demande->updated_at->format('d/m/Y') }}</p>
     </div>

@@ -27,6 +27,30 @@ trait GenerePdfDemande
         $demande->update([
             'decision_pdf' => $nomDecision,
             'prise_en_charge_pdf' => $nomPriseEnCharge,
+            'materiel_json' => [
+                'individuel' => $materielIndividuel,
+                'collectif' => $materielCollectif,
+            ],
+        ]);
+    }
+
+    protected function regenererPriseEnCharge($demande, string $type, array $materielIndividuel = [], array $materielCollectif = []): void
+    {
+        $pdfPriseEnCharge = Pdf::loadView('pdf.prise_en_charge', [
+            'demande' => $demande,
+            'materielIndividuel' => $materielIndividuel,
+            'materielCollectif' => $materielCollectif,
+        ]);
+
+        $nomPriseEnCharge = 'prises_en_charge/pec_' . $type . '_' . $demande->id . '_' . time() . '.pdf';
+        Storage::disk('public')->put($nomPriseEnCharge, $pdfPriseEnCharge->output());
+
+        $demande->update([
+            'prise_en_charge_pdf' => $nomPriseEnCharge,
+            'materiel_json' => [
+                'individuel' => $materielIndividuel,
+                'collectif' => $materielCollectif,
+            ],
         ]);
     }
 }
