@@ -1,6 +1,24 @@
 @extends('layouts.app')
 
 @section('page-title', 'Notifications')
+@section('styles')
+<style>
+    [data-theme="dark"] .text-muted {
+        color: var(--text-muted) !important;
+    }
+    [data-theme="dark"] .modal-content {
+        background-color: var(--bg-card);
+        color: var(--text-main);
+    }
+    [data-theme="dark"] .modal-header,
+    [data-theme="dark"] .modal-footer {
+        border-color: #444;
+    }
+    [data-theme="dark"] .btn-close {
+        filter: invert(1);
+    }
+</style>
+@endsection
 
 @section('sidebar')
     @include('etudiante.partials._sidebar')

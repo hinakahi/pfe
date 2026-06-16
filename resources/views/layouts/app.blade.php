@@ -54,12 +54,12 @@
             gap: 0;
         }
         .sidebar.collapsed .nav-link { 
-            padding: 10px 8px !important;
+            padding: 10px 8px ;
             justify-content: center;
             overflow: hidden;
         }
         .sidebar.collapsed .nav-link i { 
-            margin-right: 0 !important;
+            margin-right: 0 ;
             font-size: 1.3rem;
             width: 100%;
             text-align: center;
@@ -199,20 +199,20 @@
             .sidebar {
                 transform: translateX(-100%);
                 z-index: 200;
-                width: 250px !important;
+                width: 250px ;
             }
             .sidebar.open { 
                 transform: translateX(0); 
             }
             .sidebar.collapsed {
-                width: 80px !important;
+                width: 80px ;
                 transform: translateX(0);
             }
             .sidebar-overlay.open { 
                 display: block; 
             }
             .main-content { 
-                margin-left: 0 !important; 
+                margin-left: 0 ; 
             }
             .hamburger { 
                 display: block; 
@@ -232,6 +232,40 @@
             background-color: #2d3139;
             border-color: #444;
             color: var(--text-main);
+        }
+        [data-theme="dark"] .table {
+            --bs-table-bg: var(--bg-card);
+            --bs-table-color: var(--text-main);
+            --bs-table-striped-bg: #2d3139;
+            --bs-table-hover-bg: #2d3139;
+            --bs-table-border-color: #444;
+            color: var(--text-main);
+        }
+        [data-theme="dark"] .text-muted {
+            color: var(--text-muted) !important;
+        }
+        [data-theme="dark"] .card,
+        [data-theme="dark"] .modal-content,
+        [data-theme="dark"] .modal-header,
+        [data-theme="dark"] .modal-footer {
+            background-color: var(--bg-card) !important;
+            color: var(--text-main);
+            border-color: #444 !important;
+        }
+        [data-theme="dark"] .bg-white,
+        [data-theme="dark"] .bg-light {
+            background-color: #2d3139 !important;
+            color: var(--text-main) !important;
+            border-color: #444 !important;
+        }
+        [data-theme="dark"] .alert-info,
+        [data-theme="dark"] .alert-light {
+            background-color: #1f3a4d !important;
+            color: var(--text-main) !important;
+            border-color: #2d6a9f !important;
+        }
+        [data-theme="dark"] .btn-close {
+            filter: invert(1);
         }
     </style>
     @yield('styles')

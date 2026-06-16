@@ -50,13 +50,14 @@
                              style="width:38px;height:38px;background:#28a745;">
                             <i class="bi bi-arrow-repeat"></i>
                         </div>
-                        <h6 class="fw-bold mb-0 text-dark">Renouvellement de chambre</h6>
+                        <h6 class="fw-bold mb-0">Renouvellement de chambre</h6>
+
                         <i class="bi bi-chevron-right ms-auto text-muted"></i>
                     </div>
                     <p class="text-muted small mb-3">Demandez le renouvellement de votre chambre pour l'année prochaine.</p>
 
                     @if($periodeRenouvellement)
-                        <div class="rounded-2 px-3 py-2 small mb-0" style="background:#e8f4fd; color:#1a3c5e;">
+                        <div class="rounded-2 px-3 py-2 small mb-0 periode-badge">
                             <i class="bi bi-info-circle me-1"></i>
                             Période ouverte jusqu'au
                             <strong>{{ \Carbon\Carbon::parse($periodeRenouvellement->date_fin)->format('d/m/Y') }}</strong>
@@ -81,13 +82,13 @@
                              style="width:38px;height:38px;background:#fd7e14;">
                             <i class="bi bi-shuffle"></i>
                         </div>
-                        <h6 class="fw-bold mb-0 text-dark">Changement de chambre</h6>
+                        <h6 class="fw-bold mb-0 ">Changement de chambre</h6>
                         <i class="bi bi-chevron-right ms-auto text-muted"></i>
                     </div>
                     <p class="text-muted small mb-3">Demandez à changer de chambre en choisissant parmi les disponibles.</p>
 
                     @if($periodeChangement)
-                        <div class="rounded-2 px-3 py-2 small mb-0" style="background:#e8f4fd; color:#1a3c5e;">
+                        <div class="rounded-2 px-3 py-2 small mb-0 periode-badge">
                             <i class="bi bi-info-circle me-1"></i>
                             Période ouverte jusqu'au
                             <strong>{{ \Carbon\Carbon::parse($periodeChangement->date_fin)->format('d/m/Y') }}</strong>
@@ -180,6 +181,46 @@
 <style>
     .hover-card { transition: transform 0.15s ease, box-shadow 0.15s ease; }
     .hover-card:hover { transform: translateY(-3px); box-shadow: 0 8px 20px rgba(0,0,0,0.1) !important; }
+    [data-theme="dark"] .text-muted {
+            color: var(--text-muted) !important;
+        }
+        [data-theme="dark"] .card,
+        [data-theme="dark"] .modal-content,
+        [data-theme="dark"] .modal-header,
+        [data-theme="dark"] .modal-footer {
+            background-color: var(--bg-card) !important;
+            color: var(--text-main);
+            border-color: #444 !important;
+        }
+        [data-theme="dark"] .bg-white,
+        [data-theme="dark"] .bg-light {
+            background-color: #2d3139 !important;
+            color: var(--text-main) !important;
+            border-color: #444 !important;
+        }
+        [data-theme="dark"] .alert-info,
+        [data-theme="dark"] .alert-light {
+            background-color: #1f3a4d !important;
+            color: var(--text-main) !important;
+            border-color: #2d6a9f !important;
+        }
+        [data-theme="dark"] .btn-close {
+            filter: invert(1);
+        }
+        [data-theme="dark"] [style*="background"] h2,
+        [data-theme="dark"] [style*="background"] h5,
+        [data-theme="dark"] [style*="background"] p {
+            color: inherit;
+        }
+        .periode-badge {
+        background: #e8f4fd;
+        color: #1a3c5e;
+    }
+    [data-theme="dark"] .periode-badge {
+        background: #1f3a4d;
+        color: var(--text-main);
+    }
 </style>
+
 
 @endsection

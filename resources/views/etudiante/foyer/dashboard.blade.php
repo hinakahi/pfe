@@ -144,7 +144,17 @@
 
     [data-theme="dark"] .resa-row { border-color: rgba(255,255,255,0.07); }
     [data-theme="dark"] .promo-img-placeholder { background: linear-gradient(135deg,#2d2000,#3d2e00); color:#fbbf24; }
+    [data-theme="dark"] .text-muted {
+        color: var(--text-muted) !important;
+    }
+    [data-theme="dark"] .form-select,
+    [data-theme="dark"] .form-control {
+        background-color: #2d3139 !important;
+        color: var(--text-main) !important;
+        border-color: #444 !important;
+    }
 </style>
+
 @endsection
 
 @section('content')

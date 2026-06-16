@@ -267,5 +267,29 @@
     .carousel-item {
         transition: opacity 0.8s ease-in-out !important;
     }
+
+    /* ── Mode nuit ── */
+    [data-theme="dark"] .text-muted {
+        color: var(--text-muted) !important;
+    }
+
+    [data-theme="dark"] .card,
+    [data-theme="dark"] .modal-content,
+    [data-theme="dark"] .modal-header {
+        background-color: var(--bg-card) !important;
+        color: var(--text-main);
+        border-color: #444 !important;
+    }
+
+    [data-theme="dark"] .bg-white,
+    [data-theme="dark"] .input-group-text.bg-white {
+        background-color: #2d3139 !important;
+        color: var(--text-main) !important;
+        border-color: #444 !important;
+    }
+
+    [data-theme="dark"] .btn-close {
+        filter: invert(1);
+    }
 </style>
 @endsection

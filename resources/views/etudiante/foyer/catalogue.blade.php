@@ -317,6 +317,13 @@
                         {{ Str::limit($article->description, 55) }}
                     </p>
                     @endif
+                    {{-- Date de péremption --}}
+@if($article->date_peremption)
+    <div class="text-muted" style="font-size:.75rem;">
+        <i class="bi bi-calendar-event me-1"></i>
+        Expire le {{ $article->date_peremption->format('d/m/Y') }}
+    </div>
+@endif
 
                     {{-- Prix --}}
                     <div class="d-flex justify-content-between align-items-center mt-auto">

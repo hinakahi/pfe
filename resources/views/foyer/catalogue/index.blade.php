@@ -225,6 +225,51 @@
     .modal-content { border-radius: 16px; border: none; box-shadow: 0 8px 40px rgba(0,0,0,0.15); }
     .modal-header  { background: #f8fafc; border-radius: 16px 16px 0 0; border-bottom: 1.5px solid #e2e8f0; }
     .modal-footer  { border-top: 1.5px solid #e2e8f0; }
+    /* ── Mode nuit ── */
+    [data-theme="dark"] .catalogue-card {
+        background: var(--bg-card);
+    }
+    [data-theme="dark"] .catalogue-table thead th {
+        background: #1f2329;
+        color: var(--text-muted);
+        border-bottom-color: #444;
+    }
+    [data-theme="dark"] .catalogue-table tbody td {
+        color: var(--text-main);
+        border-bottom-color: #3a3f47;
+    }
+    [data-theme="dark"] .catalogue-table tbody tr:hover {
+        background: #2d3139;
+    }
+    [data-theme="dark"] .search-bar,
+    [data-theme="dark"] .filter-select {
+        background: #2d3139;
+        border-color: #444;
+        color: var(--text-main);
+    }
+    [data-theme="dark"] .article-photo-placeholder {
+        background: #2d3139;
+        color: #6b7280;
+    }
+    [data-theme="dark"] td[style*="color:#64748b"],
+    [data-theme="dark"] span[style*="color:#64748b"] {
+        color: var(--text-muted) !important;
+    }
+    [data-theme="dark"] .prix-normal {
+        color: var(--text-main);
+    }
+    [data-theme="dark"] .badge-other {
+        background: #2d3139;
+        color: var(--text-muted);
+    }
+    [data-theme="dark"] .badge-promo-inactive {
+        background: #2d3139;
+        color: var(--text-muted);
+    }
+    [data-theme="dark"] .modal-header {
+        background: #1f2329;
+        border-bottom-color: #444;
+    }
 </style>
 
 <div class="catalogue-card">
