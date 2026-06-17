@@ -9,21 +9,20 @@ use Maatwebsite\Excel\Facades\Excel;
 
 class ChambreController extends Controller
 {
-    public function dashboard()
-    {
-        $toutes = Chambre::all();
+   public function dashboard()
+{
+    $stats = [
+        'total'       => Chambre::count(),
+        'disponibles' => Chambre::where('statut', 'libre')->count(),
+        'occupees'    => Chambre::where('statut', 'occupee')->count(),
+        'une_place'   => Chambre::where('statut', 'partielle')->count(),
+        'publiees'    => Chambre::where('publiee', true)->count(),
+    ];
 
-        $stats = [
-            'total'    => $toutes->count(),
-            'libres'   => $toutes->filter(fn($c) => $c->statut === 'libre')->count(),
-            'occupees' => $toutes->filter(fn($c) => $c->statut === 'occupee')->count(),
-            'publiees' => Chambre::where('publiee', true)->count(),
-        ];
+    $dernieres = Chambre::latest()->take(5)->get();
 
-        $dernieres = Chambre::latest()->take(5)->get();
-
-        return view('hebergement.dashboard', compact('stats', 'dernieres'));
-    }
+    return view('hebergement.dashboard', compact('stats', 'dernieres'));
+}
 
     public function index(Request $request)
     {

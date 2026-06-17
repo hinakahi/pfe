@@ -168,7 +168,7 @@
         @foreach($promotions as $article)
         <div class="col-6 col-md-4 col-lg-3 article-item"
              data-nom="{{ strtolower($article->nom_article) }}"
-             data-prix="{{ $article->prix }}">
+             data-prix="{{ $article->prix_actuel }}">
             <div class="card article-card h-100">
 
                 {{-- Image avec badge PROMO --}}
@@ -212,7 +212,14 @@
 
                     {{-- Prix + stock restant --}}
                     <div class="d-flex justify-content-between align-items-center mt-auto">
-                        <span class="prix-label" style="color:#d97706;">{{ number_format($article->prix, 2) }} DA</span>
+                        <div class="d-flex align-items-center gap-2">
+    <span class="text-muted small" style="text-decoration: line-through;">
+        {{ number_format($article->prix, 2) }} DA
+    </span>
+    <span class="prix-label" style="color:#d97706;">
+        {{ number_format($article->prix_actuel, 2) }} DA
+    </span>
+</div>
                         <span class="text-muted small">{{ $article->stock }} restant(s)</span>
                     </div>
 

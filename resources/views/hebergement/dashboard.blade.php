@@ -18,7 +18,7 @@
     </div>
     <div class="col-md-3">
         <div class="p-4 rounded-3 text-white" style="background: linear-gradient(135deg, #28a745, #20c997);">
-            <div style="font-size:2rem; font-weight:700;">{{ $stats['libres'] }}</div>
+            <div style="font-size:2rem; font-weight:700;">{{ $stats['disponibles'] }}</div>
             <div><i class="bi bi-check-circle me-1"></i> Disponibles</div>
         </div>
     </div>
@@ -98,11 +98,13 @@
                     <td>{{ $chambre->bloc ?? '-' }}</td>
                     <td>{{ $chambre->etage }}</td>
                     <td>
-                        @if($chambre->statut === 'libre')
-                            <span class="badge bg-success">Disponible</span>
-                        @else
-                            <span class="badge bg-danger">Occupée</span>
-                        @endif
+                       @if($chambre->statut === 'libre')
+    <span class="badge bg-success">Disponible</span>
+@elseif($chambre->statut === 'partielle')
+    <span class="badge bg-warning text-dark">1 place libre</span>
+@else
+    <span class="badge bg-danger">Occupée</span>
+@endif
                     </td>
                 </tr>
                 @empty

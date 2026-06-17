@@ -196,9 +196,11 @@ public function modifierRenouvellement(Request $request, DemandeRenouvellement $
                             ->where('date_fin', '>=', now())
                             ->first();
 
-        $chambresDisponibles = Chambre::whereNull('etudiante_1')
-                               ->where('publiee', true)
-                               ->paginate(15);
+       //  Inclure aussi les chambres avec une place libre (partielle)
+$chambresDisponibles = Chambre::whereIn('statut', ['libre', 'partielle'])
+                       ->where('publiee', true)
+                       ->where('id', '!=', $maChambre?->id)
+                       ->paginate(15);
 
         $demandesChangement = DemandeChangement::where('etudiante_id', auth()->id())
                              ->latest()->get();

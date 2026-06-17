@@ -326,6 +326,83 @@
            class="btn btn-sm btn-outline-success mb-1" title="Prise en charge">
             <i class="bi bi-file-earmark-pdf"></i> P.E.C
         </a>
+        <button class="btn btn-sm btn-outline-warning mb-1"
+                data-bs-toggle="modal" data-bs-target="#modifierPecModal{{ $demande->id }}">
+            <i class="bi bi-pencil"></i> Modifier
+        </button>
+
+        <div class="modal fade" id="modifierPecModal{{ $demande->id }}" tabindex="-1">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header bg-warning">
+                        <h5 class="modal-title">
+                            <i class="bi bi-pencil me-2"></i>Modifier la prise en charge — {{ $demande->etudiante->name }}
+                        </h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <form method="POST" action="{{ route('hebergement.changements.modifier-pec', $demande) }}">
+                        @csrf
+                        @method('PUT')
+                        <div class="modal-body">
+                            @php
+                                $individuelActuel = $demande->materiel_json['individuel'] ?? [];
+                                $collectifActuel = $demande->materiel_json['collectif'] ?? [];
+                            @endphp
+
+                            <h6 class="fw-bold mt-3">Matériel individuel</h6>
+                            <table class="table table-sm table-bordered">
+                                <thead class="table-light">
+                                    <tr><th>N°</th><th>Désignation</th><th style="width:100px">Quantité</th></tr>
+                                </thead>
+                                <tbody>
+                                    @foreach($individuelActuel as $i => $item)
+                                    <tr>
+                                        <td>{{ sprintf('%02d', $i+1) }}</td>
+                                        <td>
+                                            <input type="text" name="individuel[{{ $i }}][designation]"
+                                                   value="{{ $item['designation'] }}" class="form-control form-control-sm">
+                                        </td>
+                                        <td>
+                                            <input type="text" name="individuel[{{ $i }}][quantite]"
+                                                   value="{{ $item['quantite'] }}" class="form-control form-control-sm">
+                                        </td>
+                                    </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+
+                            <h6 class="fw-bold mt-3">Matériel collectif</h6>
+                            <table class="table table-sm table-bordered">
+                                <thead class="table-light">
+                                    <tr><th>N°</th><th>Désignation</th><th style="width:100px">Quantité</th></tr>
+                                </thead>
+                                <tbody>
+                                    @foreach($collectifActuel as $i => $item)
+                                    <tr>
+                                        <td>{{ sprintf('%02d', $i+1) }}</td>
+                                        <td>
+                                            <input type="text" name="collectif[{{ $i }}][designation]"
+                                                   value="{{ $item['designation'] }}" class="form-control form-control-sm">
+                                        </td>
+                                        <td>
+                                            <input type="text" name="collectif[{{ $i }}][quantite]"
+                                                   value="{{ $item['quantite'] }}" class="form-control form-control-sm">
+                                        </td>
+                                    </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                            <button type="submit" class="btn btn-warning">
+                                <i class="bi bi-check-lg me-1"></i> Mettre à jour le PDF
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
         @endif
     @else
         <span class="text-muted">-</span>

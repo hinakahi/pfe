@@ -2,19 +2,8 @@
 @section('page-title', 'Changement de chambre')
 @section('content')
 
-{{-- Messages flash --}}
-@if(session('success'))
-    <div class="alert alert-success alert-dismissible fade show">
-        <i class="bi bi-check-circle me-2"></i>{{ session('success') }}
-        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-    </div>
-@endif
-@if(session('error'))
-    <div class="alert alert-danger alert-dismissible fade show">
-        <i class="bi bi-exclamation-circle me-2"></i>{{ session('error') }}
-        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-    </div>
-@endif
+
+
 
 {{-- Titre --}}
 <div class="d-flex align-items-center gap-2 mb-4">
@@ -207,14 +196,15 @@
         </h6>
         <table class="table table-sm table-hover mb-0">
             <thead class="table-light">
-                <tr>
-                    <th>Date</th>
-                    <th>Chambre actuelle</th>
-                    <th>Chambre demandée</th>
-                    <th>Statut</th>
-                    <th>Motif refus</th>
-                </tr>
-            </thead>
+    <tr>
+        <th>Date</th>
+        <th>Chambre actuelle</th>
+        <th>Chambre demandée</th>
+        <th>Statut</th>
+        <th>Motif refus</th>
+        <th>Documents</th>
+    </tr>
+</thead>
             <tbody>
                 @forelse($demandesChangement as $d)
                 <tr>
@@ -240,13 +230,31 @@
                             <span class="badge bg-danger">Refusée</span>
                         @endif
                     </td>
-                    <td><small>{{ $d->motif_refus ?? '-' }}</small></td>
-                </tr>
-                @empty
-                <tr>
-                    <td colspan="5" class="text-center text-muted py-3">Aucune demande effectuée.</td>
-                </tr>
-                @endforelse
+                  <td><small>{{ $d->motif_refus ?? '-' }}</small></td>
+<td>
+    @if($d->statut === 'acceptee' && ($d->decision_pdf || $d->prise_en_charge_pdf))
+        @if($d->decision_pdf)
+        <a href="{{ asset('storage/'.$d->decision_pdf) }}" target="_blank"
+           class="btn btn-sm btn-outline-success mb-1" title="Décision de réadmission">
+            <i class="bi bi-file-earmark-pdf"></i> Décision
+        </a>
+        @endif
+        @if($d->prise_en_charge_pdf)
+        <a href="{{ asset('storage/'.$d->prise_en_charge_pdf) }}" target="_blank"
+           class="btn btn-sm btn-outline-success mb-1" title="Prise en charge">
+            <i class="bi bi-file-earmark-pdf"></i> P.E.C
+        </a>
+        @endif
+    @else
+        <span class="text-muted">-</span>
+    @endif
+</td>
+</tr>
+@empty
+<tr>
+    <td colspan="6" class="text-center text-muted py-3">Aucune demande effectuée.</td>
+</tr>
+@endforelse
             </tbody>
         </table>
     </div>
