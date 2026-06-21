@@ -61,6 +61,16 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::get('messages', [MessageController::class, 'index'])->name('messages');
     Route::get('messages/{message}', [MessageController::class, 'show'])->name('messages.show');
     Route::delete('messages/{message}', [MessageController::class, 'destroy'])->name('messages.destroy');
+   Route::get('/notifications', function () {
+    $notifications = auth()->user()->notifications()->paginate(15);
+    return view('admin.notifications.index', compact('notifications'));
+})->name('notifications');
+
+Route::post('/notifications/{id}/read', function ($id) {
+    $notification = auth()->user()->notifications()->findOrFail($id);
+    $notification->markAsRead();
+    return back();
+})->name('notifications.read');
 });
 // ─── Étudiante ────────────────────────────────────────────────
 Route::middleware(['auth', 'role:etudiante'])->prefix('etudiante')->name('etudiante.')->group(function () {
@@ -180,13 +190,26 @@ Route::prefix('hebergement')->middleware(['auth', 'role:resp_hebergement'])->gro
     Route::put('/hebergement/renouvellements/{demande}/modifier-pec', [RenouvellementController::class, 'modifierPriseEnCharge'])
     ->name('hebergement.renouvellements.modifier-pec');
     Route::post('/renouvellements/{demande}/refuser', [RenouvellementController::class, 'refuser'])->name('hebergement.renouvellements.refuser');
+
     Route::get('/changements', [ChangementController::class, 'index'])->name('hebergement.changements.index');
     Route::post('/changements/{demande}/accepter', [ChangementController::class, 'accepter'])->name('hebergement.changements.accepter');
     Route::put('/hebergement/changements/{demande}/modifier-pec', [ChangementController::class, 'modifierPriseEnCharge'])
     ->name('hebergement.changements.modifier-pec');
     Route::post('/changements/{demande}/refuser', [ChangementController::class, 'refuser'])->name('hebergement.changements.refuser');
+    Route::get('/annonces', [\App\Http\Controllers\ResponsableHebergement\AnnonceController::class, 'index'])->name('hebergement.annonces.index');
      Route::patch('chambres/{chambre}/depublier', [ChambreController::class, 'depublier'])
      ->name('hebergement.chambres.depublier');
+
+     Route::get('/notifications', function () {
+    $notifications = auth()->user()->notifications()->paginate(15);
+    return view('hebergement.notifications.index', compact('notifications'));
+})->name('hebergement.notifications');
+
+Route::post('/notifications/{id}/read', function ($id) {
+    $notification = auth()->user()->notifications()->findOrFail($id);
+    $notification->markAsRead();
+    return back();
+})->name('hebergement.notifications.read');
 
 });
 
@@ -198,6 +221,28 @@ Route::prefix('technicien')->middleware(['auth', 'role:technicien'])->group(func
     Route::post('/demandes/{maintenance}/traiter', [DemandeMaintController::class, 'traiter'])->name('technicien.demandes.traiter');
     Route::post('/incidents', [IncidentController::class, 'store'])->name('technicien.incidents.store');
     Route::resource('stock', StockController::class)->names('technicien.stock');
+    Route::get('/notifications', function () {
+    $notifications = auth()->user()->notifications()->paginate(15);
+    return view('technicien.notifications.index', compact('notifications'));
+})->name('technicien.notifications');
+
+Route::post('/notifications/{id}/read', function ($id) {
+    $notification = auth()->user()->notifications()->findOrFail($id);
+    $notification->markAsRead();
+    return back();
+})->name('technicien.notifications.read');
+
+Route::get('/annonces', function () {
+    $annonces = \App\Models\Annonce::with('user')
+        ->where(function ($q) {
+            $q->where('destinataire', 'staff')
+              ->orWhere('destinataire', 'tous');
+        })
+        ->where('publiee', true)
+        ->latest()
+        ->paginate(10);
+    return view('technicien.annonces.index', compact('annonces'));
+})->name('technicien.annonces.index');
 });
 
 // ─── Responsable Foyer ────────────────────────────────────────
@@ -215,12 +260,23 @@ Route::prefix('foyer')->middleware(['auth', 'role:resp_foyer'])->group(function 
     Route::delete('/annonces/{annonce}', [\App\Http\Controllers\ResponsableFoyer\AnnonceController::class, 'destroy'])->name('foyer.annonces.destroy');
     Route::get('/annonces/{annonce}/edit', [\App\Http\Controllers\ResponsableFoyer\AnnonceController::class, 'edit'])->name('foyer.annonces.edit');
     Route::post('/annonces/{annonce}/update', [\App\Http\Controllers\ResponsableFoyer\AnnonceController::class, 'update'])->name('foyer.annonces.update');
-    Route::post('reservations/{reservation}/recuperee', [ReservationController::class, 'recuperee'])
-     ->name('foyer.reservations.recuperee');
+    Route::post('reservations/{reservation}/recuperee', [ReservationController::class, 'recuperee'])->name('foyer.reservations.recuperee');
     Route::post('foyer/notifications/mark-all-read', function () {
-    auth()->user()->unreadNotifications->markAsRead();
-    return back();
-})->name('foyer.notifications.markAllRead')->middleware('auth');
+        auth()->user()->unreadNotifications->markAsRead();
+        return back();
+    })->name('foyer.notifications.markAllRead')->middleware('auth');
+
+    // ─── Notifications ───────────────────────────────────────
+    Route::get('/notifications', function () {
+        $notifications = auth()->user()->notifications()->paginate(15);
+        return view('foyer.notifications.index', compact('notifications'));
+    })->name('foyer.notifications');
+
+    Route::post('/notifications/{id}/read', function ($id) {
+        $notification = auth()->user()->notifications()->findOrFail($id);
+        $notification->markAsRead();
+        return back();
+    })->name('foyer.notifications.read');
 });
 
 // ─── Inscription ─────────────────────────────────────────────

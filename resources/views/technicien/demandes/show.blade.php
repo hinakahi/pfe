@@ -114,10 +114,7 @@
                             <div class="form-text">Visible par tous les techniciens pour qu'ils puissent reprendre la demande.</div>
                         </div>
 
-                        <div class="alert alert-info py-2" style="font-size:.82rem;">
-                            <i class="bi bi-bell me-1"></i>
-                            Passer à <strong>Terminée</strong> notifie automatiquement l'étudiante.
-                        </div>
+                       
 
                     </div>
                 </div>

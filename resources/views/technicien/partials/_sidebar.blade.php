@@ -3,7 +3,11 @@
     <i class="bi bi-speedometer2"></i>
     <span>Dashboard</span>
 </a>
-
+<a href="{{ route('technicien.annonces.index') }}"
+   class="nav-link {{ request()->routeIs('technicien.annonces.*') ? 'active' : '' }}">
+    <i class="bi bi-megaphone"></i>
+    <span>Annonces</span>
+</a>
 @php
     $demandesEnAttente = \App\Models\Maintenance::where('statut', 'en_attente')->count();
 @endphp

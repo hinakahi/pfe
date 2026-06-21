@@ -14,7 +14,7 @@ return new class extends Migration
             $table->string('titre');
             $table->text('contenu');
             $table->enum('categorie', ['generale', 'hebergement', 'foyer', 'maintenance', 'promotion'])->default('generale');
-            $table->enum('destinataire', ['tous', 'etudiantes', 'techniciens'])->default('tous');
+            $table->enum('destinataire', ['tous', 'etudiantes', 'techniciens', 'staff'])->default('tous');
             $table->timestamp('date_publication')->useCurrent();
             $table->timestamps();
         });

@@ -23,7 +23,6 @@ class InscriptionController extends Controller
             'photo'     => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
 
-        // Vérifier si le matricule est autorisé
         $matricule = MatriculeAutorise::where('matricule', $request->matricule)
                                       ->where('utilise', false)
                                       ->first();
@@ -34,32 +33,36 @@ class InscriptionController extends Controller
             ])->withInput();
         }
 
-        // Vérifier que le matricule n'est pas déjà utilisé dans users
         if (User::where('matricule', $request->matricule)->exists()) {
             return back()->withErrors([
                 'matricule' => 'Ce matricule est déjà associé à un compte.'
             ])->withInput();
         }
 
-        // 1. Gérer le fichier photo AVANT de créer l'utilisateur
-$photoPath = null;
-if ($request->hasFile('photo')) {
-    $photoPath = $request->file('photo')->store('users', 'public');
-}
+        $photoPath = null;
+        if ($request->hasFile('photo')) {
+            $photoPath = $request->file('photo')->store('users', 'public');
+        }
 
-// 2. Créer l'utilisateur
-User::create([
-    'name'      => $request->name,
-    'matricule' => $request->matricule,
-    'photo'     => $photoPath, 
-    'email'     => $request->email,
-    'phone'     => $request->phone,
-    'password'  => Hash::make($request->password),
-    'role' => $matricule->role,
-]);
+        // Créer l'utilisateur et le capturer
+        $newUser = User::create([
+            'name'      => $request->name,
+            'matricule' => $request->matricule,
+            'photo'     => $photoPath,
+            'email'     => $request->email,
+            'phone'     => $request->phone,
+            'password'  => Hash::make($request->password),
+            'role'      => $matricule->role,
+        ]);
 
         // Marquer le matricule comme utilisé
         $matricule->update(['utilise' => true]);
+
+        // Notifier l'admin
+        $admin = User::where('role', 'admin')->first();
+        if ($admin) {
+            $admin->notify(new \App\Notifications\NouvelUtilisateurAdmin($newUser));
+        }
 
         return redirect()->route('login')
             ->with('success', 'Compte créé avec succès ! Connectez-vous.');

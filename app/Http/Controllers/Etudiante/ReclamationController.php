@@ -9,7 +9,6 @@ use Carbon\Carbon;
 
 class ReclamationController extends Controller
 {
-    // Sécurité : l'étudiante ne voit que SES réclamations
     private function myReclamations()
     {
         return Reclamation::where('etudiante_id', Auth::id());
@@ -19,19 +18,16 @@ class ReclamationController extends Controller
     {
         $query = $this->myReclamations();
 
-        //  FILTRE 1 : Par statut
         if ($request->filled('statut')) {
             $query->where('statut', $request->statut);
         }
 
-        //  FILTRE 2 : Par période (7, 30, 90, 365 jours)
         if ($request->filled('periode')) {
             $days = (int) $request->periode;
             $startDate = Carbon::now()->subDays($days);
             $query->where('date_reclamation', '>=', $startDate);
         }
 
-        //  FILTRE 3 : Par réponse (avec/sans)
         if ($request->filled('reponse')) {
             if ($request->reponse === 'avec') {
                 $query->whereNotNull('reponse');
@@ -40,11 +36,10 @@ class ReclamationController extends Controller
             }
         }
 
-        // Tri par date décroissante et pagination
         $reclamations = $query
             ->orderBy('date_reclamation', 'desc')
             ->paginate(10)
-            ->withQueryString(); // Important : garder les paramètres de filtre
+            ->withQueryString();
 
         return view('etudiante.reclamations.index', compact('reclamations'));
     }
@@ -65,13 +60,20 @@ class ReclamationController extends Controller
             'message.min'      => 'Le message doit contenir au moins 10 caractères.',
         ]);
 
-        Reclamation::create([
-            'etudiante_id' => Auth::id(),
-            'sujet'        => $request->sujet,
-            'message'      => $request->message,
-            'statut'       => 'en_attente',
+        // Créer et capturer la réclamation
+        $reclamation = Reclamation::create([
+            'etudiante_id'     => Auth::id(),
+            'sujet'            => $request->sujet,
+            'message'          => $request->message,
+            'statut'           => 'en_attente',
             'date_reclamation' => now(),
         ]);
+
+        // Notifier l'admin
+        $admin = \App\Models\User::where('role', 'admin')->first();
+        if ($admin) {
+            $admin->notify(new \App\Notifications\NouvelleReclamationAdmin($reclamation));
+        }
 
         return redirect()
             ->route('etudiante.reclamations.index')
@@ -151,7 +153,7 @@ class ReclamationController extends Controller
     public function updateAdmin(Request $request, Reclamation $reclamation)
     {
         $reclamation->update([
-            'statut' => $request->statut,
+            'statut'  => $request->statut,
             'reponse' => $request->reponse,
         ]);
         return back()->with('success', 'Mise à jour réussie');

@@ -113,11 +113,17 @@ class FoyerController extends Controller
             return back()->with('error', 'Votre panier est vide');
         }
         
-        foreach ($panier as $item) {
-            $item->update(['statut' => 'en_attente']);
-        }
-        
-        return back()->with('success', 'Commande confirmée. En attente de validation.');
+         foreach ($panier as $item) {
+    $item->update(['statut' => 'en_attente']);
+}
+
+// Notifier le resp_foyer
+$respFoyer = \App\Models\User::where('role', 'resp_foyer')->first();
+if ($respFoyer) {
+    $respFoyer->notify(new \App\Notifications\NouvelleReservationNotification($user));
+}
+
+return back()->with('success', 'Commande confirmée. En attente de validation.');
     }
 
     public function annuler(Reservation $reservation)

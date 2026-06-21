@@ -324,12 +324,28 @@
             <h5 class="mb-0">@yield('page-title')</h5>
         </div>
         <div class="d-flex align-items-center gap-2">
-            @if(auth()->user()->unreadNotifications->count() > 0)
-            <span class="badge bg-danger">
-                {{ auth()->user()->unreadNotifications->count() }}
-                <i class="bi bi-bell"></i>
-            </span>
-            @endif
+            @php
+    $role = auth()->user()->role;
+    $notifRoute = match($role) {
+        'technicien' => 'technicien.notifications',
+        'admin'            => 'admin.notifications',
+        'resp_hebergement' => 'hebergement.notifications',
+        'etudiante'        => 'etudiante.notifications',
+        'resp_foyer'       => 'foyer.notifications',
+        default            => null,
+    };
+    $nbNotifs = auth()->user()->unreadNotifications->count();
+@endphp
+@if($notifRoute)
+<a href="{{ route($notifRoute) }}" class="btn btn-sm position-relative p-0 me-2">
+    <i class="bi bi-bell-fill fs-5 text-warning"></i>
+    @if($nbNotifs > 0)
+    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+        {{ $nbNotifs }}
+    </span>
+    @endif
+</a>
+@endif
             @if(auth()->user()->photo)
                 <img src="{{ asset('storage/' . auth()->user()->photo) }}" 
                      alt="Photo" 

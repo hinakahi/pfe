@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Annonce;
 use App\Models\ContactMessage;
+use App\Models\User;
 
 class PublicController extends Controller
 {
@@ -22,12 +23,19 @@ class PublicController extends Controller
             'message' => 'required|string|max:2000',
         ]);
 
-        ContactMessage::create([
+        // Créer et capturer le message
+        $contactMessage = ContactMessage::create([
             'nom'     => $request->nom,
             'email'   => $request->email,
             'objet'   => $request->objet,
             'message' => $request->message,
         ]);
+
+        // Notifier l'admin
+        $admin = User::where('role', 'admin')->first();
+        if ($admin) {
+            $admin->notify(new \App\Notifications\NouveauMessageAdmin($contactMessage));
+        }
 
         return back()->with('success', 'Votre message a été envoyé avec succès.');
     }

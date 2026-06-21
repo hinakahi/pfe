@@ -5,14 +5,11 @@ use App\Models\Maintenance;
 use Illuminate\Notifications\Notification;
 use Illuminate\Support\Str;
 
-class NouvelleDemainteNotification extends Notification
+class NouvelleDemandeTechnicien extends Notification
 {
     public function __construct(public Maintenance $maintenance) {}
 
-    public function via($notifiable): array
-    {
-        return ['database'];
-    }
+    public function via($notifiable): array { return ['database']; }
 
     public function toDatabase($notifiable): array
     {

@@ -69,7 +69,7 @@ class HebergementController extends Controller
         return view('etudiante.hebergement.index', compact(
             'maChambre',
             'periodeRenouvellement',
-            'periodeChangement',        // ✅ ajouté
+            'periodeChangement',        
             'demandesRenouvellement',
             'demandesChangement'
         ));

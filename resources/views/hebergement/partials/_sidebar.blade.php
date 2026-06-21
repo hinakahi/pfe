@@ -2,6 +2,10 @@
     <i class="bi bi-speedometer2"></i>
     <span>Dashboard</span>
 </a>
+<a href="{{ route('hebergement.annonces.index') }}" class="nav-link {{ request()->routeIs('hebergement.annonces.*') ? 'active' : '' }}">
+    <i class="bi bi-megaphone"></i>
+    <span>Annonces</span>
+</a>
 
 <a href="{{ route('hebergement.chambres.index') }}" class="nav-link {{ request()->routeIs('hebergement.chambres.index') ? 'active' : '' }}">
     <i class="bi bi-door-open"></i>
