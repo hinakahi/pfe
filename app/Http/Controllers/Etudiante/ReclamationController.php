@@ -87,16 +87,29 @@ class ReclamationController extends Controller
     }
 
     public function edit(Reclamation $reclamation)
-    {
-        abort_if($reclamation->etudiante_id !== Auth::id(), 403);
-        return view('etudiante.reclamations.edit', compact('reclamation'));
+{
+    abort_if($reclamation->etudiante_id !== Auth::id(), 403);
+
+    if (in_array($reclamation->statut, ['resolue', 'fermee'])) {
+        return redirect()
+            ->route('etudiante.reclamations.show', $reclamation)
+            ->with('error', 'Impossible de modifier une réclamation déjà résolue ou fermée.');
     }
 
-    public function update(Request $request, Reclamation $reclamation)
-    {
-        abort_if($reclamation->etudiante_id !== Auth::id(), 403);
+    return view('etudiante.reclamations.edit', compact('reclamation'));
+}
 
-        $request->validate([
+    public function update(Request $request, Reclamation $reclamation)
+{
+    abort_if($reclamation->etudiante_id !== Auth::id(), 403);
+
+    if (in_array($reclamation->statut, ['resolue', 'fermee'])) {
+        return redirect()
+            ->route('etudiante.reclamations.show', $reclamation)
+            ->with('error', 'Impossible de modifier une réclamation déjà résolue ou fermée.');
+    }
+
+    $request->validate([
             'sujet'   => 'required|string|max:255',
             'message' => 'required|string|min:10',
         ], [
@@ -115,11 +128,17 @@ class ReclamationController extends Controller
             ->with('success', 'Votre réclamation a été modifiée avec succès.');
     }
 
-    public function destroy(Reclamation $reclamation)
-    {
-        abort_if($reclamation->etudiante_id !== Auth::id(), 403);
+     public function destroy(Reclamation $reclamation)
+{
+    abort_if($reclamation->etudiante_id !== Auth::id(), 403);
 
-        $reclamation->delete();
+    if (in_array($reclamation->statut, ['resolue', 'fermee'])) {
+        return redirect()
+            ->route('etudiante.reclamations.show', $reclamation)
+            ->with('error', 'Impossible de supprimer une réclamation déjà résolue ou fermée.');
+    }
+
+    $reclamation->delete();
 
         return redirect()
             ->route('etudiante.reclamations.index')

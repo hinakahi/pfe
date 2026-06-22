@@ -14,9 +14,15 @@ class AnnonceController extends Controller
 {
     $annonces = Annonce::where('user_id', auth()->id())
         ->latest()
-        ->paginate(10);
+        ->paginate(10, ['*'], 'mes_annonces');
 
-    return view('foyer.annonces.index', compact('annonces'));
+    $annoncesAdmin = Annonce::whereHas('user', function ($q) {
+            $q->where('role', 'admin');
+        })
+        ->latest()
+        ->paginate(10, ['*'], 'annonces_admin');
+
+    return view('foyer.annonces.index', compact('annonces', 'annoncesAdmin'));
 }
 
     public function create()

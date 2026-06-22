@@ -87,15 +87,15 @@
 
                     {{-- Afficher la photo actuelle si elle existe --}}
                     @if ($stock->photo)
-                        <div class="mb-2">
-                            <img src="{{ Storage::url($stock->photo) }}"
-                                 alt="photo actuelle"
-                                 class="img-thumbnail"
-                                  style="max-height: 250px; width:100%; object-fit:cover;">
-                            <div class="form-text">Photo actuelle — choisir une nouvelle photo pour la remplacer.</div>
-                        </div>
-                    @endif
-
+    <div class="mb-2">
+        <div class="stock-photo-wrap-lg">
+            <img src="{{ Storage::url($stock->photo) }}"
+                 alt="photo actuelle"
+                 class="stock-photo-img">
+        </div>
+        <div class="form-text">Photo actuelle — choisir une nouvelle photo pour la remplacer.</div>
+    </div>
+@endif
                     <input type="file" name="photo"
                            class="form-control @error('photo') is-invalid @enderror"
                            accept="image/*">

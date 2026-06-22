@@ -10,11 +10,13 @@ class NouvelleReservationNotification extends Notification
 
     public function via($notifiable): array { return ['database']; }
 
-    public function toDatabase($notifiable): array
+    public function toArray($notifiable): array
     {
         return [
             'title'   => 'Nouvelle commande foyer',
             'message' => $this->etudiante->name . ' a passé une nouvelle commande',
+            'type'    => 'nouvelle_commande',
+            'url'     => '/foyer/reservations',
         ];
     }
 }

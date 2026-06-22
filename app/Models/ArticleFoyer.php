@@ -11,19 +11,21 @@ class ArticleFoyer extends Model
     protected $table = 'articles_foyer';
     
     protected $fillable = [
-        'resp_foyer_id',
-        'nom_article',
-        'categorie',
-        'description',
-        'prix',
-        'stock',
-        'photo',
-        'disponible',
-        'promo_active',
-        'prix_promo',
-        'promo_remarque',
-        'promo_date_fin',
-        'date_peremption',
+       'resp_foyer_id',
+'nom_article',
+'categorie',
+'description',
+'prix',
+'stock',
+'photo',
+'disponible',
+'promo_active',
+'prix_promo',
+'promo_remarque',
+'promo_date_fin',
+'date_peremption',
+'promo_qte_lot',
+'promo_prix_lot',
     ];
     
     protected $casts = [
@@ -65,5 +67,19 @@ class ArticleFoyer extends Model
             return $this->prix_promo;
         }
         return $this->prix;
+    }
+
+    public function calculerTotal(int $quantite): float
+    {
+        if (
+            $this->promo_active &&
+            $this->promo_qte_lot &&
+            $this->promo_prix_lot &&
+            $quantite === (int) $this->promo_qte_lot
+        ) {
+            return (float) $this->promo_prix_lot;
+        }
+
+        return (float) $this->prix_actuel * $quantite;
     }
 }

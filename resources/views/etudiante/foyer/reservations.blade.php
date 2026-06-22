@@ -204,10 +204,10 @@
                                     <span class="fw-semibold">{{ $resa->quantite }}</span>
                                     &nbsp;•&nbsp;
                                     Prix unitaire :
-                                    <span class="fw-semibold">{{ number_format($resa->article->prix, 2) }} DA</span>
+                                    <span class="fw-semibold">{{ number_format($resa->prix_unitaire_effectif ?? $resa->article->prix_actuel, 2) }} DA</span>
                                 </div>
                                 <div class="prix-total">
-                                    Total : {{ number_format($resa->article->prix * $resa->quantite, 2) }} DA
+                                    Total : {{ number_format(($resa->prix_unitaire_effectif ?? $resa->article->prix_actuel) * $resa->quantite, 2) }} DA
                                 </div>
                             </div>
                         </div>
@@ -272,7 +272,7 @@
         $panierArticles = \App\Models\Reservation::where('etudiante_id', auth()->id())
                             ->where('statut', 'panier')->with('article')->get()
                             ->filter(fn($r) => $r->article);
-        $panierTotal    = $panierArticles->sum(fn($r) => $r->article->prix * $r->quantite);
+        $panierTotal    = $panierArticles->sum(fn($r) => $r->prix_unitaire_effectif * $r->quantite);
     @endphp
 
     @if($panierCount > 0)
@@ -308,10 +308,10 @@
                         @endif
                         <div style="flex: 1;">
                             <strong>{{ $item->article->nom_article }}</strong><br>
-                            <span style="color: #666; font-size: 0.9rem;">Qté: {{ $item->quantite }} × {{ number_format($item->article->prix, 2) }} DA</span>
+                            <span style="color: #666; font-size: 0.9rem;">Qté: {{ $item->quantite }} × {{ number_format($item->prix_unitaire_effectif, 2) }} DA</span>
                         </div>
                         <div style="text-align: right;">
-                            <strong style="color: #1a3c5e; font-size: 1.1rem;">{{ number_format($item->article->prix * $item->quantite, 2) }} DA</strong>
+                            <strong style="color: #1a3c5e; font-size: 1.1rem;">{{ number_format($item->prix_unitaire_effectif * $item->quantite, 2) }} DA</strong>
                         </div>
                         <form method="POST" action="{{ route('etudiante.foyer.annuler', $item->id) }}" style="display: inline;">
                             @csrf

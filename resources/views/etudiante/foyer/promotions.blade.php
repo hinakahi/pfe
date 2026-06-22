@@ -210,18 +210,28 @@
                     </p>
                     @endif
 
-                    {{-- Prix + stock restant --}}
-                    <div class="d-flex justify-content-between align-items-center mt-auto">
-                        <div class="d-flex align-items-center gap-2">
-    <span class="text-muted small" style="text-decoration: line-through;">
-        {{ number_format($article->prix, 2) }} DA
-    </span>
-    <span class="prix-label" style="color:#d97706;">
-        {{ number_format($article->prix_actuel, 2) }} DA
+                 {{-- Prix + stock restant --}}
+<div class="d-flex justify-content-between align-items-center mt-auto">
+    <div class="d-flex align-items-center gap-2">
+        <span class="text-muted small" style="text-decoration: line-through;">
+            {{ number_format($article->prix, 2) }} DA
+        </span>
+        <span class="prix-label" style="color:#d97706;">
+            {{ number_format($article->prix_actuel, 2) }} DA
+        </span>
+    </div>
+    <span class="text-muted small">{{ $article->stock }} restant(s)</span>
+</div>
+
+{{-- Remarque promo --}}
+@if($article->promo_remarque)
+<div class="d-flex align-items-center gap-1 mt-1">
+    <i class="bi bi-info-circle-fill" style="color:#d97706; font-size:.75rem;"></i>
+    <span class="small fw-semibold" style="color:#d97706; font-size:.78rem;">
+        {{ $article->promo_remarque }}
     </span>
 </div>
-                        <span class="text-muted small">{{ $article->stock }} restant(s)</span>
-                    </div>
+@endif
 
                     {{-- Bouton réserver --}}
                     @if($article->stock > 0)
@@ -231,8 +241,10 @@
                             data-bs-target="#modalReserver"
                             data-id="{{ $article->id }}"
                             data-nom="{{ $article->nom_article }}"
-                            data-prix="{{ $article->prix }}"
-                            data-stock="{{ $article->stock }}">
+                            data-prix="{{ $article->prix_actuel }}"
+                            data-stock="{{ $article->stock }}"
+                            data-qte-lot="{{ $article->promo_qte_lot ?? '' }}"
+                            data-prix-lot="{{ $article->promo_prix_lot ?? '' }}">
                         <i class="bi bi-cart-plus me-1"></i>Réserver
                     </button>
                     @else
@@ -354,6 +366,9 @@
 <script>
 // ── Remplir le modal ──
 const modalReserver = document.getElementById('modalReserver');
+let currentQteLot  = null;
+let currentPrixLot = null;
+
 modalReserver.addEventListener('show.bs.modal', e => {
     const btn = e.relatedTarget;
     const id    = btn.dataset.id;
@@ -361,13 +376,16 @@ modalReserver.addEventListener('show.bs.modal', e => {
     const prix  = parseFloat(btn.dataset.prix);
     const stock = parseInt(btn.dataset.stock);
 
+    currentQteLot  = btn.dataset.qteLot  ? parseInt(btn.dataset.qteLot)   : null;
+    currentPrixLot = btn.dataset.prixLot ? parseFloat(btn.dataset.prixLot) : null;
+
     document.getElementById('modalNomArticle').textContent = nom;
     document.getElementById('modalPrixArticle').textContent = prix.toFixed(2) + ' DA';
     document.getElementById('modalStock').textContent = stock;
     document.getElementById('inputQuantite').max = stock;
     document.getElementById('inputQuantite').value = 1;
-    document.getElementById('totalEstime').textContent = prix.toFixed(2) + ' DA';
     document.getElementById('formReserver').action = `/etudiante/foyer/reserver/${id}`;
+    updateTotal();
 });
 
 // ── +/- quantité ──
@@ -375,7 +393,13 @@ const inputQte = document.getElementById('inputQuantite');
 function updateTotal() {
     const prix = parseFloat(document.getElementById('modalPrixArticle').textContent);
     const qte  = parseInt(inputQte.value);
-    document.getElementById('totalEstime').textContent = (prix * qte).toFixed(2) + ' DA';
+    let total  = prix * qte;
+
+    if (currentQteLot && currentPrixLot && qte === currentQteLot) {
+        total = currentPrixLot;
+    }
+
+    document.getElementById('totalEstime').textContent = total.toFixed(2) + ' DA';
 }
 document.getElementById('btnMoins').addEventListener('click', () => {
     if (inputQte.value > 1) { inputQte.value--; updateTotal(); }

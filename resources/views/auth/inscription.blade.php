@@ -86,7 +86,7 @@
         <label class="form-label fw-semibold">Email <span class="text-danger">*</span></label>
         <div class="input-group">
             <span class="input-group-text"><i class="bi bi-envelope"></i></span>
-            <input type="email" name="email" class="form-control" value="{{ old('email') }}" placeholder="votre@email.dz" required>
+            <input type="email" name="email" class="form-control" value="{{ old('email') }}" placeholder="votre@email.com" required>
         </div>
     </div>
 

@@ -91,7 +91,7 @@ body::before {
                 <div class="input-group">
                     <span class="input-group-text"><i class="bi bi-envelope"></i></span>
                     <input type="email" name="email" class="form-control"
-                           value="{{ old('email') }}" placeholder="votre@email.dz" required>
+                           value="{{ old('email') }}" placeholder="votre@email.com" required>
                 </div>
             </div>
           <div class="mb-4">

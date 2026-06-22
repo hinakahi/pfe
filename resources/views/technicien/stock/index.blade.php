@@ -102,10 +102,12 @@
              data-statut="{{ $stock->est_epuise ? 'epuise' : ($stock->est_faible ? 'faible' : 'disponible') }}">
             <div class="card h-100 {{ $stock->est_epuise ? 'border-danger' : ($stock->est_faible ? 'border-warning' : '') }}">
             @if($stock->photo)
-    <img src="{{ Storage::url($stock->photo) }}"
-         class="card-img-top"
-         alt="{{ $stock->designation }}"
-         style="height:160px; object-fit:cover;">
+    <div class="card-img-top stock-photo-wrap">
+        <img src="{{ Storage::url($stock->photo) }}"
+             alt="{{ $stock->designation }}"
+             class="stock-photo-img"
+             loading="lazy">
+    </div>
 @else
     <div class="card-img-top bg-light d-flex align-items-center justify-content-center"
          style="height:160px;">
@@ -176,6 +178,22 @@
     </div>
 
 </div>
+<style>
+.stock-photo-wrap {
+    height: 140px;
+    background: #f8f9fa;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 14px;
+    overflow: hidden;
+}
+.stock-photo-img {
+    max-height: 100%;
+    max-width: 100%;
+    object-fit: contain;
+}
+</style>
 
 {{-- ══════════════════════════════════════════
      SCRIPT DE FILTRAGE (côté client)

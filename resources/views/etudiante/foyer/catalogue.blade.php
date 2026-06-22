@@ -326,23 +326,42 @@
 @endif
 
                     {{-- Prix --}}
-                    <div class="d-flex justify-content-between align-items-center mt-auto">
-                        <span class="prix-art">{{ number_format($article->prix_actuel, 2) }} DA</span>
-                        <span class="text-muted" style="font-size:.78rem;">
-                            {{ $article->stock }} restant(s)
-                        </span>
-                    </div>
+<div class="d-flex justify-content-between align-items-center mt-auto">
+    <div>
+        @if($article->promo_active && $article->prix_actuel < $article->prix)
+            <span class="text-muted" style="text-decoration:line-through; font-size:.85rem;">
+                {{ number_format($article->prix, 2) }} DA
+            </span><br>
+        @endif
+        <span class="prix-art">{{ number_format($article->prix_actuel, 2) }} DA</span>
+    </div>
+    <span class="text-muted" style="font-size:.78rem;">
+        {{ $article->stock }} restant(s)
+    </span>
+</div>
+
+{{-- Remarque promo --}}
+@if($article->promo_active && $article->promo_remarque)
+<div class="d-flex align-items-center gap-1">
+    <i class="bi bi-info-circle-fill" style="color:#d97706; font-size:.75rem;"></i>
+    <span class="small fw-semibold" style="color:#d97706; font-size:.78rem;">
+        {{ $article->promo_remarque }}
+    </span>
+</div>
+@endif
 
                     {{-- Bouton --}}
                     @if($article->stock > 0)
                     <button type="button"
                             class="btn-add-cart"
-                            data-bs-toggle="modal"
-                            data-bs-target="#modalPanier"
-                            data-id="{{ $article->id }}"
-                            data-nom="{{ $article->nom_article }}"
-                            data-prix="{{ $article->prix_actuel }}"
-                            data-stock="{{ $article->stock }}">
+        data-bs-toggle="modal"
+        data-bs-target="#modalPanier"
+        data-id="{{ $article->id }}"
+        data-nom="{{ $article->nom_article }}"
+        data-prix="{{ $article->prix_actuel }}"
+        data-stock="{{ $article->stock }}"
+        data-qte-lot="{{ $article->promo_qte_lot ?? '' }}"
+        data-prix-lot="{{ $article->promo_prix_lot ?? '' }}">
                         <i class="bi bi-cart-plus me-1"></i>Ajouter au panier
                     </button>
                     @else
@@ -390,22 +409,29 @@
             </div>
 
             <div class="text-end" style="min-width:90px;">
-                <div class="prix-art">{{ number_format($article->prix_actuel, 2) }} DA</div>
-                <div class="text-muted" style="font-size:.75rem;">
-                    Stock : {{ $article->stock }}
-                </div>
+                 <div class="prix-art">{{ number_format($article->prix_actuel, 2) }} DA</div>
+@if($article->promo_active && $article->promo_remarque)
+<div style="color:#d97706; font-size:.72rem; font-weight:600;">
+    <i class="bi bi-info-circle-fill me-1"></i>{{ $article->promo_remarque }}
+</div>
+@endif
+<div class="text-muted" style="font-size:.75rem;">
+    Stock : {{ $article->stock }}
+</div>
             </div>
 
             @if($article->stock > 0)
             <button type="button"
-                    class="btn btn-primary btn-sm"
-                    data-bs-toggle="modal"
-                    data-bs-target="#modalPanier"
-                    data-id="{{ $article->id }}"
-                    data-nom="{{ $article->nom_article }}"
-                    data-prix="{{ $article->prix_actuel }}"
-                    data-stock="{{ $article->stock }}"
-                    style="white-space:nowrap;">
+                     class="btn btn-primary btn-sm"
+        data-bs-toggle="modal"
+        data-bs-target="#modalPanier"
+        data-id="{{ $article->id }}"
+        data-nom="{{ $article->nom_article }}"
+        data-prix="{{ $article->prix_actuel }}"
+        data-stock="{{ $article->stock }}"
+        data-qte-lot="{{ $article->promo_qte_lot ?? '' }}"
+        data-prix-lot="{{ $article->promo_prix_lot ?? '' }}"
+        style="white-space:nowrap;">
                 <i class="bi bi-cart-plus me-1"></i>Ajouter
             </button>
             @else
@@ -495,7 +521,7 @@
 @if(auth()->check())
 @php
     $panierCount    = \App\Models\Reservation::where('etudiante_id', auth()->id())->where('statut','panier')->count();
-    $panierTotal    = \App\Models\Reservation::where('etudiante_id', auth()->id())->where('statut','panier')->get()->sum(fn($r) => $r->article->prix * $r->quantite);
+   $panierTotal = \App\Models\Reservation::where('etudiante_id', auth()->id())->where('statut','panier')->get()->sum(fn($r) => $r->prix_unitaire_effectif * $r->quantite);
     $panierArticles = \App\Models\Reservation::where('etudiante_id', auth()->id())->where('statut','panier')->get();
 @endphp
 
@@ -518,7 +544,7 @@
             <div class="modal-body" id="panierModalBody">
                 @forelse($panierArticles as $item)
                 <div id="panier-item-{{ $item->id }}"
-                     data-prix="{{ $item->article->prix }}"
+                     data-prix="{{ $item->prix_unitaire_effectif }}"
                      data-qte="{{ $item->quantite }}"
                      style="display:flex; align-items:center; gap:12px; padding:12px 0; border-bottom:1px solid #dee2e6; transition:opacity 0.3s;">
                     @if($item->article->photo)
@@ -531,9 +557,9 @@
                     @endif
                     <div style="flex:1;">
                         <strong>{{ $item->article->nom_article }}</strong><br>
-                        <span style="color:#666; font-size:.9rem;">Qté: {{ $item->quantite }} × {{ number_format($item->article->prix,2) }} DA</span>
+                        <span style="color:#666; font-size:.9rem;">Qté: {{ $item->quantite }} × {{ number_format($item->prix_unitaire_effectif,2) }} DA</span>
                     </div>
-                    <strong style="color:#1a3c5e;">{{ number_format($item->article->prix * $item->quantite,2) }} DA</strong>
+                    <strong style="color:#1a3c5e;">{{ number_format($item->prix_unitaire_effectif * $item->quantite,2) }} DA</strong>
                     <button type="button" class="btn btn-outline-danger btn-sm"
                             onclick="supprimerArticlePanier({{ $item->id }})">
                         <i class="bi bi-x-lg"></i>
@@ -571,26 +597,56 @@
 <script>
 // ── Modal panier ──
 const modalEl = document.getElementById('modalPanier');
+let currentQteLot  = null;
+let currentPrixLot = null;
+
 modalEl.addEventListener('show.bs.modal', e => {
     const b = e.relatedTarget;
     const prix  = parseFloat(b.dataset.prix);
     const stock = parseInt(b.dataset.stock);
+
+    currentQteLot  = b.dataset.qteLot  ? parseInt(b.dataset.qteLot)   : null;
+    currentPrixLot = b.dataset.prixLot ? parseFloat(b.dataset.prixLot) : null;
 
     document.getElementById('mNom').textContent   = b.dataset.nom;
     document.getElementById('mPrix').textContent  = prix.toFixed(2) + ' DA';
     document.getElementById('mStock').textContent = stock;
     document.getElementById('mQte').max   = stock;
     document.getElementById('mQte').value = 1;
-    document.getElementById('mTotal').textContent = prix.toFixed(2) + ' DA';
     document.getElementById('formPanier').action =
         `/etudiante/foyer/reserver/${b.dataset.id}`;
+
+    let offreLotEl = document.getElementById('offreLotInfo');
+    if (currentQteLot && currentPrixLot) {
+        if (!offreLotEl) {
+            offreLotEl = document.createElement('div');
+            offreLotEl.id = 'offreLotInfo';
+            offreLotEl.style = 'margin-top:8px; color:#d97706; font-size:.82rem; font-weight:600;';
+            document.getElementById('mTotal').parentNode.appendChild(offreLotEl);
+        }
+        offreLotEl.innerHTML = `<i class="bi bi-lightning-fill me-1"></i>Offre : ${currentQteLot} pour ${currentPrixLot.toFixed(2)} DA`;
+        offreLotEl.style.display = 'block';
+    } else if (offreLotEl) {
+        offreLotEl.style.display = 'none';
+    }
+
+    calcTotal();
 });
 
 const qte = document.getElementById('mQte');
 function calcTotal() {
     const prix = parseFloat(document.getElementById('mPrix').textContent);
-    document.getElementById('mTotal').textContent =
-        (prix * parseInt(qte.value)).toFixed(2) + ' DA';
+    const q    = parseInt(qte.value);
+    let total  = prix * q;
+
+    if (currentQteLot && currentPrixLot && q === currentQteLot) {
+        total = currentPrixLot;
+        document.getElementById('mTotal').style.color = '#16a34a';
+    } else {
+        document.getElementById('mTotal').style.color = '#1a3c5e';
+    }
+
+    document.getElementById('mTotal').textContent = total.toFixed(2) + ' DA';
 }
 document.getElementById('btnM').addEventListener('click', () => {
     if (qte.value > 1) { qte.value--; calcTotal(); }
@@ -644,6 +700,7 @@ function updateCount() {
     const n = document.querySelectorAll('.art-item:not([style*="none"])').length;
     document.getElementById('countLabel').textContent = n + ' article(s)';
 }
+
 // ── Badge panier ──
 function updateBadge(delta) {
     const badge = document.querySelector('#panierBtn .badge-count');

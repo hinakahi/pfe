@@ -3,16 +3,17 @@
 @section('content')
 <div class="container" style="max-width: 700px;">
     {{-- Boutons d'action --}}
-    <div class="d-flex gap-2 mb-4 flex-wrap">
-        <a href="{{ route('etudiante.reclamations.index') }}" class="btn btn-outline-secondary">
-            <i class="bi bi-arrow-left"></i> Retour
-        </a>
-        
+<div class="d-flex gap-2 mb-4 flex-wrap">
+    <a href="{{ route('etudiante.reclamations.index') }}" class="btn btn-outline-secondary">
+        <i class="bi bi-arrow-left"></i> Retour
+    </a>
+
+    @if(!in_array($reclamation->statut, ['resolue', 'fermee']))
         {{-- Bouton Modifier --}}
         <a href="{{ route('etudiante.reclamations.edit', $reclamation) }}" class="btn btn-primary">
             <i class="bi bi-pencil me-1"></i> Modifier
         </a>
-        
+
         {{-- Bouton Supprimer --}}
         <form action="{{ route('etudiante.reclamations.destroy', $reclamation) }}" method="POST" style="display:inline;" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cette réclamation ?');">
             @csrf
@@ -21,7 +22,13 @@
                 <i class="bi bi-trash me-1"></i> Supprimer
             </button>
         </form>
-    </div>
+    @else
+        <span class="btn btn-outline-secondary disabled">
+            <i class="bi bi-lock me-1"></i> Réclamation {{ $reclamation->statut === 'resolue' ? 'résolue' : 'fermée' }}, modification impossible
+        </span>
+    @endif
+</div>
+    
 
     {{-- Réclamation --}}
     <div class="card shadow-sm mb-4">

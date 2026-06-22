@@ -161,7 +161,7 @@
 
 @php
     $panierCount = $reservations->where('statut','panier')->count();
-    $panierTotal = $reservations->where('statut','panier')->sum(fn($r) => $r->article ? $r->article->prix * $r->quantite : 0);
+    $panierTotal = $reservations->where('statut','panier')->sum(fn($r) => $r->prix_unitaire_effectif ? $r->prix_unitaire_effectif * $r->quantite : 0);
 @endphp
 
 {{-- Stats cliquables --}}
@@ -288,7 +288,7 @@
                         <div class="text-muted" style="font-size:.78rem;">
                             Qté : {{ $resa->quantite }}
                             &nbsp;•&nbsp;
-                            {{ number_format($resa->article->prix * $resa->quantite, 2) }} DA
+                            {{ number_format(($resa->prix_unitaire_effectif ?? $resa->article->prix_actuel) * $resa->quantite, 2) }} DA
                         </div>
                     </div>
 

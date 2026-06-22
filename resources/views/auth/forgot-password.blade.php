@@ -70,7 +70,7 @@
                 <label class="form-label fw-semibold">Adresse email</label>
                 <div class="input-group">
                     <span class="input-group-text"><i class="bi bi-envelope"></i></span>
-                    <input type="email" name="email" class="form-control" placeholder="votre@email.dz" required>
+                    <input type="email" name="email" class="form-control" placeholder="votre@email.com" required>
                 </div>
             </div>
 

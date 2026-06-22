@@ -9,63 +9,189 @@
 
 @section('content')
 
+{{-- ══════════════════════════════════════════
+     ONGLETS : Mes annonces / Annonces admin
+══════════════════════════════════════════ --}}
+<ul class="nav nav-tabs mb-4" id="annTabs" role="tablist">
+    <li class="nav-item" role="presentation">
+        <button class="nav-link active" id="mes-annonces-tab" data-bs-toggle="tab"
+                data-bs-target="#mes-annonces-pane" type="button" role="tab">
+            <i class="bi bi-megaphone me-1"></i>Mes annonces
+        </button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link" id="annonces-admin-tab" data-bs-toggle="tab"
+                data-bs-target="#annonces-admin-pane" type="button" role="tab">
+            <i class="bi bi-shield-check me-1"></i>Annonces de l'administration
+        </button>
+    </li>
+</ul>
 
-{{-- Toolbar --}}
-<div class="card mb-4">
-    <div class="card-body py-3">
-        <div class="d-flex flex-wrap align-items-center gap-3">
+<div class="tab-content" id="annTabsContent">
 
-            <input type="text" id="annSearch" class="form-control"
-                   style="max-width:320px;"
-                   placeholder="Rechercher une annonce..."
-                   oninput="annFilter()">
+    {{-- ══════════════════════════════════════════
+         ONGLET 1 : MES ANNONCES (gestion complète)
+    ══════════════════════════════════════════ --}}
+    <div class="tab-pane fade show active" id="mes-annonces-pane" role="tabpanel">
 
-            <select id="annCatFilter" class="form-select" style="max-width:200px;" onchange="annFilter()">
-                <option value="all">Toutes les catégories</option>
-                <option value="generale">Générale</option>
-                <option value="promotion">Promotion</option>
-            </select>
+        {{-- Toolbar --}}
+        <div class="card mb-4">
+            <div class="card-body py-3">
+                <div class="d-flex flex-wrap align-items-center gap-3">
 
-            <span class="text-muted" style="font-size:.85rem;">
-                {{ $annonces->total() }} annonce(s)
-            </span>
+                    <input type="text" id="annSearch" class="form-control"
+                           style="max-width:320px;"
+                           placeholder="Rechercher une annonce..."
+                           oninput="annFilter()">
 
-            <a href="{{ route('foyer.annonces.create') }}"
-               class="btn btn-primary ms-auto">
-                <i class="bi bi-plus-lg me-1"></i>Nouvelle annonce
-            </a>
+                    <select id="annCatFilter" class="form-select" style="max-width:200px;" onchange="annFilter()">
+                        <option value="all">Toutes les catégories</option>
+                        <option value="generale">Générale</option>
+                        <option value="promotion">Promotion</option>
+                    </select>
+
+                    <span class="text-muted" style="font-size:.85rem;">
+                        {{ $annonces->total() }} annonce(s)
+                    </span>
+
+                    <a href="{{ route('foyer.annonces.create') }}"
+                       class="btn btn-primary ms-auto">
+                        <i class="bi bi-plus-lg me-1"></i>Nouvelle annonce
+                    </a>
+                </div>
+            </div>
         </div>
+
+        {{-- Liste --}}
+        <div class="d-flex flex-column gap-3">
+        @forelse($annonces as $annonce)
+            @php
+                $catLabels = [
+                    'generale'  => ['label' => 'Générale',  'bg' => 'bg-secondary'],
+                    'promotion' => ['label' => 'Promotion',  'bg' => 'bg-info text-dark'],
+                ];
+                $cat = $catLabels[$annonce->categorie] ?? $catLabels['generale'];
+
+                $urgBadge = match($annonce->urgence ?? 'general') {
+                    'urgent' => '<span class="badge bg-danger"><i class="bi bi-circle-fill me-1" style="font-size:.6rem;"></i>Urgent</span>',
+                    default  => '',
+                };
+            @endphp
+
+            <div class="card shadow-sm ann-item"
+                 data-categorie="{{ $annonce->categorie }}"
+                 data-titre="{{ strtolower($annonce->titre) }}"
+                 data-contenu="{{ strtolower(Str::limit($annonce->contenu, 300)) }}">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start gap-3">
+
+                        <div style="flex:1;">
+                            {{-- Badges --}}
+                            <div class="d-flex flex-wrap gap-2 mb-2">
+                                <span class="badge {{ $cat['bg'] }}">{{ $cat['label'] }}</span>
+                                {!! $urgBadge !!}
+                            </div>
+
+                            {{-- Titre --}}
+                            <div class="fw-bold mb-1" style="font-size:1rem;">
+                                {{ $annonce->titre }}
+                            </div>
+
+                            {{-- Contenu --}}
+                            <div class="text-muted mb-2" style="font-size:.88rem; line-height:1.5;">
+                                {{ Str::limit($annonce->contenu, 200) }}
+                            </div>
+
+                            {{-- Meta --}}
+                            <div class="d-flex flex-wrap gap-3 text-muted" style="font-size:.78rem;">
+                                <span><i class="bi bi-person me-1"></i>{{ $annonce->user->name ?? 'Foyer' }}</span>
+                                <span><i class="bi bi-clock me-1"></i>{{ $annonce->created_at->diffForHumans() }}</span>
+                                <span><i class="bi bi-send me-1"></i>{{ $annonce->destinataire }}</span>
+                                @if($annonce->publiee)
+                                    <span class="text-success fw-semibold">● Publiée</span>
+                                @else
+                                    <span class="text-muted">○ Non publiée</span>
+                                @endif
+                            </div>
+                        </div>
+
+                        {{-- Actions --}}
+                        <div class="d-flex gap-2 flex-shrink-0">
+                            <a href="{{ route('foyer.annonces.edit', $annonce) }}"
+                               class="btn btn-sm btn-outline-primary">
+                                <i class="bi bi-pencil me-1"></i>Modifier
+                            </a>
+                            <form method="POST"
+                                  action="{{ route('foyer.annonces.destroy', $annonce) }}"
+                                  onsubmit="return confirm('Supprimer cette annonce ?')">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit" class="btn btn-sm btn-outline-danger">
+                                    <i class="bi bi-trash me-1"></i>Supprimer
+                                </button>
+                            </form>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+        @empty
+            <div class="card">
+                <div class="card-body text-center text-muted py-5">
+                    <i class="bi bi-megaphone fs-1 opacity-25"></i>
+                    <p class="mt-2 mb-3">Aucune annonce publiée pour l'instant.</p>
+                    <a href="{{ route('foyer.annonces.create') }}" class="btn btn-primary">
+                        <i class="bi bi-plus-lg me-1"></i>Créer la première annonce
+                    </a>
+                </div>
+            </div>
+        @endforelse
+
+        <div id="ann-no-result" style="display:none;">
+            <div class="card">
+                <div class="card-body text-center text-muted py-5">
+                    <i class="bi bi-search fs-1 opacity-25"></i>
+                    <p class="mt-2 mb-0">Aucune annonce ne correspond à votre recherche.</p>
+                </div>
+            </div>
+        </div>
+
+        </div>
+
+        @if($annonces->hasPages())
+            <div class="mt-3">{{ $annonces->links() }}</div>
+        @endif
+
     </div>
-</div>
 
-{{-- Liste --}}
-<div class="d-flex flex-column gap-3">
-@forelse($annonces as $annonce)
-    @php
-        $catLabels = [
-            'generale'  => ['label' => 'Générale',  'bg' => 'bg-secondary'],
-            'promotion' => ['label' => 'Promotion',  'bg' => 'bg-info text-dark'],
-        ];
-        $cat = $catLabels[$annonce->categorie] ?? $catLabels['generale'];
+    {{-- ══════════════════════════════════════════
+         ONGLET 2 : ANNONCES DE L'ADMINISTRATION (lecture seule)
+    ══════════════════════════════════════════ --}}
+    <div class="tab-pane fade" id="annonces-admin-pane" role="tabpanel">
 
-        $urgBadge = match($annonce->urgence ?? 'general') {
-            'urgent' => '<span class="badge bg-danger"><i class="bi bi-circle-fill me-1" style="font-size:.6rem;"></i>Urgent</span>',
-            default  => '',
-        };
-    @endphp
+        <div class="d-flex flex-column gap-3">
+        @forelse($annoncesAdmin as $annonce)
+            @php
+                $catLabels = [
+                    'generale'  => ['label' => 'Générale',  'bg' => 'bg-secondary'],
+                    'promotion' => ['label' => 'Promotion',  'bg' => 'bg-info text-dark'],
+                ];
+                $cat = $catLabels[$annonce->categorie] ?? $catLabels['generale'];
 
-    <div class="card shadow-sm ann-item"
-         data-categorie="{{ $annonce->categorie }}"
-         data-titre="{{ strtolower($annonce->titre) }}"
-         data-contenu="{{ strtolower(Str::limit($annonce->contenu, 300)) }}">
-        <div class="card-body">
-            <div class="d-flex justify-content-between align-items-start gap-3">
+                $urgBadge = match($annonce->urgence ?? 'general') {
+                    'urgent' => '<span class="badge bg-danger"><i class="bi bi-circle-fill me-1" style="font-size:.6rem;"></i>Urgent</span>',
+                    default  => '',
+                };
+            @endphp
 
-                <div style="flex:1;">
+            <div class="card shadow-sm">
+                <div class="card-body">
                     {{-- Badges --}}
                     <div class="d-flex flex-wrap gap-2 mb-2">
                         <span class="badge {{ $cat['bg'] }}">{{ $cat['label'] }}</span>
                         {!! $urgBadge !!}
+                        <span class="badge bg-dark"><i class="bi bi-shield-check me-1"></i>Administration</span>
                     </div>
 
                     {{-- Titre --}}
@@ -80,64 +206,29 @@
 
                     {{-- Meta --}}
                     <div class="d-flex flex-wrap gap-3 text-muted" style="font-size:.78rem;">
-                        <span><i class="bi bi-person me-1"></i>{{ $annonce->user->name ?? 'Foyer' }}</span>
+                        <span><i class="bi bi-person me-1"></i>{{ $annonce->user->name ?? 'Admin' }}</span>
                         <span><i class="bi bi-clock me-1"></i>{{ $annonce->created_at->diffForHumans() }}</span>
-                        <span><i class="bi bi-send me-1"></i>{{ $annonce->destinataire }}</span>
-                        @if($annonce->publiee)
-                            <span class="text-success fw-semibold">● Publiée</span>
-                        @else
-                            <span class="text-muted">○ Non publiée</span>
-                        @endif
                     </div>
                 </div>
-
-                {{-- Actions --}}
-                <div class="d-flex gap-2 flex-shrink-0">
-                    <a href="{{ route('foyer.annonces.edit', $annonce) }}"
-                       class="btn btn-sm btn-outline-primary">
-                        <i class="bi bi-pencil me-1"></i>Modifier
-                    </a>
-                    <form method="POST"
-                          action="{{ route('foyer.annonces.destroy', $annonce) }}"
-                          onsubmit="return confirm('Supprimer cette annonce ?')">
-                        @csrf
-                        @method('DELETE')
-                        <button type="submit" class="btn btn-sm btn-outline-danger">
-                            <i class="bi bi-trash me-1"></i>Supprimer
-                        </button>
-                    </form>
-                </div>
-
             </div>
-        </div>
-    </div>
 
-@empty
-    <div class="card">
-        <div class="card-body text-center text-muted py-5">
-            <i class="bi bi-megaphone fs-1 opacity-25"></i>
-            <p class="mt-2 mb-3">Aucune annonce publiée pour l'instant.</p>
-            <a href="{{ route('foyer.annonces.create') }}" class="btn btn-primary">
-                <i class="bi bi-plus-lg me-1"></i>Créer la première annonce
-            </a>
+        @empty
+            <div class="card">
+                <div class="card-body text-center text-muted py-5">
+                    <i class="bi bi-shield-check fs-1 opacity-25"></i>
+                    <p class="mt-2 mb-0">Aucune annonce de l'administration pour l'instant.</p>
+                </div>
+            </div>
+        @endforelse
         </div>
-    </div>
-@endforelse
 
-<div id="ann-no-result" style="display:none;">
-    <div class="card">
-        <div class="card-body text-center text-muted py-5">
-            <i class="bi bi-search fs-1 opacity-25"></i>
-            <p class="mt-2 mb-0">Aucune annonce ne correspond à votre recherche.</p>
-        </div>
+        @if($annoncesAdmin->hasPages())
+            <div class="mt-3">{{ $annoncesAdmin->links() }}</div>
+        @endif
+
     </div>
-</div>
 
 </div>
-
-@if($annonces->hasPages())
-    <div class="mt-3">{{ $annonces->links() }}</div>
-@endif
 
 @endsection
 
@@ -160,5 +251,16 @@ function annFilter() {
     document.getElementById('ann-no-result').style.display =
         visible === 0 && items.length > 0 ? 'block' : 'none';
 }
+
+document.addEventListener('DOMContentLoaded', function () {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('tab') === 'admin') {
+        const tabBtn = document.getElementById('annonces-admin-tab');
+        if (tabBtn) {
+            const tab = new bootstrap.Tab(tabBtn);
+            tab.show();
+        }
+    }
+});
 </script>
 @endsection

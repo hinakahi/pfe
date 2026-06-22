@@ -153,19 +153,24 @@ public function update(Request $request, ArticleFoyer $catalogue)
 }
     public function updatePromo(Request $request, ArticleFoyer $article)
 {
-    $request->validate([
-        'prix_promo'     => 'nullable|numeric|min:0',
-        'promo_remarque' => 'nullable|string|max:255',
-        'promo_date_fin' => 'nullable|date',
+     $request->validate([
+        'prix_promo'      => 'nullable|numeric|min:0',
+        'promo_remarque'  => 'nullable|string|max:255',
+        'promo_date_fin'  => 'nullable|date',
+        'promo_qte_lot'   => 'nullable|integer|min:1',
+        'promo_prix_lot'  => 'nullable|numeric|min:0',
     ]);
 
     $article->update([
-        'promo_active'   => $request->boolean('promo_active'),  
-        'prix_promo'     => $request->prix_promo,
-        'promo_remarque' => $request->promo_remarque,
+        'promo_active'    => $request->boolean('promo_active'),
+        'prix_promo'      => $request->prix_promo,
+        'promo_remarque'  => $request->promo_remarque,
+        'promo_qte_lot'   => $request->promo_qte_lot ?: null,
+        'promo_prix_lot'  => $request->promo_prix_lot ?: null,
     ]);
 
     return redirect()->route('foyer.catalogue.index')
-        ->with('success', ' Promotion mise à jour avec succès');
+        ->with('success', 'Promotion mise à jour avec succès');
 }
+
 }

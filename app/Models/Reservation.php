@@ -13,15 +13,18 @@ class Reservation extends Model
         'etudiante_id',
         'article_id',
         'resp_foyer_id',
-        'quantite',
-        'statut',
-        'date_reservation',
+       'quantite',
+       'prix_unitaire_effectif',
+       'statut',
+       'date_reservation',
+       'validee_at',
     ];
     
     protected $casts = [
         'date_reservation' => 'datetime',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
+         'prix_unitaire_effectif' => 'decimal:2',
     ];
     
     // ─── RELATIONS ──────────────────────────────────────

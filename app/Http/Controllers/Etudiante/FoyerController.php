@@ -90,11 +90,15 @@ class FoyerController extends Controller
         if ($article->stock < $validated['quantite']) {
             return back()->with('error', 'Stock insuffisant');
         }
+
+        $total = $article->calculerTotal($validated['quantite']);
+        $prixUnitaireEffectif = round($total / $validated['quantite'], 2);
         
         Reservation::create([
             'etudiante_id' => auth()->id(),
             'article_id' => $article->id,
             'quantite' => $validated['quantite'],
+            'prix_unitaire_effectif' => $prixUnitaireEffectif,
             'statut' => 'panier',
         ]);
         

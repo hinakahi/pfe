@@ -13,13 +13,14 @@ class NouvelleAnnonceNotification extends Notification
         return ['database'];
     }
 
-  public function toDatabase($notifiable): array
-{
-    return [
-        'title'    => $this->annonce->titre,      
-        'message'  => $this->annonce->contenu,    
-        'categorie'  => $this->annonce->categorie,
-        'annonce_id' => $this->annonce->id,
-    ];
-}
+    public function toArray($notifiable): array
+    {
+        return [
+            'title'      => 'Nouvelle annonce : ' . $this->annonce->titre,
+            'message'    => $this->annonce->contenu,
+            'categorie'  => $this->annonce->categorie,
+            'annonce_id' => $this->annonce->id,
+            'url'        => route('foyer.annonces.index', ['tab' => 'admin']),
+        ];
+    }
 }

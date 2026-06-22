@@ -478,7 +478,7 @@
                                     class="action-btn action-btn-promo"
                                     data-bs-toggle="modal"
                                     data-bs-target="#promoModal"
-                                    onclick="openPromoModal({{ $article->id }}, '{{ $article->nom_article }}', {{ $article->prix }}, {{ $article->promo_active ? 'true' : 'false' }}, {{ $article->prix_promo ?? 'null' }}, '{{ $article->promo_remarque ?? '' }}')"
+                                    onclick="openPromoModal({{ $article->id }}, '{{ $article->nom_article }}', {{ $article->prix }}, {{ $article->promo_active ? 'true' : 'false' }}, {{ $article->prix_promo ?? 'null' }}, '{{ $article->promo_remarque ?? '' }}', {{ $article->promo_qte_lot ?? 'null' }}, {{ $article->promo_prix_lot ?? 'null' }})"
                                     title="Promotion">
                                 <i class="bi bi-tag"></i>
                             </button>
@@ -560,9 +560,21 @@
                             <span id="savings" class="text-success fw-bold">0.00 DA</span>
                         </div>
                         <div class="mb-3">
-                            <label class="form-label fw-semibold">Remarque</label>
-                            <input type="text" id="promoRemarque" name="promo_remarque" class="form-control" placeholder="Ex : Promotion de la semaine">
-                        </div>
+    <label class="form-label fw-semibold">Remarque <span class="text-muted fw-normal small">(ex: 2 avec 90)</span></label>
+    <input type="text" id="promoRemarque" name="promo_remarque" class="form-control" placeholder="Ex : 2 avec 90">
+</div>
+
+{{-- Offre lot --}}
+<div class="mb-2">
+    <label class="form-label fw-semibold">Offre lot <span class="text-muted fw-normal small">(optionnel)</span></label>
+    <div class="d-flex gap-2">
+        <input type="number" id="promoQteLot" name="promo_qte_lot" class="form-control"
+               placeholder="Qté (ex: 2)" min="1" style="width:120px;">
+        <input type="number" id="promoPrixLot" name="promo_prix_lot" class="form-control"
+               placeholder="Prix total (ex: 90)" min="0" step="0.01">
+    </div>
+    <div class="small text-muted mt-1">Si l'étudiante prend exactement cette quantité, ce prix s'applique automatiquement.</div>
+</div>
                     </div>
                 </div>
 
@@ -615,7 +627,7 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 });
 
-function openPromoModal(articleId, articleName, prixNormal, promoActive, prixPromo, remarque) {
+function openPromoModal(articleId, articleName, prixNormal, promoActive, prixPromo, remarque, qteLot, prixLot) {
     document.getElementById('modalArticleName').textContent = articleName;
     document.getElementById('prixNormal').value = prixNormal.toFixed(2);
 
@@ -625,11 +637,13 @@ function openPromoModal(articleId, articleName, prixNormal, promoActive, prixPro
     const remarqueInput    = document.getElementById('promoRemarque');
     const promoForm        = document.getElementById('promoForm');
 
-    promoActiveCheck.checked    = promoActive;
-    prixPromoInput.value        = prixPromo || '';
-    remarqueInput.value         = remarque  || '';
-    promoFields.style.display   = promoActive ? 'block' : 'none';
-    promoForm.action            = `/foyer/catalogue/${articleId}/update-promo`;
+    promoActiveCheck.checked  = promoActive;
+    prixPromoInput.value      = prixPromo || '';
+    remarqueInput.value       = remarque  || '';
+    document.getElementById('promoQteLot').value  = qteLot  || '';
+    document.getElementById('promoPrixLot').value = prixLot || '';
+    promoFields.style.display = promoActive ? 'block' : 'none';
+    promoForm.action          = `/foyer/catalogue/${articleId}/update-promo`;
 
     if (prixPromo) {
         document.getElementById('savings').textContent = (prixNormal - prixPromo).toFixed(2) + ' DA';
