@@ -34,11 +34,52 @@
         </div>
     </div>
 
+    <div class="card mb-4">
+        <div class="card-body py-3">
+            <div class="row g-2 align-items-center">
+
+                <div class="col-12 col-md-7">
+                    <div class="input-group">
+                        <span class="input-group-text bg-white border-end-0">
+                            <i class="bi bi-search text-muted"></i>
+                        </span>
+                        <input type="text" id="notifSearch"
+                               class="form-control border-start-0 ps-0"
+                               placeholder="Rechercher une notification…"
+                               oninput="notifFilter()">
+                    </div>
+                </div>
+
+                <div class="col-8 col-md-3">
+                    <select id="notifStatutFilter" class="form-select" onchange="notifFilter()">
+                        <option value="all">Toutes</option>
+                        <option value="unread">Non lues</option>
+                        <option value="read">Lues</option>
+                    </select>
+                </div>
+
+                <div class="col-4 col-md-2 text-end">
+                    <button class="btn btn-outline-secondary w-100" onclick="resetNotifFiltres()" title="Réinitialiser">
+                        <i class="bi bi-x-lg"></i>
+                    </button>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
     @if($notifications->count())
 
         @foreach($notifications as $notification)
 
-        <div class="card mb-3 shadow-sm {{ !$notification->read_at ? 'border-primary' : '' }}">
+        @php
+            $titre   = $notification->data['title'] ?? 'Notification';
+            $message = $notification->data['message'] ?? '';
+        @endphp
+
+        <div class="card mb-3 shadow-sm notif-item {{ !$notification->read_at ? 'border-primary' : '' }}"
+             data-statut="{{ $notification->read_at ? 'read' : 'unread' }}"
+             data-texte="{{ strtolower($titre . ' ' . $message) }}">
             <div class="card-body d-flex justify-content-between align-items-center">
 
                 <div>
@@ -46,9 +87,7 @@
                         <span class="badge bg-danger me-2">Nouveau</span>
                     @endif
 
-                    <strong>
-                        {{ $notification->data['title'] ?? 'Notification' }}
-                    </strong>
+                    <strong>{{ $titre }}</strong>
 
                     <br>
 
@@ -76,7 +115,7 @@
 
                     <div class="modal-header">
                         <h5 class="modal-title">
-                            {{ $notification->data['title'] ?? 'Notification' }}
+                            {{ $titre }}
                         </h5>
 
                         <button type="button"
@@ -88,7 +127,7 @@
                     <div class="modal-body">
 
                         <p>
-                            {{ $notification->data['message'] ?? '' }}
+                            {{ $message }}
                         </p>
 
                         <small class="text-muted">
@@ -127,6 +166,15 @@
 
         @endforeach
 
+        <div id="notif-no-result" style="display:none;">
+            <div class="card">
+                <div class="card-body text-center text-muted py-5">
+                    <i class="bi bi-search fs-1 opacity-25"></i>
+                    <p class="mt-2 mb-0">Aucune notification ne correspond à votre recherche.</p>
+                </div>
+            </div>
+        </div>
+
         <div class="mt-4">
             {{ $notifications->links() }}
         </div>
@@ -143,4 +191,31 @@
     @endif
 
 </div>
+@endsection
+
+@section('scripts')
+<script>
+function notifFilter() {
+    const q      = document.getElementById('notifSearch').value.toLowerCase().trim();
+    const statut = document.getElementById('notifStatutFilter').value;
+    const items  = document.querySelectorAll('.notif-item');
+    let visible  = 0;
+
+    items.forEach(item => {
+        const matchTexte  = !q || item.dataset.texte.includes(q);
+        const matchStatut = statut === 'all' || item.dataset.statut === statut;
+        const show = matchTexte && matchStatut;
+        item.style.display = show ? '' : 'none';
+        if (show) visible++;
+    });
+
+    document.getElementById('notif-no-result').style.display = visible === 0 ? 'block' : 'none';
+}
+
+function resetNotifFiltres() {
+    document.getElementById('notifSearch').value = '';
+    document.getElementById('notifStatutFilter').value = 'all';
+    notifFilter();
+}
+</script>
 @endsection
