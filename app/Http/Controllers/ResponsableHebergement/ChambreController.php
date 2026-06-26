@@ -128,13 +128,18 @@ class ChambreController extends Controller
                          ->with('success', 'Chambre mise à jour.');
     }
 
-    public function destroy(Chambre $chambre)
-    {
-        $chambre->delete();
-
+   public function destroy(Chambre $chambre)
+{
+    if (in_array($chambre->statut, ['occupee', 'partielle'])) {
         return redirect()->route('hebergement.chambres.index')
-                         ->with('success', 'Chambre supprimée.');
+                         ->with('error', 'Impossible de supprimer une chambre occupée.');
     }
+
+    $chambre->delete();
+
+    return redirect()->route('hebergement.chambres.index')
+                     ->with('success', 'Chambre supprimée.');
+}
 
     public function publierVides()
     {

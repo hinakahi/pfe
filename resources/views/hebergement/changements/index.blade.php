@@ -3,10 +3,7 @@
 
 @section('content')
 
-<div class="mb-4">
-    <h4 class="fw-bold mb-1">Demandes de changement de chambre</h4>
-    <p class="text-muted mb-0">Traiter les demandes de changement soumises par les étudiantes.</p>
-</div>
+
 
 {{-- Stats cliquables --}}
 <div class="row g-3 mb-4">

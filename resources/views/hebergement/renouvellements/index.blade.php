@@ -3,10 +3,7 @@
 
 @section('content')
 
-<div class="mb-4">
-    <h4 class="fw-bold mb-1">Demandes de renouvellement</h4>
-    <p class="text-muted mb-0">Vérifier les justificatifs et traiter les demandes.</p>
-</div>
+
 
 {{-- Stats cliquables --}}
 <div class="row g-3 mb-3">

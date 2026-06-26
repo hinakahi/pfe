@@ -9,9 +9,7 @@ use Illuminate\Support\Facades\Hash;
 
 class ProfileController extends Controller
 {
-    /**
-     * Afficher profil étudiant
-     */
+    
     public function show()
     {
         $user = auth()->user();
