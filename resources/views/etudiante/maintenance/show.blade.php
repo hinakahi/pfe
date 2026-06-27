@@ -100,8 +100,8 @@
                     <tbody>
                         @foreach($maintenance->materiels as $materiel)
                         <tr>
-                            <td>{{ $materiel->designation ?? $materiel->nom }}</td>
-                            <td class="text-center">{{ $materiel->pivot->quantite ?? '—' }}</td>
+                            <td>{{ $materiel->nom_materiel }}</td>
+                            <td class="text-center">{{ $materiel->quantite ?? '—' }}</td>
                         </tr>
                         @endforeach
                     </tbody>
