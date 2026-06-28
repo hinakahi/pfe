@@ -16,10 +16,8 @@
     <a href="{{ route('etudiante.hebergement.index') }}" class="btn btn-sm btn-outline-secondary">
         <i class="bi bi-arrow-left"></i>
     </a>
-    <div>
-        <h4 class="fw-bold mb-0">Renouvellement de chambre</h4>
-        <p class="text-muted mb-0 small">Demandez le renouvellement de votre chambre pour l'année prochaine.</p>
-    </div>
+    
+    
 </div>
 
 {{-- Ma chambre --}}
@@ -39,7 +37,12 @@
 
 @php
     $derniereDemande = $demandesRenouvellement->first();
-    $demandeEnCours = $demandesRenouvellement->whereIn('statut', ['en_attente', 'validee'])->first();
+    $demandeEnCours = $demandesRenouvellement
+    ->whereIn('statut', ['en_attente', 'validee'])
+    ->filter(fn($d) => $periodeRenouvellement && 
+        $d->created_at >= $periodeRenouvellement->date_debut && 
+        $d->created_at <= $periodeRenouvellement->date_fin)
+    ->first();
 @endphp
 
 {{-- Carte d'action --}}

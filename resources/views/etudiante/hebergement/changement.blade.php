@@ -10,10 +10,7 @@
     <a href="{{ route('etudiante.hebergement.renouvellement') }}" class="btn btn-sm btn-outline-secondary">
         <i class="bi bi-arrow-left"></i>
     </a>
-    <div>
-        <h4 class="fw-bold mb-0">Changement de chambre</h4>
-        <p class="text-muted mb-0 small">Choisissez une chambre disponible et soumettez votre demande.</p>
-    </div>
+    
 </div>
 
 {{-- Ma chambre actuelle --}}
@@ -48,9 +45,47 @@
         <i class="bi bi-info-circle me-1"></i>
         <span>Période ouverte jusqu'au <strong>{{ $periodeChangement->date_fin->format('d/m/Y') }}</strong></span>
     </div>
+    {{-- Deux cartes cliquables --}}
+<div class="row g-3 mb-3">
+    <div class="col-md-6">
+        <div class="card border-0 shadow-sm h-100 carte-toggle"
+             style="cursor:pointer; border-left: 4px solid #2d6a9f !important;"
+             onclick="toggleSection('section-chambres', this)">
+            <div class="card-body d-flex align-items-center gap-3">
+                <div class="rounded-circle d-flex align-items-center justify-content-center"
+                     style="width:48px;height:48px;background:#e8f4fd;">
+                    <i class="bi bi-building" style="font-size:1.4rem;color:#2d6a9f;"></i>
+                </div>
+                <div class="flex-grow-1">
+                    <div class="fw-bold">Chambres disponibles</div>
+                    <div class="text-muted small">{{ $chambresDisponibles->total() ?? $chambresDisponibles->count() }} chambre(s)</div>
+                </div>
+                <i class="bi bi-chevron-down text-muted toggle-icon"></i>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card border-0 shadow-sm h-100 carte-toggle"
+             style="cursor:pointer; border-left: 4px solid #fd7e14 !important;"
+             onclick="toggleSection('section-demandes', this)">
+            <div class="card-body d-flex align-items-center gap-3">
+                <div class="rounded-circle d-flex align-items-center justify-content-center"
+                     style="width:48px;height:48px;background:#fff3e8;">
+                    <i class="bi bi-clock-history" style="font-size:1.4rem;color:#fd7e14;"></i>
+                </div>
+                <div class="flex-grow-1">
+                    <div class="fw-bold">Mes demandes de changement</div>
+                    <div class="text-muted small">{{ $demandesChangement->count() }} demande(s)</div>
+                </div>
+                <i class="bi bi-chevron-down text-muted toggle-icon"></i>
+            </div>
+        </div>
+    </div>
+</div>
 @endif
 
 {{-- Liste des chambres disponibles --}}
+<div id="section-chambres" style="display:none;" class="mb-4">
 <div class="card border-0 shadow-sm mb-4">
     <div class="card-body">
         <h6 class="fw-bold mb-3">
@@ -187,8 +222,10 @@
         @endif
     </div>
 </div>
+</div>  {{-- ferme section-chambres --}}
 
 {{-- Historique changements --}}
+<div id="section-demandes" style="display:none;" class="mb-4">
 <div class="card border-0 shadow-sm">
     <div class="card-body">
         <h6 class="fw-bold mb-3">
@@ -259,9 +296,24 @@
         </table>
     </div>
 </div>
+</div> 
 
 {{-- Script recherche --}}
 <script>
+function toggleSection(id, carte) {
+    const section = document.getElementById(id);
+    const icon = carte.querySelector('.toggle-icon');
+    const isOpen = section.style.display !== 'none';
+    document.querySelectorAll('#section-chambres, #section-demandes').forEach(s => s.style.display = 'none');
+    document.querySelectorAll('.toggle-icon').forEach(i => { i.classList.remove('bi-chevron-up'); i.classList.add('bi-chevron-down'); });
+    document.querySelectorAll('.carte-toggle').forEach(c => c.classList.remove('active-carte'));
+    if (!isOpen) {
+        section.style.display = 'block';
+        icon.classList.replace('bi-chevron-down', 'bi-chevron-up');
+        carte.classList.add('active-carte');
+        section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+}
     const searchNumero = document.getElementById('searchNumero');
     const searchBloc   = document.getElementById('searchBloc');
     const resetBtn     = document.getElementById('resetSearch');
@@ -296,5 +348,10 @@
         filtrer();
     });
 </script>
+<style>
+.carte-toggle { transition: box-shadow 0.2s; }
+.carte-toggle:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.10) !important; }
+.active-carte { box-shadow: 0 4px 20px rgba(45,106,159,0.18) !important; }
+</style>
 
 @endsection

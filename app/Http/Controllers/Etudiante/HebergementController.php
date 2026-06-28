@@ -110,10 +110,12 @@ class HebergementController extends Controller
         return back()->with('error', 'La période de renouvellement est fermée.');
     }
 
-    //  Bloquer les doublons
-    $dejaEnCours = DemandeRenouvellement::where('etudiante_id', auth()->id())
-        ->whereIn('statut', ['en_attente', 'validee'])
-        ->exists();
+   //  Bloquer les doublons uniquement dans la période actuelle
+   $dejaEnCours = DemandeRenouvellement::where('etudiante_id', auth()->id())
+      ->whereIn('statut', ['en_attente', 'validee'])
+      ->where('created_at', '>=', $periode->date_debut)
+      ->where('created_at', '<=', $periode->date_fin)
+     ->exists();
 
     if ($dejaEnCours) {
         return back()->with('error', 'Vous avez déjà une demande en cours.');

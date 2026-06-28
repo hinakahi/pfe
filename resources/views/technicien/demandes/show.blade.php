@@ -128,8 +128,7 @@
                             <i class="bi bi-box-seam me-2 text-warning"></i>Matériel utilisé
                             <small class="text-muted fw-normal">(optionnel)</small>
                         </h6>
-                        <small class="text-muted">Décrémente le stock automatiquement</small>
-                    </div>
+                        
                     <div class="card-body">
 
                         <div class="mb-3">
