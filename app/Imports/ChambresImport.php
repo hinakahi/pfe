@@ -21,14 +21,26 @@ class ChambresImport implements ToModel, WithHeadingRow, WithValidation
             $etudiante2 = $row['etudiante_2'] ?? null;
         }
 
+        $etudiante1 = $row['etudiante_1'] ?? null;
+
+        // Calcul du statut
+        $occupied = collect([$etudiante1, $etudiante2])->filter()->count();
+
+        $statut = match($occupied) {
+            0 => 'libre',
+            1 => $row['type'] === 'double' ? 'partielle' : 'occupee',
+            2 => 'occupee',
+        };
+
         return new Chambre([
             'numero'      => $row['numero'],
             'type'        => $row['type'],
             'bloc'        => $row['bloc'],
             'etage'       => $row['etage'],
             'capacite'    => $row['capacite'],
-            'etudiante_1' => $row['etudiante_1'] ?? null,
+            'etudiante_1' => $etudiante1,
             'etudiante_2' => $etudiante2,
+            'statut'      => $statut,
             'publiee'     => false,
         ]);
     }

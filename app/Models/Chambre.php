@@ -17,6 +17,7 @@ class Chambre extends Model
         'etudiante_1',
         'etudiante_2',
         'publiee',
+        'statut',
     ];
 
     protected $casts = [
@@ -41,19 +42,38 @@ class Chambre extends Model
         return !$this->etudiante_1 && !$this->etudiante_2;
     }
 
-    // Scopes
-    public function scopeLibres($query)
-    {
-        return $query->whereNull('etudiante_1')->whereNull('etudiante_2');
-    }
+     // Scopes
+public function scopeLibres($query)
+ {
+    return $query->whereNull('etudiante_1')->whereNull('etudiante_2');
+ }
 
-    public function scopeOccupees($query)
-    {
-        return $query->whereNotNull('etudiante_1');
-    }
+ public function scopePartielles($query)
+ {
+    return $query->where('type', '!=', 'individuelle')
+        ->where(function ($q) {
+            $q->where(function ($q2) {
+                $q2->whereNotNull('etudiante_1')->whereNull('etudiante_2');
+            })->orWhere(function ($q2) {
+                $q2->whereNull('etudiante_1')->whereNotNull('etudiante_2');
+            });
+        });
+ }
 
-    public function scopePubliees($query)
-    {
-        return $query->where('publiee', true);
-    }
+   public function scopeOccupees($query)
+  {
+    return $query->where(function ($q) {
+        $q->where('type', 'individuelle')
+          ->whereNotNull('etudiante_1');
+    })->orWhere(function ($q) {
+        $q->where('type', '!=', 'individuelle')
+          ->whereNotNull('etudiante_1')
+          ->whereNotNull('etudiante_2');
+    });
+ }
+
+  public function scopePubliees($query)
+  {
+    return $query->where('publiee', true);
+  }
 }

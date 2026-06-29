@@ -3,47 +3,55 @@
 
 @section('content')
 
-{{-- Stats --}}
-<div class="row g-3 mb-4">
+{{-- Stats cliquables --}}
+<div class="row mb-4">
     <div class="col-md-3">
-        <div class="card text-center border-0 bg-light">
-            <div class="card-body py-3">
-                <div class="text-muted small">Total</div>
-                <div class="fw-bold fs-4">{{ $stats['total'] }}</div>
+        <a href="{{ route('hebergement.chambres.index', array_filter(array_merge(request()->query(), ['statut' => null]))) }}"
+           class="text-decoration-none">
+            <div class="stat-card {{ !request('statut') ? 'stat-card-active' : '' }}"
+                 style="background: linear-gradient(135deg,#1a3c5e,#2d6a9f)">
+                <div class="number">{{ $stats['total'] }}</div>
+                <div class="label"><i class="bi bi-door-open me-1"></i>Total chambres</div>
             </div>
-        </div>
+        </a>
     </div>
     <div class="col-md-3">
-        <div class="card text-center border-0" style="background:#fff3f3">
-            <div class="card-body py-3">
-                <div class="text-muted small">Occupées</div>
-                <div class="fw-bold fs-4 text-danger">{{ $stats['occupees'] }}</div>
+        <a href="{{ route('hebergement.chambres.index', array_merge(request()->query(), ['statut' => 'libre'])) }}"
+           class="text-decoration-none">
+            <div class="stat-card {{ request('statut') == 'libre' ? 'stat-card-active' : '' }}"
+                 style="background: linear-gradient(135deg,#198754,#20c997)">
+                <div class="number">{{ $stats['disponibles'] }}</div>
+                <div class="label"><i class="bi bi-check-circle me-1"></i>Disponibles</div>
             </div>
-        </div>
+        </a>
     </div>
     <div class="col-md-3">
-        <div class="card text-center border-0" style="background:#fff8ec">
-            <div class="card-body py-3">
-                <div class="text-muted small">1 place libre</div>
-                <div class="fw-bold fs-4 text-warning">{{ $stats['une_place'] }}</div>
+        <a href="{{ route('hebergement.chambres.index', array_merge(request()->query(), ['statut' => 'occupee'])) }}"
+           class="text-decoration-none">
+            <div class="stat-card {{ request('statut') == 'occupee' ? 'stat-card-active' : '' }}"
+                 style="background: linear-gradient(135deg,#fd7e14,#ffc107)">
+                <div class="number">{{ $stats['occupees'] }}</div>
+                <div class="label"><i class="bi bi-person-fill me-1"></i>Occupées</div>
             </div>
-        </div>
+        </a>
     </div>
     <div class="col-md-3">
-        <div class="card text-center border-0" style="background:#f0faf4">
-            <div class="card-body py-3">
-                <div class="text-muted small">Disponibles</div>
-                <div class="fw-bold fs-4 text-success">{{ $stats['disponibles'] }}</div>
+        <a href="{{ route('hebergement.chambres.index', array_merge(request()->query(), ['statut' => 'partielle'])) }}"
+           class="text-decoration-none">
+            <div class="stat-card {{ request('statut') == 'partielle' ? 'stat-card-active' : '' }}"
+                 style="background: linear-gradient(135deg,#dc3545,#e91e63)">
+                <div class="number">{{ $stats['une_place'] }}</div>
+                <div class="label"><i class="bi bi-exclamation-circle me-1"></i>1 place libre</div>
             </div>
-        </div>
+        </a>
     </div>
 </div>
 
-{{-- Titre --}}
-<div class="mb-4">
-    <h4 class="fw-bold mb-1">Gestion des chambres</h4>
-    <p class="text-muted mb-0">Consulter, filtrer et gérer les affectations de chambres.</p>
-</div>
+<style>
+.stat-card-active {
+    box-shadow: 0 0 0 3px #fff, 0 0 0 5px rgba(0,0,0,0.3);
+}
+</style>
 
 {{-- Filtres + Actions --}}
 <div class="card mb-4">
@@ -53,6 +61,7 @@
             {{-- Formulaire GET filtres --}}
             <form method="GET" action="{{ route('hebergement.chambres.index') }}" id="filterForm"
                   class="col-md-7 d-flex gap-2 align-items-center p-0">
+                  <input type="hidden" name="statut" value="{{ request('statut') }}">
                 <select class="form-select form-select-sm" name="categorie" onchange="this.form.submit()">
                     <option value="">Toutes catégories</option>
                     <option value="individuelle" {{ request('categorie') == 'individuelle' ? 'selected' : '' }}>Individuelle</option>

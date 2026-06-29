@@ -3,10 +3,7 @@
 @section('content')
 
 {{-- Topbar titre --}}
-<div class="mb-4">
-    <h4 class="fw-bold mb-1">Tableau de bord — Hébergement</h4>
-    <p class="text-muted mb-0">Vue d'ensemble de la gestion des chambres.</p>
-</div>
+
 
 {{-- Stats colorées --}}
 <div class="row g-3 mb-4">

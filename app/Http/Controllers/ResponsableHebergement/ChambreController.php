@@ -43,6 +43,9 @@ class ChambreController extends Controller
             $query->whereIn('statut', ['libre', 'partielle']);
         }
 
+        if ($request->filled('statut')) {
+          $query->where('statut', $request->statut);
+        }
         $chambres = $query->paginate(20)->withQueryString();
 
         $stats = [
