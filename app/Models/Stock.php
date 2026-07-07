@@ -30,4 +30,8 @@ class Stock extends Model
     {
         return $this->quantite <= $this->seuil_minimum && $this->quantite > 0;
     }
+    public function materiels()
+{
+    return $this->hasMany(Materiel::class, 'stock_id');
+}
 }

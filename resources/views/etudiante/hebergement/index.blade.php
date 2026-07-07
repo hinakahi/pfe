@@ -16,11 +16,7 @@
     </div>
 @endif
 
-{{-- Titre --}}
-<div class="mb-4">
-    <h4 class="fw-bold mb-1">Mon Hébergement</h4>
-    <p class="text-muted mb-0">Gérer votre chambre et vos demandes.</p>
-</div>
+
 
 {{-- Ma chambre --}}
 <div class="p-4 rounded-3 text-white mb-4" style="background: linear-gradient(135deg, #1a3c5e, #2d6a9f);">

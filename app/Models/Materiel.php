@@ -11,6 +11,7 @@ class Materiel extends Model
 
     protected $fillable = [
         'maintenance_id',
+        'stock_id',
         'nom_materiel',
         'quantite',
         'stock_epuise',
@@ -25,4 +26,8 @@ class Materiel extends Model
     {
         return $this->belongsTo(Maintenance::class, 'maintenance_id');
     }
+    public function stock()
+{
+    return $this->belongsTo(Stock::class, 'stock_id');
+}
 }

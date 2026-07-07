@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Inscription - Résidence Si Oukli</title>
+    <title>Inscription - Résidence Si Ouakli</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
     <style>
@@ -49,7 +49,7 @@
 <div class="register-card">
     <div class="register-logo">
         <img src="{{ asset('photo/mon_logo.jpg') }}" alt="Logo" style="width:80px; height:auto; border-radius:10px;">
-        <h4>Inscription — Résidence Si Oukli</h4>
+        <h4>Inscription — Résidence Si Ouakli</h4>
     </div>
 
     @if($errors->any())

@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>@yield('title', 'Résidence Si Oukli')</title>
+    <title>@yield('title', 'Résidence Si Ouakli')</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
     <style>
@@ -278,7 +278,7 @@
     <div class="sidebar-brand">
         <img src="{{ asset('photo/mon_logo.jpg') }}" alt="Logo"
              style="width:36px; height:36px; border-radius:8px; object-fit:cover; flex-shrink:0;">
-        <span>Si Oukli</span>
+        <span>Si Ouakli</span>
         <div class="d-flex gap-1 ms-auto">
             <button class="collapse-btn" id="collapseBtn" title="Réduire">
                 <i class="bi bi-chevron-left" id="collapseIcon"></i>

@@ -66,7 +66,7 @@
                 <div class="d-flex flex-wrap gap-2">
                     @foreach($maintenance->materiels as $m)
                     <span class="badge bg-light text-dark border" style="font-size:.78rem;">
-                        <i class="bi bi-box me-1"></i>{{ $m->nom_materiel }} ×{{ $m->quantite }}
+                        <i class="bi bi-box me-1"></i>{{ $m->stock->designation ?? 'Matériel supprimé' }} ×{{ $m->quantite }}
                         @if($m->stock_epuise)
                             <span class="text-danger ms-1">⚠ épuisé</span>
                         @endif
@@ -133,8 +133,7 @@
 
                         <div class="mb-3">
                             <label class="form-label fw-semibold">Sélectionner un matériel</label>
-                            <select name="materiels[0][stock_id]" class="form-select" id="stockSelect"
-                                    onchange="syncNom(this)">
+                            <select name="materiels[0][stock_id]" class="form-select" id="stockSelect">
                                 <option value="">-- Aucun matériel --</option>
                                 @foreach($stocks as $s)
                                 <option value="{{ $s->id }}"
@@ -146,7 +145,7 @@
                                 </option>
                                 @endforeach
                             </select>
-                            <input type="hidden" name="materiels[0][nom_materiel]" id="nomMateriel">
+                            
                         </div>
 
                         <div class="mb-3">
@@ -155,12 +154,7 @@
                                    class="form-control" min="1" value="1">
                         </div>
 
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" name="stock_epuise" id="stockEpuise">
-                            <label class="form-check-label" for="stockEpuise" style="font-size:.85rem;">
-                                <i class="bi bi-exclamation-triangle text-warning me-1"></i>Signaler stock épuisé
-                            </label>
-                        </div>
+                     
 
                     </div>
                 </div>
@@ -192,10 +186,20 @@
 
                 <div class="row g-3">
                     <div class="col-md-4">
-                        <label class="form-label fw-semibold">Matériel concerné</label>
-                        <input type="text" name="nom_materiel"
-                               class="form-control" placeholder="ex: tournevis, ventouse…" required>
-                    </div>
+    <label class="form-label fw-semibold">Matériel concerné</label>
+    <select name="stock_id" class="form-select" id="incidentStockSelect" required>
+        <option value="">-- Sélectionner un matériel --</option>
+        @foreach($stocks as $s)
+        <option value="{{ $s->id }}"
+                data-nom="{{ $s->designation }}">
+            {{ $s->designation }}
+            ({{ $s->quantite }} {{ $s->unite }})
+            {{ $s->est_epuise ? '⚠ Épuisé' : ($s->est_faible ? '⚠ Stock faible' : '') }}
+        </option>
+        @endforeach
+    </select>
+    
+</div>
                     <div class="col-md-2">
                         <label class="form-label fw-semibold">Quantité</label>
                         <input type="number" name="quantite"
@@ -219,10 +223,7 @@
 </div>
 
 <script>
-function syncNom(select) {
-    const option = select.options[select.selectedIndex];
-    document.getElementById('nomMateriel').value = option.dataset.nom ?? '';
-}
+
 
 const selectStatut = document.getElementById('selectStatut');
 const blocCommentaire = document.getElementById('blocCommentaire');

@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>SiOukli — Résidence Universitaire Si Oukli · Tamda, Tizi Ouzou</title>
+    <title>SiOuakli — Résidence Universitaire Si Ouakli · Tamda, Tizi Ouzou</title>
     <link rel="stylesheet" href="{{ asset('css/welcome.css') }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
   </head>
@@ -13,10 +13,10 @@
       <nav class="nav-container">
         <a href="#accueil" class="logo-container">
           <div class="logo-icon">
-    <img src="{{ asset('photo/mon_logo.jpg') }}" alt="Logo SiOukli">
+    <img src="{{ asset('photo/mon_logo.jpg') }}" alt="Logo SiOuakli">
       </div>
           <div>
-            <span class="logo-text">Si<span>Oukli</span></span>
+            <span class="logo-text">Si<span>Ouakli</span></span>
             <small class="logo-sub">Résidence kasri Mohammed · Tamda</small>
           </div>
         </a>
@@ -47,8 +47,8 @@
           </div>
           <div class="slider-stage" id="sliderStage"></div>
           <div class="text-overlay" id="textOverlay">
-            <span class="slide-badge" id="slideBadge">Résidence Si Oukli</span>
-            <h2 class="slide-title" id="slideTitle">Bienvenue à la Résidence Si Oukli</h2>
+            <span class="slide-badge" id="slideBadge">Résidence Si Ouakli</span>
+            <h2 class="slide-title" id="slideTitle">Bienvenue à la Résidence Si Ouakli</h2>
             <p class="slide-description" id="slideDescription">
               Votre espace de vie universitaire au cœur du pôle de Tamda, Tizi Ouzou.
             </p>
@@ -73,7 +73,7 @@
           <span class="section-tag">Ce que nous offrons</span>
           <h2 class="section-title">Tous vos services, en un clic</h2>
           <p class="section-subtitle">
-            La résidence Si Oukli met à votre disposition une gamme complète de
+            La résidence Si Ouakli met à votre disposition une gamme complète de
             services pour un séjour universitaire serein et confortable.
           </p>
         </div>
@@ -109,7 +109,7 @@
             <div class="service-content active" id="hebergement">
               <div class="service-content-icon">🏠</div>
               <h2>Hébergement <span>confortable</span></h2>
-              <p>La résidence Si Oukli dispose de <strong>2000 lits</strong> répartis dans 8 pavillons modernes. Chaque résidente bénéficie d'un espace sécurisé et bien équipé.</p>
+              <p>La résidence Si Ouakli dispose de <strong>2000 lits</strong> répartis dans 8 pavillons modernes. Chaque résidente bénéficie d'un espace sécurisé et bien équipé.</p>
               <p>Via l'application, vous pouvez demander un changement de chambre, signaler un problème ou suivre vos demandes en temps réel.</p>
               <ul class="service-features">
                 <li>Chambres doubles et individuelles (cas exceptionnels)</li>
@@ -181,8 +181,8 @@
       <div class="section-container">
         <div class="section-header reveal">
           <span class="section-tag" style="color: var(--sky3); background: rgba(56, 189, 248, 0.1); border-color: rgba(56, 189, 248, 0.2);">Notre histoire</span>
-          <h2 class="section-title">La résidence Si Oukli en chiffres</h2>
-          <p class="section-subtitle">Kasri Mohammed Akli — dit Si Oukli — accompagne les étudiantes de l'UMMTO depuis 2009.</p>
+          <h2 class="section-title">La résidence Si Ouakli en chiffres</h2>
+          <p class="section-subtitle">Kasri Mohammed Akli — dit Si Ouakli — accompagne les étudiantes de l'UMMTO depuis 2009.</p>
         </div>
         <div class="about-grid">
           <div class="about-timeline reveal-left">
@@ -198,7 +198,7 @@
             <div class="timeline-item">
               <div class="timeline-dot"></div>
               <div class="timeline-year">2026</div>
-              <div class="timeline-title">Projet de numérisation Si Oukli</div>
+              <div class="timeline-title">Projet de numérisation Si Ouakli</div>
               <div class="timeline-description">
                 Lancement du projet de modernisation numérique visant à digitaliser tous les services : hébergement, maintenance, bibliothèque, santé, restauration et activités culturelles.
               </div>
@@ -240,7 +240,7 @@
         <div class="section-header reveal">
           <span class="section-tag">Nous contacter</span>
           <h2 class="section-title">Une question ? Écrivez-nous</h2>
-          <p class="section-subtitle">Pour toute demande d'information concernant la résidence Si Oukli ou la plateforme TAMDA 1.</p>
+          <p class="section-subtitle">Pour toute demande d'information concernant la résidence Si Ouakli ou la plateforme TAMDA 1.</p>
         </div>
         <div class="contact-content">
          <div class="contact-form reveal-left">
@@ -332,10 +332,10 @@
             <div class="footer-logo-wrap">
                <a href="#accueil" class="logo-container">
           <div class="logo-icon">
-    <img src="{{ asset('photo/mon_logo.jpg') }}" alt="Logo SiOukli">
+    <img src="{{ asset('photo/mon_logo.jpg') }}" alt="Logo SiOuakli">
       </div>
           <div>
-            <span class="logo-text">Si<span>Oukli</span></span>
+            <span class="logo-text">Si<span>Ouakli</span></span>
             <small class="logo-sub">Résidence kasri Mohammed · Tamda</small>
           </div>
         </a>
@@ -343,7 +343,7 @@
              
             </div>
             <p class="footer-description">
-              Plateforme numérique de gestion de la résidence universitaire Kasri Mohammed Akli (Si Oukli) — Tamda, Tizi Ouzou. Un écosystème digital pour les 1318 résidentes.
+              Plateforme numérique de gestion de la résidence universitaire Kasri Mohammed Akli (Si Ouakli) — Tamda, Tizi Ouzou. Un écosystème digital pour les 1318 résidentes.
             </p>
             <div class="footer-social">
               <a href="https://www.facebook.com/dz.onou.15.dout.rut1" class="social-link"><i class="fab fa-facebook-f"></i></a>
@@ -379,7 +379,7 @@
           </div>
         </div>
         <div class="footer-bottom">
-          <div class="footer-copyright">© 2026 — Résidence Si Oukli, Tamda · Tizi Ouzou</div>
+          <div class="footer-copyright">© 2026 — Résidence Si Ouakli, Tamda · Tizi Ouzou</div>
           <div class="footer-copyright">Développé dans le cadre du PFE — Université Mouloud Mammeri</div>
         </div>
       </div>
@@ -403,8 +403,8 @@
         {
           url: "{{ asset('photo/7.jpg') }}",
           thumb: "{{ asset('photo/577790172_821772173946876_8246481439298717551_n.jpg') }}",
-          badge: "Résidence Si Oukli",
-          title: "Bienvenue à la Résidence Si Oukli",
+          badge: "Résidence Si Ouakli",
+          title: "Bienvenue à la Résidence Si Ouakli",
           description: "2000 lits, 8 pavillons modernes — votre espace de vie universitaire à Tamda, Tizi Ouzou.",
         },
         {
@@ -452,7 +452,7 @@
       ];
 
       /* ══════════ SLIDER LOGIC ══════════ */
-      class SiOukliSlider {
+      class SiOuakliSlider {
         constructor() {
           this.idx = 0;
           this.anim = false;
@@ -604,7 +604,7 @@
           document.getElementById("playPauseBtn").onclick = () => this.toggle();
         }
       }
-      const slider = new SiOukliSlider();
+      const slider = new SiOuakliSlider();
 
       /* ══════════ NAVBAR SCROLL ══════════ */
       window.addEventListener("scroll", () => {

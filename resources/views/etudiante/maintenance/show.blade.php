@@ -100,7 +100,7 @@
                     <tbody>
                         @foreach($maintenance->materiels as $materiel)
                         <tr>
-                            <td>{{ $materiel->nom_materiel }}</td>
+                            <td>{{ $materiel->stock->designation ?? '' }}</td>
                             <td class="text-center">{{ $materiel->quantite ?? '—' }}</td>
                         </tr>
                         @endforeach
