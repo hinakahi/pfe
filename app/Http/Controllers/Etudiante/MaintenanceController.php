@@ -38,22 +38,25 @@ public function index(Request $request)
 }
 
     public function store(Request $request)
-    {
-        $request->validate([
-            'chambre_id'  => 'required|exists:chambres,id',
-            'type'        => 'required|in:electricite,plomberie,menuiserie,autre',
-            'description' => 'required|string|max:500',
-            'urgence'     => 'required|in:normale,urgente',
-        ]);
+{
+    $request->validate([
+        'type_lieu'    => 'required|in:chambre,commun',
+        'chambre_id'   => 'required_if:type_lieu,chambre|nullable|exists:chambres,id',
+        'lieu_commun'  => 'required_if:type_lieu,commun|nullable|string|max:255',
+        'type'         => 'required|in:electricite,plomberie,menuiserie,autre',
+        'description'  => 'required|string|max:500',
+        'urgence'      => 'required|in:normale,urgente',
+    ]);
 
-        $maintenance = Maintenance::create([
-            'etudiante_id' => auth()->id(),
-            'chambre_id'   => $request->chambre_id,
-            'type'         => $request->type,
-            'description'  => $request->description,
-            'urgence'      => $request->urgence,
-            'statut'       => 'en_attente',
-        ]);
+    $maintenance = Maintenance::create([
+        'etudiante_id' => auth()->id(),
+        'chambre_id'   => $request->type_lieu === 'chambre' ? $request->chambre_id : null,
+        'lieu_commun'  => $request->type_lieu === 'commun' ? $request->lieu_commun : null,
+        'type'         => $request->type,
+        'description'  => $request->description,
+        'urgence'      => $request->urgence,
+        'statut'       => 'en_attente',
+    ]);
 
         $techniciens = User::where('role', 'technicien')->get();
         foreach ($techniciens as $technicien) {

@@ -54,16 +54,10 @@
                 @error('email')<div class="invalid-feedback">{{ $message }}</div>@enderror
             </div>
 
-            <div class="mb-3">
-                <label class="form-label fw-semibold">Rôle</label>
-                <select name="role" class="form-select" required>
-                    <option value="admin"            {{ old('role',$utilisateur->role)=='admin'            ? 'selected' : '' }}>Administrateur</option>
-                    <option value="etudiante"        {{ old('role',$utilisateur->role)=='etudiante'        ? 'selected' : '' }}>Étudiante</option>
-                    <option value="resp_hebergement" {{ old('role',$utilisateur->role)=='resp_hebergement' ? 'selected' : '' }}>Resp. Hébergement</option>
-                    <option value="technicien"       {{ old('role',$utilisateur->role)=='technicien'       ? 'selected' : '' }}>Technicien</option>
-                    <option value="resp_foyer"       {{ old('role',$utilisateur->role)=='resp_foyer'       ? 'selected' : '' }}>Resp. Foyer</option>
-                </select>
-            </div>
+             <div class="mb-3">
+                 <label class="form-label fw-semibold">Rôle</label>
+                 <input type="text" class="form-control" value="{{ ucfirst(str_replace('_',' ',$utilisateur->role)) }}" disabled>
+             </div>
 
             {{-- Mot de passe avec toggle --}}
             <div class="row mb-4">

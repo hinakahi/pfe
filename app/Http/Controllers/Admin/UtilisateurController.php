@@ -7,7 +7,20 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 
 class UtilisateurController extends Controller
+{   private function deriveRoleFromMatricule(string $matricule): ?string
 {
+    $matricule = strtoupper($matricule);
+
+    return match (true) {
+        str_starts_with($matricule, 'ETU')  => 'etudiante',
+        str_starts_with($matricule, 'HEB')  => 'resp_hebergement',
+        str_starts_with($matricule, 'TECH') => 'technicien',
+        str_starts_with($matricule, 'FOY')  => 'resp_foyer',
+        str_starts_with($matricule, 'ADM')  => 'admin',
+        default => null,
+    };
+} 
+
     public function index()
     {
         $utilisateurs = User::latest()->paginate(15);
@@ -25,19 +38,19 @@ class UtilisateurController extends Controller
             'name'      => 'required|string|max:191',
             'matricule' => 'required|string|max:191|unique:users',
             'email'     => 'required|email|max:191|unique:users',
-            'role'      => 'required|in:admin,etudiante,resp_hebergement,technicien,resp_foyer',
+            
             'phone'     => 'nullable|string|max:20',
             'password'  => 'required|string|min:6|confirmed',
         ]);
 
         User::create([
-            'name'      => $request->name,
-            'matricule' => $request->matricule,
-            'email'     => $request->email,
-            'role'      => $request->role,
-            'phone'     => $request->phone,
-            'password'  => Hash::make($request->password),
-        ]);
+    'name'      => $request->name,
+    'matricule' => $request->matricule,
+    'email'     => $request->email,
+    'role'      => $this->deriveRoleFromMatricule($request->matricule) ?? 'etudiante',
+    'phone'     => $request->phone,
+    'password'  => Hash::make($request->password),
+]);
 
         return redirect()->route('admin.utilisateurs.index')
             ->with('success', 'Utilisateur créé avec succès.');
@@ -54,13 +67,14 @@ class UtilisateurController extends Controller
         'name'      => 'required|string|max:191',
         'matricule' => 'required|string|max:191|unique:users,matricule,' . $utilisateur->id,
         'email'     => 'required|email|max:191|unique:users,email,' . $utilisateur->id,
-        'role'      => 'required|in:admin,etudiante,resp_hebergement,technicien,resp_foyer',
-        'phone'     => 'nullable|string|max:20',
-        'password'  => 'nullable|string|min:6|confirmed',
-        'photo'     => 'nullable|image|mimes:jpg,jpeg,png|max:2048', // ← ajouté
+        
+        'phone'     => 'nullable|string|max:10',
+        'password'  => 'nullable|string|min:8|confirmed',
+        'photo'     => 'nullable|image|mimes:jpg,jpeg,png|max:2048', 
     ]);
 
-    $data = $request->only('name', 'matricule', 'email', 'role', 'phone');
+    $data = $request->only('name', 'matricule', 'email', 'phone');
+    $data['role'] = $this->deriveRoleFromMatricule($request->matricule) ?? $utilisateur->role;
 
     if ($request->filled('password')) {
         $data['password'] = Hash::make($request->password);

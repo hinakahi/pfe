@@ -1,5 +1,16 @@
 @extends('layouts.app')
+
 @section('page-title', 'Tableau de bord')
+
+@section('styles')
+<style>
+    .list-group-item {
+        background: var(--bg-card);
+        color: var(--text-main);
+        border-color: rgba(255,255,255,0.08);
+    }
+</style>
+@endsection
 @section('sidebar')
     @include('etudiante.partials._sidebar')
 @endsection

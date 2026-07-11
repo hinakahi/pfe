@@ -100,18 +100,22 @@
                     </p>
 
                     <div class="text-muted small">
-                        <i class="bi bi-door-open me-1"></i>Chambre {{ $demande->chambre->numero ?? '—' }}
-                        &nbsp;·&nbsp;
-                        <i class="bi bi-building me-1"></i>Bloc {{ $demande->chambre->bloc ?? '—' }}
-                        &nbsp;·&nbsp;
-                        <i class="bi bi-layers me-1"></i>Étage {{ $demande->chambre->etage ?? '—' }}
-                        &nbsp;·&nbsp;
-                        <i class="bi bi-clock me-1"></i>{{ $demande->created_at->format('d/m/Y') }}
-                        @if($demande->technicien)
-                            &nbsp;·&nbsp;
-                            <i class="bi bi-person-gear me-1"></i>{{ $demande->technicien->name }}
-                        @endif
-                    </div>
+    @if($demande->chambre)
+        <i class="bi bi-door-open me-1"></i>Chambre {{ $demande->chambre->numero }}
+        &nbsp;·&nbsp;
+        <i class="bi bi-building me-1"></i>Bloc {{ $demande->chambre->bloc }}
+        &nbsp;·&nbsp;
+        <i class="bi bi-layers me-1"></i>Étage {{ $demande->chambre->etage }}
+    @elseif($demande->lieu_commun)
+        <i class="bi bi-geo-alt me-1"></i>{{ $demande->lieu_commun }}
+    @endif
+    &nbsp;·&nbsp;
+    <i class="bi bi-clock me-1"></i>{{ $demande->created_at->format('d/m/Y') }}
+    @if($demande->technicien)
+        &nbsp;·&nbsp;
+        <i class="bi bi-person-gear me-1"></i>{{ $demande->technicien->name }}
+    @endif
+</div>
                 </div>
 
                 <div class="d-flex gap-2 ms-3 flex-shrink-0">
@@ -173,34 +177,44 @@
                 <div class="modal-body">
                     <div class="row g-3">
 
-                        {{-- Chambre automatique --}}
-                        <div class="col-md-4">
-                            <label class="form-label fw-semibold">Chambre</label>
-                            @if($chambre)
-                                <input type="hidden" name="chambre_id" value="{{ $chambre->id }}">
-                                <input type="text" class="form-control bg-light"
-                                       value="Chambre {{ $chambre->numero }}" readonly>
-                            @else
-                                <div class="alert alert-warning py-2 mb-0 small">
-                                    Aucune chambre assignée à votre compte.
-                                </div>
-                            @endif
-                            @error('chambre_id') <div class="text-danger small mt-1">{{ $message }}</div> @enderror
-                        </div>
+                         <div class="col-12 mb-2">
+    <label class="form-label fw-semibold">Où se situe le problème ? <span class="text-danger">*</span></label>
+    <div class="d-flex gap-3">
+        <div class="form-check">
+            <input class="form-check-input" type="radio" name="type_lieu" id="lieuChambre" value="chambre" checked onclick="toggleLieu()">
+            <label class="form-check-label" for="lieuChambre">Ma chambre</label>
+        </div>
+        <div class="form-check">
+            <input class="form-check-input" type="radio" name="type_lieu" id="lieuCommun" value="commun" onclick="toggleLieu()">
+            <label class="form-check-label" for="lieuCommun">Espace commun (sanitaires, couloir...)</label>
+        </div>
+    </div>
+</div>
 
-                        {{-- Bloc (automatique depuis la chambre) --}}
-                        <div class="col-md-4">
-                            <label class="form-label fw-semibold">Bloc</label>
-                            <input type="text" class="form-control bg-light"
-                                   value="{{ $chambre->bloc ?? '—' }}" readonly>
-                        </div>
+<div id="blocChambre" class="row g-3">
+    <div class="col-md-4">
+        <label class="form-label fw-semibold">Chambre</label>
+        @if($chambre)
+            <input type="hidden" name="chambre_id" value="{{ $chambre->id }}">
+            <input type="text" class="form-control bg-light" value="Chambre {{ $chambre->numero }}" readonly>
+        @else
+            <div class="alert alert-warning py-2 mb-0 small">Aucune chambre assignée.</div>
+        @endif
+    </div>
+    <div class="col-md-4">
+        <label class="form-label fw-semibold">Bloc</label>
+        <input type="text" class="form-control bg-light" value="{{ $chambre->bloc ?? '—' }}" readonly>
+    </div>
+    <div class="col-md-4">
+        <label class="form-label fw-semibold">Étage</label>
+        <input type="text" class="form-control bg-light" value="{{ $chambre->etage ?? '—' }}" readonly>
+    </div>
+</div>
 
-                        {{-- Étage (automatique depuis la chambre) --}}
-                        <div class="col-md-4">
-                            <label class="form-label fw-semibold">Étage</label>
-                            <input type="text" class="form-control bg-light"
-                                   value="{{ $chambre->etage ?? '—' }}" readonly>
-                        </div>
+<div id="blocCommun" class="col-12 d-none">
+    <label class="form-label fw-semibold">Précisez le lieu <span class="text-danger">*</span></label>
+    <input type="text" name="lieu_commun" id="inputLieuCommun" class="form-control" placeholder="Ex : Sanitaires Bloc B, 2e étage">
+</div>
 
                         <div class="col-md-6">
                             <label class="form-label fw-semibold">Type <span class="text-danger">*</span></label>
@@ -235,7 +249,7 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
-                    <button type="submit" class="btn btn-primary" @unless($chambre) disabled @endunless>
+                    <button type="submit" class="btn btn-primary">
                         <i class="bi bi-send me-1"></i>Envoyer la demande
                     </button>
                 </div>
@@ -251,5 +265,13 @@
     });
 </script>
 @endif
+<script>
+function toggleLieu() {
+    const estCommun = document.getElementById('lieuCommun').checked;
+    document.getElementById('blocChambre').classList.toggle('d-none', estCommun);
+    document.getElementById('blocCommun').classList.toggle('d-none', !estCommun);
+    document.getElementById('inputLieuCommun').required = estCommun;
+}
+</script>
 
 @endsection

@@ -323,6 +323,8 @@
         <i class="bi bi-calendar-event me-1"></i>
         Expire le {{ $article->date_peremption->format('d/m/Y') }}
     </div>
+    
+
 @endif
 
                     {{-- Prix --}}

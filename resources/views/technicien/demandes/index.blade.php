@@ -133,10 +133,12 @@
                             <span><i class="bi bi-person me-1"></i>{{ $d->etudiante->name ?? '-' }}</span>
 
                             @if($d->chambre)
-                                <span><i class="bi bi-door-closed me-1"></i>Chambre {{ $d->chambre->numero }}</span>
-                                <span><i class="bi bi-building me-1"></i>Bloc {{ $d->chambre->bloc }}</span>
-                                <span><i class="bi bi-layers me-1"></i>Étage {{ $d->chambre->etage }}</span>
-                            @endif
+    <span><i class="bi bi-door-closed me-1"></i>Chambre {{ $d->chambre->numero }}</span>
+    <span><i class="bi bi-building me-1"></i>Bloc {{ $d->chambre->bloc }}</span>
+    <span><i class="bi bi-layers me-1"></i>Étage {{ $d->chambre->etage }}</span>
+@elseif($d->lieu_commun)
+    <span><i class="bi bi-geo-alt me-1"></i>{{ $d->lieu_commun }}</span>
+@endif
 
                             <span><i class="bi bi-calendar me-1"></i>{{ $d->date_signalement?->format('d/m/Y') }}</span>
                         </div>

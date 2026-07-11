@@ -79,4 +79,14 @@ class StockController extends Controller
         return redirect()->route('technicien.stock.index')
                          ->with('success', 'Matériel supprimé du stock.');
     }
+
+    public function historique(Stock $stock)
+{
+    $utilisations = $stock->materiels()
+        ->with('maintenance.technicien', 'maintenance.chambre', 'maintenance.etudiante')
+        ->latest()
+        ->paginate(10);
+
+    return view('technicien.stock.historique', compact('stock', 'utilisations'));
+}
 }

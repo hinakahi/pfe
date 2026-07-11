@@ -20,6 +20,7 @@ class Maintenance extends Model
         'commentaire_technicien',
         'date_signalement',
         'date_resolution',
+        'lieu_commun',
     ];
 
     protected $casts = [

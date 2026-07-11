@@ -150,6 +150,9 @@
                            class="btn btn-sm btn-outline-primary w-100">
                             <i class="bi bi-pencil me-1"></i>Modifier
                         </a>
+                        <a href="{{ route('technicien.stock.historique', $stock) }}" class="btn btn-outline-info btn-sm">
+    <i class="bi bi-clock-history me-1"></i>Historique
+</a>
                         <form method="POST" action="{{ route('technicien.stock.destroy', $stock->id) }}"
                               onsubmit="return confirm('Supprimer ce matériel ?')">
                             @csrf

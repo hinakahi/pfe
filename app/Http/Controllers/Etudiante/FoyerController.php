@@ -30,13 +30,27 @@ class FoyerController extends Controller
         $totalReservations = Reservation::where('etudiante_id', $user->id)
          ->where('statut', 'en_attente')
          ->count();
-        $totalArticles = ArticleFoyer::where('disponible', true)->count();
-        $totalPromotions = ArticleFoyer::where('promo_active', true)
-        ->where('stock', '>', 0)
-        ->count();
-        $promotions = ArticleFoyer::where('promo_active', true)
-        ->where('stock', '>', 0)
-        ->latest()->limit(5)->get();
+        $totalArticles = ArticleFoyer::where('disponible', true)
+    ->where(function($q) {
+        $q->whereNull('date_peremption')
+          ->orWhere('date_peremption', '>=', now());
+    })
+    ->count();
+       $totalPromotions = ArticleFoyer::where('promo_active', true)
+    ->where('stock', '>', 0)
+    ->where(function($q) {
+        $q->whereNull('date_peremption')
+          ->orWhere('date_peremption', '>=', now());
+    })
+    ->count();
+
+$promotions = ArticleFoyer::where('promo_active', true)
+    ->where('stock', '>', 0)
+    ->where(function($q) {
+        $q->whereNull('date_peremption')
+          ->orWhere('date_peremption', '>=', now());
+    })
+    ->latest()->limit(5)->get();
         
         return view('etudiante.foyer.dashboard', compact(
             'reservations', 'promotions',
@@ -44,11 +58,16 @@ class FoyerController extends Controller
         ));
     }
 
-    public function categories()
-    {
-        $articles = ArticleFoyer::where('disponible', true)->latest()->get();
-        return view('etudiante.foyer.articles', compact('articles'));
-    }
+ public function categories()
+{
+    $articles = ArticleFoyer::where('disponible', true)
+        ->where(function($q) {
+            $q->whereNull('date_peremption')
+              ->orWhere('date_peremption', '>=', now());
+        })
+        ->latest()->get();
+    return view('etudiante.foyer.articles', compact('articles'));
+}
 
    public function index($categorie)
 {
@@ -58,6 +77,12 @@ class FoyerController extends Controller
     if ($categorie !== 'tous') {
         $query->where('categorie', $categorie);
     }
+
+    // Exclure les articles périmés
+    $query->where(function($q) {
+        $q->whereNull('date_peremption')
+          ->orWhere('date_peremption', '>=', now());
+    });
     
     $articles = $query->latest()->paginate(12);
     
@@ -74,12 +99,17 @@ class FoyerController extends Controller
     }
 
     public function promotions()
-    {
-        $promotions = ArticleFoyer::where('promo_active', true)
+{
+    $promotions = ArticleFoyer::where('promo_active', true)
         ->where('stock', '>', 0)
+        ->where(function($q) {
+            $q->whereNull('date_peremption')
+              ->orWhere('date_peremption', '>=', now());
+        })
         ->paginate(12);
-        return view('etudiante.foyer.promotions', compact('promotions'));
-    }
+
+    return view('etudiante.foyer.promotions', compact('promotions'));
+}
 
     public function reserver(Request $request, ArticleFoyer $article)
     {

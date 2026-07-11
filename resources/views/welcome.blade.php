@@ -472,7 +472,6 @@
         }
         buildSlices() {
           const st = document.getElementById("sliderStage");
-          const W = st.offsetWidth || 1100;
           for (let i = 0; i < this.slices; i++) {
             const sc = document.createElement("div");
             sc.className = "slice-container";
@@ -483,8 +482,8 @@
               face.className = `slice-face face-${f}`;
               const img = document.createElement("div");
               img.className = "slice-image";
-              img.style.width = W + "px";
-              img.style.left = -(i * (W / this.slices)) + "px";
+              img.style.width = (this.slices * 100) + "%";
+              img.style.left = -(i * 100) + "%";
               face.appendChild(img);
               cube.appendChild(face);
             }

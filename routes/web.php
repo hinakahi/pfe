@@ -220,29 +220,32 @@ Route::prefix('technicien')->middleware(['auth', 'role:technicien'])->group(func
     Route::get('/demandes/{maintenance}', [DemandeMaintController::class, 'show'])->name('technicien.demandes.show');
     Route::post('/demandes/{maintenance}/traiter', [DemandeMaintController::class, 'traiter'])->name('technicien.demandes.traiter');
     Route::post('/incidents', [IncidentController::class, 'store'])->name('technicien.incidents.store');
+
     Route::resource('stock', StockController::class)->names('technicien.stock');
+    Route::get('/stock/{stock}/historique', [StockController::class, 'historique'])->name('technicien.stock.historique');
+
     Route::get('/notifications', function () {
-    $notifications = auth()->user()->notifications()->paginate(15);
-    return view('technicien.notifications.index', compact('notifications'));
-})->name('technicien.notifications');
+        $notifications = auth()->user()->notifications()->paginate(15);
+        return view('technicien.notifications.index', compact('notifications'));
+    })->name('technicien.notifications');
 
-Route::post('/notifications/{id}/read', function ($id) {
-    $notification = auth()->user()->notifications()->findOrFail($id);
-    $notification->markAsRead();
-    return back();
-})->name('technicien.notifications.read');
+    Route::post('/notifications/{id}/read', function ($id) {
+        $notification = auth()->user()->notifications()->findOrFail($id);
+        $notification->markAsRead();
+        return back();
+    })->name('technicien.notifications.read');
 
-Route::get('/annonces', function () {
-    $annonces = \App\Models\Annonce::with('user')
-        ->where(function ($q) {
-            $q->where('destinataire', 'staff')
-              ->orWhere('destinataire', 'tous');
-        })
-        ->where('publiee', true)
-        ->latest()
-        ->paginate(10);
-    return view('technicien.annonces.index', compact('annonces'));
-})->name('technicien.annonces.index');
+    Route::get('/annonces', function () {
+        $annonces = \App\Models\Annonce::with('user')
+            ->where(function ($q) {
+                $q->where('destinataire', 'staff')
+                  ->orWhere('destinataire', 'tous');
+            })
+            ->where('publiee', true)
+            ->latest()
+            ->paginate(10);
+        return view('technicien.annonces.index', compact('annonces'));
+    })->name('technicien.annonces.index');
 });
 
 // ─── Responsable Foyer ────────────────────────────────────────
