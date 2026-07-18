@@ -21,10 +21,13 @@
 {{-- KPIs --}}
 <div class="row">
     <div class="col-md-3">
-        <div class="stat-card" style="background: linear-gradient(135deg,#1a3c5e,#2d6a9f)">
-            <div class="number">{{ $totalUtilisateurs }}</div>
-            <div class="label"><i class="bi bi-people me-1"></i>Utilisateurs</div>
-        </div>
+        <a href="{{ route('admin.utilisateurs.index') }}" style="text-decoration:none;">
+            <div class="stat-card" style="background: linear-gradient(135deg,#1a3c5e,#2d6a9f); cursor:pointer; transition: opacity .2s;"
+                 onmouseover="this.style.opacity='.85'" onmouseout="this.style.opacity='1'">
+                <div class="number">{{ $totalUtilisateurs }}</div>
+                <div class="label"><i class="bi bi-people me-1"></i>Utilisateurs</div>
+            </div>
+        </a>
     </div>
     <div class="col-md-3">
         <div class="stat-card" style="background: linear-gradient(135deg,#198754,#20c997)">

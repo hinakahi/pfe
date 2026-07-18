@@ -42,19 +42,40 @@ public function index(Request $request)
     $request->validate([
         'type_lieu'    => 'required|in:chambre,commun',
         'chambre_id'   => 'required_if:type_lieu,chambre|nullable|exists:chambres,id',
-        'lieu_commun'  => 'required_if:type_lieu,commun|nullable|string|max:255',
+        'lieu_type'    => 'required_if:type_lieu,commun|nullable|string|max:100',
+        'lieu_bloc'    => 'nullable|string|max:50',
+        'lieu_etage'   => 'nullable|string|max:50',
+        'lieu_autre'   => 'required_if:lieu_type,Autre|nullable|string|max:255',
         'type'         => 'required|in:electricite,plomberie,menuiserie,autre',
         'description'  => 'required|string|max:500',
         'urgence'      => 'required|in:normale,urgente',
+        'photo'        => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
     ]);
+
+    $photoPath = null;
+    if ($request->hasFile('photo')) {
+        $photoPath = $request->file('photo')->store('maintenances', 'public');
+    }
+
+    // Construction du lieu commun à partir des morceaux du formulaire
+    $lieuCommun = null;
+    if ($request->type_lieu === 'commun') {
+        $lieu = $request->lieu_type === 'Autre' ? $request->lieu_autre : $request->lieu_type;
+        $details = array_filter([
+            $request->filled('lieu_bloc') ? 'Bloc ' . $request->lieu_bloc : null,
+            $request->filled('lieu_etage') ? 'Étage ' . $request->lieu_etage : null,
+        ]);
+        $lieuCommun = $lieu . (count($details) ? ' — ' . implode(', ', $details) : '');
+    }
 
     $maintenance = Maintenance::create([
         'etudiante_id' => auth()->id(),
         'chambre_id'   => $request->type_lieu === 'chambre' ? $request->chambre_id : null,
-        'lieu_commun'  => $request->type_lieu === 'commun' ? $request->lieu_commun : null,
+        'lieu_commun'  => $lieuCommun,
         'type'         => $request->type,
         'description'  => $request->description,
         'urgence'      => $request->urgence,
+        'photo'        => $photoPath,
         'statut'       => 'en_attente',
     ]);
 
@@ -88,9 +109,13 @@ public function index(Request $request)
                              ->with('error', 'Impossible de modifier une demande en cours ou terminée.');
         }
 
-        $chambres = Chambre::all();
+        $user = auth()->user();
 
-        return view('etudiante.maintenance.edit', compact('maintenance', 'chambres'));
+        $chambre = Chambre::where('etudiante_1', $user->matricule)
+                          ->orWhere('etudiante_2', $user->matricule)
+                          ->first();
+
+        return view('etudiante.maintenance.edit', compact('maintenance', 'chambre'));
     }
 
     public function update(Request $request, Maintenance $maintenance)
@@ -104,13 +129,34 @@ public function index(Request $request)
         }
 
         $request->validate([
-            'chambre_id'  => 'required|exists:chambres,id',
-            'type'        => 'required|in:electricite,plomberie,menuiserie,autre',
-            'description' => 'required|string|max:500',
-            'urgence'     => 'required|in:normale,urgente',
+            'type_lieu'    => 'required|in:chambre,commun',
+            'chambre_id'   => 'required_if:type_lieu,chambre|nullable|exists:chambres,id',
+            'lieu_type'    => 'required_if:type_lieu,commun|nullable|string|max:100',
+            'lieu_bloc'    => 'nullable|string|max:50',
+            'lieu_etage'   => 'nullable|string|max:50',
+            'lieu_autre'   => 'required_if:lieu_type,Autre|nullable|string|max:255',
+            'type'         => 'required|in:electricite,plomberie,menuiserie,autre',
+            'description'  => 'required|string|max:500',
+            'urgence'      => 'required|in:normale,urgente',
         ]);
 
-        $maintenance->update($request->only('chambre_id', 'type', 'description', 'urgence'));
+        $lieuCommun = null;
+        if ($request->type_lieu === 'commun') {
+            $lieu = $request->lieu_type === 'Autre' ? $request->lieu_autre : $request->lieu_type;
+            $details = array_filter([
+                $request->filled('lieu_bloc') ? 'Bloc ' . $request->lieu_bloc : null,
+                $request->filled('lieu_etage') ? 'Étage ' . $request->lieu_etage : null,
+            ]);
+            $lieuCommun = $lieu . (count($details) ? ' — ' . implode(', ', $details) : '');
+        }
+
+        $maintenance->update([
+            'chambre_id'  => $request->type_lieu === 'chambre' ? $request->chambre_id : null,
+            'lieu_commun' => $lieuCommun,
+            'type'        => $request->type,
+            'description' => $request->description,
+            'urgence'     => $request->urgence,
+        ]);
 
         return redirect()->route('etudiante.maintenance.show', $maintenance)
                          ->with('success', 'Demande modifiée avec succès.');

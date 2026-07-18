@@ -46,6 +46,18 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::resource('utilisateurs', UtilisateurController::class);
+    // Routes supplémentaires pour l'archivage
+     Route::patch('utilisateurs/{id}/restore', [UtilisateurController::class, 'restore'])
+    ->name('utilisateurs.restore');
+
+   Route::delete('utilisateurs/{id}/force-delete', [UtilisateurController::class, 'forceDelete'])
+    ->name('utilisateurs.force-delete');
+
+    Route::post('utilisateurs/bulk-archive', [UtilisateurController::class, 'bulkArchive'])
+    ->name('utilisateurs.bulk-archive');
+
+    Route::post('utilisateurs/bulk-restore', [UtilisateurController::class, 'bulkRestore'])
+       ->name('utilisateurs.bulk-restore');
     Route::resource('annonces', AnnonceController::class);
     Route::resource('periodes', PeriodeController::class);
     Route::resource('matricules', \App\Http\Controllers\Admin\MatriculeController::class);
@@ -136,6 +148,10 @@ Route::middleware(['auth', 'role:etudiante'])->prefix('etudiante')->name('etudia
     });
     Route::get('/hebergement/changement', [HebergementController::class, 'showChangement'])->name('changement');
     Route::post('/hebergement/changement', [HebergementController::class, 'demanderChangement'])->name('changement.store');
+    Route::put('/hebergement/changement/{demande}/modifier', [HebergementController::class, 'modifierChangement'])
+    ->name('changement.modifier');
+Route::delete('/hebergement/changement/{demande}/annuler', [HebergementController::class, 'annulerChangement'])
+    ->name('changement.annuler');
     Route::put('/hebergement/renouvellement/{demande}/modifier', [HebergementController::class, 'modifierRenouvellement'])
     ->name('hebergement.renouvellement.modifier');
    
@@ -223,7 +239,7 @@ Route::prefix('technicien')->middleware(['auth', 'role:technicien'])->group(func
 
     Route::resource('stock', StockController::class)->names('technicien.stock');
     Route::get('/stock/{stock}/historique', [StockController::class, 'historique'])->name('technicien.stock.historique');
-
+    Route::get('/stock-historique', [StockController::class, 'historiqueGlobal'])->name('technicien.stock.historique-global');
     Route::get('/notifications', function () {
         $notifications = auth()->user()->notifications()->paginate(15);
         return view('technicien.notifications.index', compact('notifications'));

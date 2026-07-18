@@ -1,18 +1,18 @@
 @extends('layouts.app')
-
+@section('page-title', 'Mes demandes de maintenance')
 @section('content')
 <div class="container py-4">
 
     {{-- Header --}}
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h4 class="mb-0 fw-bold">Mes demandes de maintenance</h4>
+        
         <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalCreer">
             <i class="bi bi-plus-lg me-1"></i> Nouvelle demande
         </button>
     </div>
 
     {{-- Alerts --}}
-    
+
     @if(session('error'))
         <div class="alert alert-danger alert-dismissible fade show" role="alert">
             {{ session('error') }}
@@ -63,62 +63,84 @@
     </div>
 
     {{-- Liste --}}
+    @php
+        $typeIcons = [
+            'electricite' => 'bi-lightning-charge',
+            'plomberie'   => 'bi-droplet',
+            'menuiserie'  => 'bi-hammer',
+            'autre'       => 'bi-tools',
+        ];
+    @endphp
+
     @forelse($demandes as $demande)
-    <div class="card mb-3 border-0 shadow-sm">
-        <div class="card-body">
-            <div class="d-flex justify-content-between align-items-start">
-                <div class="flex-grow-1">
-                    <div class="d-flex align-items-center gap-2 mb-1">
+    @php
+        $borderColor = match($demande->statut) {
+            'en_attente' => '#ffc107',
+            'en_cours'   => '#0d6efd',
+            'terminee'   => '#198754',
+            default      => '#dee2e6',
+        };
+        $statutClass = match($demande->statut) {
+            'en_attente' => 'warning text-dark',
+            'en_cours'   => 'primary',
+            'terminee'   => 'success',
+            default      => 'secondary',
+        };
+        $statutLabel = match($demande->statut) {
+            'en_attente' => 'En attente',
+            'en_cours'   => 'En cours',
+            'terminee'   => 'Terminée',
+            default      => $demande->statut,
+        };
+    @endphp
+    <div class="card mb-3 shadow-sm" style="border-left: 5px solid {{ $borderColor }};">
+        <div class="card-body py-3">
+            <div class="d-flex flex-wrap align-items-start justify-content-between gap-3">
+
+                <div style="flex:1; min-width:240px;">
+
+                    {{-- Badges --}}
+                    <div class="d-flex flex-wrap align-items-center gap-2 mb-2">
+                        <span class="badge bg-{{ $statutClass }}">{{ $statutLabel }}</span>
+
                         @if($demande->urgence === 'urgente')
                             <span class="badge bg-danger">
                                 <i class="bi bi-exclamation-triangle-fill me-1"></i>Urgente
                             </span>
                         @else
-                            <span class="badge bg-secondary">Normale</span>
+                            <span class="badge bg-light text-dark border">Normale</span>
                         @endif
 
-                        @php
-                            $statutClass = match($demande->statut) {
-                                'en_attente' => 'warning text-dark',
-                                'en_cours'   => 'info text-dark',
-                                'terminee'   => 'success',
-                                default      => 'secondary',
-                            };
-                            $statutLabel = match($demande->statut) {
-                                'en_attente' => 'En attente',
-                                'en_cours'   => 'En cours',
-                                'terminee'   => 'Terminée',
-                                default      => $demande->statut,
-                            };
-                        @endphp
-                        <span class="badge bg-{{ $statutClass }}">{{ $statutLabel }}</span>
-                        <span class="text-muted small">{{ ucfirst($demande->type) }}</span>
+                        <span class="badge bg-light text-dark border">
+                            <i class="bi {{ $typeIcons[$demande->type] ?? 'bi-tools' }} me-1"></i>
+                            {{ ucfirst($demande->type) }}
+                        </span>
                     </div>
 
-                    <p class="mb-1 text-truncate" style="max-width: 600px;">
+                    {{-- Description --}}
+                    <p class="mb-2 text-truncate" style="max-width: 600px;">
                         {{ $demande->description }}
                     </p>
 
-                    <div class="text-muted small">
-    @if($demande->chambre)
-        <i class="bi bi-door-open me-1"></i>Chambre {{ $demande->chambre->numero }}
-        &nbsp;·&nbsp;
-        <i class="bi bi-building me-1"></i>Bloc {{ $demande->chambre->bloc }}
-        &nbsp;·&nbsp;
-        <i class="bi bi-layers me-1"></i>Étage {{ $demande->chambre->etage }}
-    @elseif($demande->lieu_commun)
-        <i class="bi bi-geo-alt me-1"></i>{{ $demande->lieu_commun }}
-    @endif
-    &nbsp;·&nbsp;
-    <i class="bi bi-clock me-1"></i>{{ $demande->created_at->format('d/m/Y') }}
-    @if($demande->technicien)
-        &nbsp;·&nbsp;
-        <i class="bi bi-person-gear me-1"></i>{{ $demande->technicien->name }}
-    @endif
-</div>
+                    {{-- Localisation + date + technicien --}}
+                    <div class="d-flex flex-wrap gap-3 text-muted" style="font-size:.85rem;">
+                        @if($demande->chambre)
+                            <span><i class="bi bi-door-closed me-1"></i>Chambre {{ $demande->chambre->numero }}</span>
+                            <span><i class="bi bi-building me-1"></i>Bloc {{ $demande->chambre->bloc }}</span>
+                            <span><i class="bi bi-layers me-1"></i>Étage {{ $demande->chambre->etage }}</span>
+                        @elseif($demande->lieu_commun)
+                            <span><i class="bi bi-geo-alt me-1"></i>{{ $demande->lieu_commun }}</span>
+                        @endif
+                        <span><i class="bi bi-calendar me-1"></i>{{ $demande->created_at->format('d/m/Y') }}</span>
+                        @if($demande->technicien)
+                            <span class="text-primary"><i class="bi bi-person-gear me-1"></i>{{ $demande->technicien->name }}</span>
+                        @endif
+                    </div>
+
                 </div>
 
-                <div class="d-flex gap-2 ms-3 flex-shrink-0">
+                {{-- Actions --}}
+                <div class="d-flex gap-2 flex-shrink-0">
                     <a href="{{ route('etudiante.maintenance.show', $demande) }}"
                        class="btn btn-outline-secondary btn-sm">
                         <i class="bi bi-eye me-1"></i>Détails
@@ -140,18 +162,21 @@
                         </form>
                     @endif
                 </div>
+
             </div>
         </div>
     </div>
     @empty
-        <div class="text-center py-5 text-muted">
-            <i class="bi bi-tools fs-1 d-block mb-3"></i>
-            <p class="mb-0">Aucune demande trouvée.</p>
-            @if(request()->hasAny(['statut','urgence','periode']))
-                <a href="{{ route('etudiante.maintenance.index') }}" class="btn btn-sm btn-outline-secondary mt-3">
-                    Effacer les filtres
-                </a>
-            @endif
+        <div class="card">
+            <div class="card-body text-center text-muted py-5">
+                <i class="bi bi-tools fs-1 opacity-25 d-block mb-3"></i>
+                <p class="mb-0">Aucune demande trouvée.</p>
+                @if(request()->hasAny(['statut','urgence','periode']))
+                    <a href="{{ route('etudiante.maintenance.index') }}" class="btn btn-sm btn-outline-secondary mt-3">
+                        Effacer les filtres
+                    </a>
+                @endif
+            </div>
         </div>
     @endforelse
 
@@ -172,7 +197,7 @@
                 <h5 class="modal-title fw-bold">Nouvelle demande de maintenance</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
-            <form action="{{ route('etudiante.maintenance.store') }}" method="POST">
+            <form action="{{ route('etudiante.maintenance.store') }}" method="POST" enctype="multipart/form-data">
                 @csrf
                 <div class="modal-body">
                     <div class="row g-3">
@@ -186,7 +211,7 @@
         </div>
         <div class="form-check">
             <input class="form-check-input" type="radio" name="type_lieu" id="lieuCommun" value="commun" onclick="toggleLieu()">
-            <label class="form-check-label" for="lieuCommun">Espace commun (sanitaires, couloir...)</label>
+            <label class="form-check-label" for="lieuCommun">Espace commun </label>
         </div>
     </div>
 </div>
@@ -211,9 +236,31 @@
     </div>
 </div>
 
-<div id="blocCommun" class="col-12 d-none">
-    <label class="form-label fw-semibold">Précisez le lieu <span class="text-danger">*</span></label>
-    <input type="text" name="lieu_commun" id="inputLieuCommun" class="form-control" placeholder="Ex : Sanitaires Bloc B, 2e étage">
+<div id="blocCommun" class="row g-3 d-none">
+    <div class="col-md-6">
+        <label class="form-label fw-semibold">Lieu <span class="text-danger">*</span></label>
+        <select name="lieu_type" id="selectLieuType" class="form-select">
+            <option value="">Choisir</option>
+            <option value="Couloir">Couloir</option>
+            <option value="Sanitaires">Sanitaires</option>
+            <option value="Douches">Douches</option>
+            <option value="Cuisine commune">Cuisine commune</option>
+            <option value="Salle commune">Salle commune</option>
+            <option value="Autre">Autre</option>
+        </select>
+    </div>
+    <div class="col-md-3">
+        <label class="form-label fw-semibold">Bloc</label>
+        <input type="text" name="lieu_bloc" id="inputLieuBloc" class="form-control" placeholder="Ex : B">
+    </div>
+    <div class="col-md-3">
+        <label class="form-label fw-semibold">Étage</label>
+        <input type="text" name="lieu_etage" id="inputLieuEtage" class="form-control" placeholder="Ex : 2">
+    </div>
+    <div class="col-12" id="blocAutrePrecision" style="display:none;">
+        <label class="form-label fw-semibold">Précisez</label>
+        <input type="text" name="lieu_autre" id="inputLieuAutre" class="form-control" placeholder="Précisez le lieu...">
+    </div>
 </div>
 
                         <div class="col-md-6">
@@ -245,6 +292,13 @@
                             @error('description') <div class="invalid-feedback">{{ $message }}</div> @enderror
                         </div>
 
+                        <div class="col-12">
+                            <label class="form-label fw-semibold">Photo (optionnel)</label>
+                            <input type="file" name="photo" accept="image/*"
+                                   class="form-control @error('photo') is-invalid @enderror">
+                            @error('photo') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                        </div>
+
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -270,8 +324,14 @@ function toggleLieu() {
     const estCommun = document.getElementById('lieuCommun').checked;
     document.getElementById('blocChambre').classList.toggle('d-none', estCommun);
     document.getElementById('blocCommun').classList.toggle('d-none', !estCommun);
-    document.getElementById('inputLieuCommun').required = estCommun;
+    document.getElementById('selectLieuType').required = estCommun;
 }
+
+document.getElementById('selectLieuType').addEventListener('change', function () {
+    const estAutre = this.value === 'Autre';
+    document.getElementById('blocAutrePrecision').style.display = estAutre ? 'block' : 'none';
+    document.getElementById('inputLieuAutre').required = estAutre;
+});
 </script>
 
 @endsection

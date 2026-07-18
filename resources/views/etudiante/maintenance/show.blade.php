@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container py-4" style="max-width: 750px;">
+<div class="container py-4" style="max-width: 800px;">
 
     {{-- Breadcrumb --}}
     <nav aria-label="breadcrumb" class="mb-4">
@@ -13,101 +13,136 @@
         </ol>
     </nav>
 
+    @php
+        $borderColor = match($maintenance->statut) {
+            'en_attente' => '#ffc107',
+            'en_cours'   => '#0d6efd',
+            'terminee'   => '#198754',
+            default      => '#dee2e6',
+        };
+        $statutClass = match($maintenance->statut) {
+            'en_attente' => 'warning text-dark',
+            'en_cours'   => 'primary',
+            'terminee'   => 'success',
+            default      => 'secondary',
+        };
+        $statutLabel = match($maintenance->statut) {
+            'en_attente' => 'En attente',
+            'en_cours'   => 'En cours',
+            'terminee'   => 'Terminée',
+            default      => $maintenance->statut,
+        };
+        $typeIcons = [
+            'electricite' => 'bi-lightning-charge',
+            'plomberie'   => 'bi-droplet',
+            'menuiserie'  => 'bi-hammer',
+            'autre'       => 'bi-tools',
+        ];
+    @endphp
+
     {{-- Card principale --}}
-    <div class="card border-0 shadow-sm">
-        <div class="card-header bg-white border-bottom py-3 d-flex justify-content-between align-items-center">
-            <h5 class="mb-0 fw-bold">Détails de la demande</h5>
-            <div class="d-flex gap-2">
-                @php
-                    $statutClass = match($maintenance->statut) {
-                        'en_attente' => 'warning text-dark',
-                        'en_cours'   => 'info text-dark',
-                        'terminee'   => 'success',
-                        default      => 'secondary',
-                    };
-                    $statutLabel = match($maintenance->statut) {
-                        'en_attente' => 'En attente',
-                        'en_cours'   => 'En cours',
-                        'terminee'   => 'Terminée',
-                        default      => $maintenance->statut,
-                    };
-                @endphp
-                @if($maintenance->urgence === 'urgente')
-                    <span class="badge bg-danger fs-6">
-                        <i class="bi bi-exclamation-triangle-fill me-1"></i>Urgente
-                    </span>
-                @else
-                    <span class="badge bg-secondary fs-6">Normale</span>
-                @endif
-                <span class="badge bg-{{ $statutClass }} fs-6">{{ $statutLabel }}</span>
-            </div>
-        </div>
-
+    <div class="card shadow-sm" style="border-left: 5px solid {{ $borderColor }};">
         <div class="card-body p-4">
-            <div class="row g-4">
 
-                <div class="col-md-6">
-                    <p class="text-muted small mb-1 fw-semibold text-uppercase">Chambre</p>
-                    <p class="mb-0 fs-5">{{ $maintenance->chambre->numero ?? '—' }}</p>
+            {{-- En-tête : ID + badges --}}
+            <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
+                <div class="d-flex flex-wrap align-items-center gap-2">
+                    <span class="text-muted fw-bold">#{{ $maintenance->id }}</span>
+                    <span class="badge bg-{{ $statutClass }}">{{ $statutLabel }}</span>
+
+                    @if($maintenance->urgence === 'urgente')
+                        <span class="badge bg-danger">
+                            <i class="bi bi-exclamation-triangle-fill me-1"></i>Urgente
+                        </span>
+                    @else
+                        <span class="badge bg-light text-dark border">Normale</span>
+                    @endif
+
+                    <span class="badge bg-light text-dark border">
+                        <i class="bi {{ $typeIcons[$maintenance->type] ?? 'bi-tools' }} me-1"></i>
+                        {{ ucfirst($maintenance->type) }}
+                    </span>
                 </div>
-
-                <div class="col-md-6">
-                    <p class="text-muted small mb-1 fw-semibold text-uppercase">Type</p>
-                    <p class="mb-0 fs-5">{{ ucfirst($maintenance->type) }}</p>
-                </div>
-
-                <div class="col-12">
-                    <p class="text-muted small mb-1 fw-semibold text-uppercase">Description</p>
-                    <p class="mb-0">{{ $maintenance->description }}</p>
-                </div>
-
-                <div class="col-md-6">
-                    <p class="text-muted small mb-1 fw-semibold text-uppercase">Date de signalement</p>
-                    <p class="mb-0">{{ $maintenance->created_at->format('d/m/Y à H:i') }}</p>
-                </div>
-
-                @if($maintenance->date_resolution)
-                <div class="col-md-6">
-                    <p class="text-muted small mb-1 fw-semibold text-uppercase">Date de résolution</p>
-                    <p class="mb-0">{{ $maintenance->date_resolution->format('d/m/Y à H:i') }}</p>
-                </div>
-                @endif
-
-                @if($maintenance->technicien)
-                <div class="col-md-6">
-                    <p class="text-muted small mb-1 fw-semibold text-uppercase">Technicien assigné</p>
-                    <p class="mb-0">
-                        <i class="bi bi-person-gear me-1 text-primary"></i>
-                        {{ $maintenance->technicien->name }}
-                    </p>
-                </div>
-                @endif
-
             </div>
+
+            {{-- Localisation + date --}}
+            <div class="d-flex flex-wrap gap-4 text-muted mb-3 pb-3 border-bottom" style="font-size:.92rem;">
+                @if($maintenance->chambre)
+                    <span><i class="bi bi-door-closed me-1"></i>Chambre {{ $maintenance->chambre->numero }}</span>
+                    <span><i class="bi bi-building me-1"></i>Bloc {{ $maintenance->chambre->bloc }}</span>
+                    <span><i class="bi bi-layers me-1"></i>Étage {{ $maintenance->chambre->etage }}</span>
+                @elseif($maintenance->lieu_commun)
+                    <span><i class="bi bi-geo-alt me-1"></i>{{ $maintenance->lieu_commun }}</span>
+                @endif
+                <span><i class="bi bi-calendar me-1"></i>{{ $maintenance->created_at->format('d/m/Y à H:i') }}</span>
+            </div>
+
+            {{-- Description --}}
+            <div class="mb-3">
+                <div class="text-muted mb-1" style="font-size:.75rem;font-weight:700;text-transform:uppercase;">
+                    Description
+                </div>
+                <p class="mb-0">{{ $maintenance->description }}</p>
+            </div>
+
+            {{-- Photo si présente --}}
+            @if($maintenance->photo)
+            <div class="mb-3">
+                <div class="text-muted mb-2" style="font-size:.75rem;font-weight:700;text-transform:uppercase;">
+                    Photo
+                </div>
+                <a href="{{ asset('storage/' . $maintenance->photo) }}" target="_blank">
+                    <img src="{{ asset('storage/' . $maintenance->photo) }}" alt="Photo de la demande"
+                         style="max-height:220px;border-radius:.5rem;" class="border">
+                </a>
+            </div>
+            @endif
+
+            {{-- Technicien / résolution --}}
+            @if($maintenance->technicien || $maintenance->date_resolution)
+            <div class="alert {{ $maintenance->statut === 'terminee' ? 'alert-success' : 'alert-primary' }} py-2 mb-3" style="font-size:.88rem;">
+                @if($maintenance->technicien)
+                    <div>
+                        <i class="bi bi-person-gear me-1"></i>
+                        <strong>Technicien assigné :</strong> {{ $maintenance->technicien->name }}
+                    </div>
+                @endif
+                @if($maintenance->date_resolution)
+                    <div class="{{ $maintenance->technicien ? 'mt-1' : '' }}">
+                        <i class="bi bi-check-circle me-1"></i>
+                        <strong>Résolue le :</strong> {{ $maintenance->date_resolution->format('d/m/Y à H:i') }}
+                    </div>
+                @endif
+            </div>
+            @endif
 
             {{-- Matériels si présents --}}
             @if($maintenance->materiels->isNotEmpty())
-            <hr class="my-4">
-            <h6 class="fw-bold mb-3">Matériels utilisés</h6>
-            <div class="table-responsive">
-                <table class="table table-sm table-bordered mb-0">
-                    <thead class="table-light">
-                        <tr>
-                            <th>Désignation</th>
-                            <th class="text-center">Quantité</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach($maintenance->materiels as $materiel)
-                        <tr>
-                            <td>{{ $materiel->stock->designation ?? '' }}</td>
-                            <td class="text-center">{{ $materiel->quantite ?? '—' }}</td>
-                        </tr>
-                        @endforeach
-                    </tbody>
-                </table>
+            <div class="mb-1">
+                <div class="text-muted mb-2" style="font-size:.75rem;font-weight:700;text-transform:uppercase;">
+                    Matériel utilisé
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-sm table-bordered mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Désignation</th>
+                                <th class="text-center" style="width:120px;">Quantité</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach($maintenance->materiels as $materiel)
+                            <tr>
+                                <td><i class="bi bi-box me-1 text-muted"></i>{{ $materiel->stock->designation ?? 'Matériel supprimé' }}</td>
+                                <td class="text-center">{{ $materiel->quantite ?? '—' }}</td>
+                            </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
             </div>
             @endif
+
         </div>
 
         <div class="card-footer bg-white border-top py-3 d-flex justify-content-between">

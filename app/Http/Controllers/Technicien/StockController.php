@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Technicien;
 
 use App\Http\Controllers\Controller;
 use App\Models\Stock;
+use App\Models\Materiel;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
@@ -89,4 +90,34 @@ class StockController extends Controller
 
     return view('technicien.stock.historique', compact('stock', 'utilisations'));
 }
+
+    public function historiqueGlobal(Request $request)
+    {
+        $query = Materiel::with('stock', 'maintenance.technicien', 'maintenance.chambre');
+
+        if ($request->filled('stock_id')) {
+            $query->where('stock_id', $request->stock_id);
+        }
+
+        if ($request->filled('semestre')) {
+            $now = now();
+            // Année de début de l'année scolaire en cours (ex: si on est en mars 2026, l'année scolaire a commencé en sept 2025)
+            $anneeDebut = $now->month >= 9 ? $now->year : $now->year - 1;
+
+            if ($request->semestre === 's1') {
+                $debut = \Carbon\Carbon::create($anneeDebut, 9, 1)->startOfDay();
+                $fin   = \Carbon\Carbon::create($anneeDebut + 1, 1, 31)->endOfDay();
+            } else { // s2
+                $debut = \Carbon\Carbon::create($anneeDebut + 1, 2, 1)->startOfDay();
+                $fin   = \Carbon\Carbon::create($anneeDebut + 1, 6, 30)->endOfDay();
+            }
+
+            $query->whereBetween('created_at', [$debut, $fin]);
+        }
+
+        $utilisations = $query->latest()->paginate(15);
+        $stocks = Stock::orderBy('designation')->get();
+
+        return view('technicien.stock.historique-global', compact('utilisations', 'stocks'));
+    }
 }

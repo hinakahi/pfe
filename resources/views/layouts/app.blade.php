@@ -32,7 +32,7 @@
             transition: background-color 0.3s, color 0.3s;
         }
         .sidebar {
-            min-height: 100vh;
+            height: calc(var(--vh, 1vh) * 100);
             background: var(--bg-sidebar);
             width: 250px;
             position: fixed;
@@ -381,6 +381,13 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
     const html = document.documentElement;
+    // Calcule la vraie hauteur d'écran (fix Safari iOS)
+    function setRealVh() {
+        document.documentElement.style.setProperty('--vh', (window.innerHeight * 0.01) + 'px');
+    }
+    setRealVh();
+    window.addEventListener('resize', setRealVh);
+    window.addEventListener('orientationchange', setRealVh);
     const sidebar = document.getElementById('sidebar');
     const mainContent = document.getElementById('mainContent');
 
@@ -413,6 +420,12 @@
     }
 
     collapseBtn.addEventListener('click', () => {
+        // Sur mobile, le menu est un tiroir : le bouton "<" doit le fermer complètement
+        if (window.innerWidth <= 768) {
+            sidebar.classList.remove('open');
+            overlay.classList.remove('open');
+            return;
+        }
         sidebar.classList.toggle('collapsed');
         mainContent.classList.toggle('expanded');
         const collapsed = sidebar.classList.contains('collapsed');

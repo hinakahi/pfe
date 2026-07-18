@@ -1,6 +1,7 @@
 @extends('layouts.app')
 
 @section('page-title', 'Notifications')
+
 @section('styles')
 <style>
     [data-theme="dark"] .text-muted {
@@ -25,14 +26,8 @@
 @endsection
 
 @section('content')
-<div class="container-fluid">
-
-    <div class="row mb-4">
-        <div class="col-md-12">
-            <h2><i class="bi bi-bell"></i> Notifications</h2>
-            <p class="text-muted">Vos notifications personnelles</p>
-        </div>
-    </div>
+<div class="container" style="margin-top: 2rem;">
+   
 
     <div class="card mb-4">
         <div class="card-body py-3">
@@ -68,103 +63,88 @@
         </div>
     </div>
 
-    @if($notifications->count())
+    @if($notifications->count() > 0)
 
-        @foreach($notifications as $notification)
+        <div class="row g-3">
+            @foreach($notifications as $notif)
+                @php
+                    $titre   = $notif->data['title'] ?? 'Notification';
+                    $message = $notif->data['message'] ?? 'Cliquez pour voir les détails.';
+                @endphp
 
-        @php
-            $titre   = $notification->data['title'] ?? 'Notification';
-            $message = $notification->data['message'] ?? '';
-        @endphp
+                <div class="col-md-12 notif-item"
+                     data-statut="{{ $notif->read_at ? 'read' : 'unread' }}"
+                     data-texte="{{ strtolower($titre . ' ' . $message) }}">
 
-        <div class="card mb-3 shadow-sm notif-item {{ !$notification->read_at ? 'border-primary' : '' }}"
-             data-statut="{{ $notification->read_at ? 'read' : 'unread' }}"
-             data-texte="{{ strtolower($titre . ' ' . $message) }}">
-            <div class="card-body d-flex justify-content-between align-items-center">
+                    <div class="card border-0 shadow-sm {{ !$notif->read_at ? 'border-primary' : '' }}"
+                         style="border-left: 4px solid {{ $notif->read_at ? '#ccc' : '#0d6efd' }} !important; border-radius: 10px; opacity: {{ $notif->read_at ? '0.7' : '1' }};">
+                        <div class="card-body d-flex justify-content-between align-items-center gap-3">
 
-                <div>
-                    @if(!$notification->read_at)
-                        <span class="badge bg-danger me-2">Nouveau</span>
-                    @endif
+                            <div style="flex:1;">
+                                @if(!$notif->read_at)
+                                    <span class="badge bg-danger me-2">Nouveau</span>
+                                @endif
 
-                    <strong>{{ $titre }}</strong>
+                                <strong>{{ $titre }}</strong>
+                                <p class="text-muted mb-1" style="font-size:0.9rem;">{{ Str::limit($message, 120) }}</p>
+                                <small class="text-muted">{{ $notif->created_at->diffForHumans() }}</small>
+                            </div>
 
-                    <br>
+                            <button class="btn btn-primary flex-shrink-0"
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#notification{{ $notif->id }}">
+                                Voir
+                            </button>
 
-                    <small class="text-muted">
-                        {{ $notification->created_at->diffForHumans() }}
-                    </small>
+                        </div>
+                    </div>
                 </div>
 
-                <button class="btn btn-primary"
-                        data-bs-toggle="modal"
-                        data-bs-target="#notification{{ $notification->id }}">
-                    Voir
-                </button>
+                <!-- Modal -->
+                <div class="modal fade" id="notification{{ $notif->id }}" tabindex="-1">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
 
-            </div>
-        </div>
+                            <div class="modal-header">
+                                <h5 class="modal-title">{{ $titre }}</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                            </div>
 
-        <!-- Modal -->
-        <div class="modal fade"
-             id="notification{{ $notification->id }}"
-             tabindex="-1">
+                            <div class="modal-body">
+                                <p>{{ $message }}</p>
+                                <small class="text-muted">{{ $notif->created_at->format('d/m/Y H:i') }}</small>
+                            </div>
 
-            <div class="modal-dialog">
-                <div class="modal-content">
+                            <div class="modal-footer">
+                                @php
+                                    $lienNotif = $notif->data['url'] ?? match($notif->data['type'] ?? null) {
+                                        'maintenance' => route('etudiante.maintenance.index'),
+                                        default       => route('etudiante.notifications'),
+                                    };
+                                @endphp
 
-                    <div class="modal-header">
-                        <h5 class="modal-title">
-                            {{ $titre }}
-                        </h5>
+                                <a href="{{ $lienNotif }}" class="btn btn-outline-primary me-auto">
+                                    Voir plus
+                                </a>
 
-                        <button type="button"
-                                class="btn-close"
-                                data-bs-dismiss="modal">
-                        </button>
+                                @if(!$notif->read_at)
+                                    <form action="{{ route('etudiante.notifications.read', $notif->id) }}" method="POST">
+                                        @csrf
+                                        <button type="submit" class="btn btn-success">
+                                            ✓ Marquer comme lu
+                                        </button>
+                                    </form>
+                                @else
+                                    <span class="badge bg-success">✓ Déjà lue</span>
+                                @endif
+                            </div>
+
+                        </div>
                     </div>
-
-                    <div class="modal-body">
-
-                        <p>
-                            {{ $message }}
-                        </p>
-
-                        <small class="text-muted">
-                            {{ $notification->created_at->format('d/m/Y H:i') }}
-                        </small>
-
-                    </div>
-
-                    <div class="modal-footer">
-
-                        @if(!$notification->read_at)
-
-                            <form action="{{ route('etudiante.notifications.read', $notification->id) }}"
-                                  method="POST">
-                                @csrf
-
-                                <button type="submit"
-                                        class="btn btn-success">
-                                    ✓ Marquer comme lu
-                                </button>
-                            </form>
-
-                        @else
-
-                            <span class="badge bg-success">
-                                ✓ Déjà lue
-                            </span>
-
-                        @endif
-
-                    </div>
-
                 </div>
-            </div>
-        </div>
 
-        @endforeach
+            @endforeach
+        </div>
 
         <div id="notif-no-result" style="display:none;">
             <div class="card">
@@ -181,10 +161,10 @@
 
     @else
 
-        <div class="card">
-            <div class="card-body text-center">
-                <i class="bi bi-bell-slash fs-1 text-muted"></i>
-                <p class="mt-3">Aucune notification</p>
+        <div class="card text-center shadow-sm border-0">
+            <div class="card-body py-5">
+                <i class="bi bi-bell-slash" style="font-size: 3rem; color: #ccc;"></i>
+                <p class="mt-3 text-muted">Aucune notification</p>
             </div>
         </div>
 

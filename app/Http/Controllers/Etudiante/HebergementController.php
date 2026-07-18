@@ -266,6 +266,58 @@ $chambresDisponibles = Chambre::whereIn('statut', ['libre', 'partielle'])
         }
 
         return redirect()->route('etudiante.changement')
-                         ->with('success', 'Demande de changement envoyée avec succès.');
+      ->with('success', 'Demande de changement envoyée avec succès.');
+      
     }
+    public function modifierChangement(Request $request, DemandeChangement $demande)
+    {
+        if ($demande->etudiante_id !== auth()->id()) {
+            abort(403);
+        }
+
+        if ($demande->statut !== 'en_attente') {
+            return back()->with('error', 'Cette demande a déjà été traitée, modification impossible.');
+        }
+
+        $rules = [
+            'chambre_demandee_id' => 'required|exists:chambres,id',
+            'motif'               => 'required|string|max:500',
+        ];
+
+        $chambre = Chambre::find($request->chambre_demandee_id);
+        if ($chambre && $chambre->type === 'individuelle') {
+            $rules['justificatif'] = 'nullable|file|mimes:pdf|max:5120';
+        }
+
+        $request->validate($rules);
+
+        $data = [
+            'chambre_demandee_id' => $request->chambre_demandee_id,
+            'motif'               => $request->motif,
+        ];
+
+        if ($request->hasFile('justificatif')) {
+            $data['justificatif'] = $request->file('justificatif')->store('justificatifs', 'public');
+        }
+
+        $demande->update($data);
+
+        return back()->with('success', 'Demande modifiée avec succès.');
+    }
+
+    public function annulerChangement(DemandeChangement $demande)
+    {
+        if ($demande->etudiante_id !== auth()->id()) {
+            abort(403);
+        }
+
+        if ($demande->statut !== 'en_attente') {
+            return back()->with('error', "Impossible d'annuler une demande déjà traitée.");
+        }
+
+        $demande->delete();
+
+        return back()->with('success', 'Demande annulée avec succès.');
+    }
+
 }

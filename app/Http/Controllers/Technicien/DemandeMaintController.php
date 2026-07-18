@@ -36,8 +36,13 @@ class DemandeMaintController extends Controller
     public function index(Request $request)
     {
         $query = Maintenance::with('etudiante', 'chambre', 'materiels')
-                   ->orderByRaw("FIELD(urgence, 'urgente', 'normale')")
-                   ->orderByRaw("FIELD(statut, 'en_attente', 'en_cours', 'terminee')")
+                   ->orderByRaw("
+                        CASE
+                            WHEN statut != 'terminee' AND urgence = 'urgente' THEN 1
+                            WHEN statut != 'terminee' AND urgence = 'normale' THEN 2
+                            ELSE 3
+                        END ASC
+                   ")
                    ->latest();
 
         if ($request->statut && $request->statut !== 'tous') {

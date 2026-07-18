@@ -114,13 +114,13 @@
                                 <span class="badge bg-success">Terminée</span>
                             @endif
 
+                            <span class="badge bg-light text-dark border">{{ ucfirst($d->type) }}</span>
+
                             @if($d->urgence === 'urgente')
                                 <span class="badge bg-danger">
                                     <i class="bi bi-exclamation-triangle me-1"></i>Urgente
                                 </span>
                             @endif
-
-                            <span class="badge bg-light text-dark border">{{ ucfirst($d->type) }}</span>
                         </div>
 
                         {{-- Ligne 2 : Titre panne --}}
