@@ -39,14 +39,23 @@ class ReservationController extends Controller
             return back()->with('error', 'Cette réservation a déjà été traitée.');
         }
 
-        if ($reservation->article->stock < $reservation->quantite) {
+        $article = $reservation->article;
+
+        // Vérifie si l'article est toujours disponible (pas périmé/retiré du catalogue)
+        $estPerime = $article && $article->date_peremption && $article->date_peremption <= now();
+
+        if (!$article || !$article->disponible || $estPerime) {
+            return back()->with('error', "Impossible de valider : l'article « {$article->nom_article} » n'est plus disponible (périmé ou retiré du catalogue).");
+        }
+
+        if ($article->stock < $reservation->quantite) {
             return back()->with('error', 'Stock insuffisant pour valider cette réservation.');
         }
 
-        $reservation->article->decrement('stock', $reservation->quantite);
+        $article->decrement('stock', $reservation->quantite);
 
-        if ($reservation->article->fresh()->stock === 0) {
-            $reservation->article->update(['disponible' => false]);
+        if ($article->fresh()->stock === 0) {
+            $article->update(['disponible' => false]);
         }
 
         $reservation->update([

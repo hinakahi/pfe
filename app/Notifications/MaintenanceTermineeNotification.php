@@ -25,6 +25,7 @@ class MaintenanceTermineeNotification extends Notification
             'maintenance_id' => $this->maintenance->id,
             'description'    => $this->maintenance->description,
             'chambre'        => $this->maintenance->chambre->numero ?? '-',
+            'url'            => route('etudiante.maintenance.show', $this->maintenance->id),
         ];
     }
 }

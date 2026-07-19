@@ -81,7 +81,7 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
 Route::post('/notifications/{id}/read', function ($id) {
     $notification = auth()->user()->notifications()->findOrFail($id);
     $notification->markAsRead();
-    return back();
+    return redirect($notification->data['url'] ?? url()->previous());
 })->name('notifications.read');
 });
 // ─── Étudiante ────────────────────────────────────────────────
@@ -98,7 +98,7 @@ Route::middleware(['auth', 'role:etudiante'])->prefix('etudiante')->name('etudia
     Route::post('/notifications/{id}/read', function ($id) {
         $notification = auth()->user()->notifications()->findOrFail($id);
         $notification->markAsRead();
-        return back();
+        return redirect($notification->data['url'] ?? url()->previous());
     })->name('notifications.read');
 
     // ─── Annonces ────────────────────────────────────────────
@@ -224,8 +224,8 @@ Route::prefix('hebergement')->middleware(['auth', 'role:resp_hebergement'])->gro
 Route::post('/notifications/{id}/read', function ($id) {
     $notification = auth()->user()->notifications()->findOrFail($id);
     $notification->markAsRead();
-    return back();
-})->name('hebergement.notifications.read');
+    return redirect($notification->data['url'] ?? url()->previous());
+})->name('notifications.read');
 
 });
 
@@ -248,7 +248,7 @@ Route::prefix('technicien')->middleware(['auth', 'role:technicien'])->group(func
     Route::post('/notifications/{id}/read', function ($id) {
         $notification = auth()->user()->notifications()->findOrFail($id);
         $notification->markAsRead();
-        return back();
+        return redirect($notification->data['url'] ?? url()->previous());
     })->name('technicien.notifications.read');
 
     Route::get('/annonces', function () {
@@ -260,7 +260,19 @@ Route::prefix('technicien')->middleware(['auth', 'role:technicien'])->group(func
             ->where('publiee', true)
             ->latest()
             ->paginate(10);
-        return view('technicien.annonces.index', compact('annonces'));
+
+        $annoncesUrgentes = \App\Models\Annonce::with('user')
+            ->where(function ($q) {
+                $q->where('destinataire', 'staff')
+                  ->orWhere('destinataire', 'tous');
+            })
+            ->where('publiee', true)
+            ->where('urgence', 'urgent')
+            ->latest()
+            ->take(5)
+            ->get();
+
+        return view('technicien.annonces.index', compact('annonces', 'annoncesUrgentes'));
     })->name('technicien.annonces.index');
 });
 
@@ -294,7 +306,7 @@ Route::prefix('foyer')->middleware(['auth', 'role:resp_foyer'])->group(function 
     Route::post('/notifications/{id}/read', function ($id) {
         $notification = auth()->user()->notifications()->findOrFail($id);
         $notification->markAsRead();
-        return back();
+        return redirect($notification->data['url'] ?? url()->previous());
     })->name('foyer.notifications.read');
 });
 

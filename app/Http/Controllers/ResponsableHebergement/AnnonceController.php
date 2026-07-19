@@ -18,6 +18,17 @@ class AnnonceController extends Controller
             ->latest()
             ->paginate(10);
 
-        return view('hebergement.annonces.index', compact('annonces'));
+        $annoncesUrgentes = Annonce::with('user')
+            ->where(function ($q) {
+                $q->where('destinataire', 'staff')
+                  ->orWhere('destinataire', 'tous');
+            })
+            ->where('publiee', true)
+            ->where('urgence', 'urgent')
+            ->latest()
+            ->take(5)
+            ->get();
+
+        return view('hebergement.annonces.index', compact('annonces', 'annoncesUrgentes'));
     }
 }

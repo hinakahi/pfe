@@ -15,12 +15,21 @@ class NouvelleAnnonceNotification extends Notification
 
     public function toArray($notifiable): array
     {
+        $url = match($notifiable->role) {
+            'etudiante'        => route('etudiante.annonces'),
+            'technicien'       => route('technicien.annonces.index'),
+            'resp_foyer'       => route('foyer.annonces.index'),
+            'resp_hebergement' => route('hebergement.annonces.index'),
+            'admin'            => route('admin.annonces.index'),
+            default            => url('/'),
+        };
+
         return [
             'title'      => 'Nouvelle annonce : ' . $this->annonce->titre,
             'message'    => $this->annonce->contenu,
             'categorie'  => $this->annonce->categorie,
             'annonce_id' => $this->annonce->id,
-            'url'        => route('foyer.annonces.index', ['tab' => 'admin']),
+            'url'        => $url,
         ];
     }
 }

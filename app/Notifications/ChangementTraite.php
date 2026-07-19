@@ -26,6 +26,7 @@ class ChangementTraite extends Notification
                 ? 'Votre demande de changement de chambre a été acceptée.'
                 : 'Votre demande de changement de chambre a été refusée. Motif : ' . $this->motif,
             'statut'  => $this->statut,
+            'url'     => route('etudiante.hebergement.demandes'),
         ];
     }
 }

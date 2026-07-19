@@ -32,15 +32,37 @@
                     </span>
                 @endif
             </div>
+            <h5 class="fw-bold mb-2">{{ $maintenance->description }}</h5>
+
+{{-- Photo si présente --}}
+@if($maintenance->photo)
+<div class="mb-3">
+    <div class="text-muted mb-2" style="font-size:.75rem;font-weight:700;text-transform:uppercase;">
+        Photo
+    </div>
+    <a href="{{ asset('storage/' . $maintenance->photo) }}" target="_blank">
+        <img src="{{ asset('storage/' . $maintenance->photo) }}" alt="Photo de la demande"
+             style="max-height:220px;border-radius:.5rem;" class="border">
+    </a>
+</div>
+@endif
+
+<div class="d-flex flex-wrap gap-3 text-muted" style="font-size:.85rem;">
 
             <h5 class="fw-bold mb-2">{{ $maintenance->description }}</h5>
 
             <div class="d-flex flex-wrap gap-3 text-muted" style="font-size:.85rem;">
                 <span><i class="bi bi-person me-1"></i>{{ $maintenance->etudiante->name ?? '-' }}</span>
-                <span><i class="bi bi-envelope me-1"></i>{{ $maintenance->etudiante->email ?? '-' }}</span>
-                <span><i class="bi bi-door-closed me-1"></i>Chambre {{ $maintenance->chambre->numero ?? '-' }}</span>
-                <span><i class="bi bi-building me-1"></i>Bloc {{ $maintenance->chambre->bloc ?? '-' }}</span>
-                <span><i class="bi bi-layers me-1"></i>Étage {{ $maintenance->chambre->etage ?? '-' }}</span>
+<span><i class="bi bi-envelope me-1"></i>{{ $maintenance->etudiante->email ?? '-' }}</span>
+
+@if($maintenance->chambre)
+    <span><i class="bi bi-door-closed me-1"></i>Chambre {{ $maintenance->chambre->numero }}</span>
+    <span><i class="bi bi-building me-1"></i>Bloc {{ $maintenance->chambre->bloc }}</span>
+    <span><i class="bi bi-layers me-1"></i>Étage {{ $maintenance->chambre->etage }}</span>
+@elseif($maintenance->lieu_commun)
+    <span><i class="bi bi-geo-alt me-1"></i>{{ $maintenance->lieu_commun }}</span>
+@endif
+                
                 <span><i class="bi bi-calendar me-1"></i>{{ $maintenance->date_signalement?->format('d/m/Y') }}</span>
                 <span><i class="bi bi-tools me-1"></i>{{ ucfirst($maintenance->type) }}</span>
             </div>

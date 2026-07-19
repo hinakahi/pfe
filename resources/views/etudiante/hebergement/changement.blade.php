@@ -283,7 +283,6 @@
                             <span class="text-muted">-</span>
                         @endif
                     </td>
-                    {{-- Actions : seulement bouton + form, PAS de modal ici --}}
                     <td>
                         @if($d->statut === 'en_attente')
                             <button type="button" class="btn btn-sm btn-outline-primary mb-1"
@@ -311,64 +310,96 @@
                 @endforelse
             </tbody>
         </table>
-
-        {{-- Modals de modification — HORS du tableau, à la fin --}}
-        @foreach($demandesChangement as $d)
-            @if($d->statut === 'en_attente')
-            <div class="modal fade" id="modalEdit{{ $d->id }}" tabindex="-1">
-                <div class="modal-dialog">
-                    <div class="modal-content border-0 shadow">
-                        <div class="modal-header" style="background: linear-gradient(135deg, #1a3c5e, #2d6a9f);">
-                            <h5 class="modal-title text-white">
-                                <i class="bi bi-pencil me-2"></i>Modifier ma demande
-                            </h5>
-                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-                        </div>
-                        <form action="{{ route('etudiante.changement.modifier', $d->id) }}" method="POST" enctype="multipart/form-data">
-                            @csrf
-                            @method('PUT')
-                            <div class="modal-body">
-                                <div class="mb-3">
-                                    <label class="form-label fw-semibold">Chambre demandée</label>
-                                    <select name="chambre_demandee_id" class="form-select" required>
-                                        <option value="">-- Choisir --</option>
-                                        @foreach($chambresDisponibles as $chambre)
-                                            <option value="{{ $chambre->id }}"
-                                                {{ $d->chambre_demandee_id == $chambre->id ? 'selected' : '' }}>
-                                                {{ $chambre->numero }} — Bloc {{ $chambre->bloc }} (Étage {{ $chambre->etage }})
-                                            </option>
-                                        @endforeach
-                                    </select>
-                                </div>
-                                <div class="mb-3">
-                                    <label class="form-label fw-semibold">Motif du changement</label>
-                                    <textarea name="motif" class="form-control" rows="3" maxlength="500" required>{{ $d->motif }}</textarea>
-                                </div>
-                                @if($d->chambreDemandee && $d->chambreDemandee->type === 'individuelle')
-                                <div class="mb-3">
-                                    <label class="form-label fw-semibold">Justificatif (PDF)</label>
-                                    <input type="file" name="justificatif" class="form-control" accept=".pdf">
-                                    <div class="form-text">Laisser vide pour garder le fichier actuel.</div>
-                                </div>
-                                @endif
-                            </div>
-                            <div class="modal-footer">
-                                <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Fermer</button>
-                                <button type="submit" class="btn btn-sm text-white" style="background:#fd7e14;">
-                                    <i class="bi bi-save me-1"></i> Enregistrer
-                                </button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            </div>
-            @endif
-        @endforeach
     </div>
 </div>
-</div>
+</div> {{-- ferme section-demandes --}}
 
-{{-- Script recherche --}}
+{{-- Modals de modification — sélection en cascade Bloc > Type > Étage > Chambre --}}
+@php
+    $blocsDisponibles = $chambresDisponibles->pluck('bloc')->unique()->sort()->values();
+@endphp
+@foreach($demandesChangement as $d)
+    @if($d->statut === 'en_attente')
+    <div class="modal fade" id="modalEdit{{ $d->id }}" tabindex="-1"
+         data-etage="{{ optional($d->chambreDemandee)->etage }}"
+         data-chambre-id="{{ $d->chambre_demandee_id }}">
+        <div class="modal-dialog">
+            <div class="modal-content border-0 shadow">
+                <div class="modal-header" style="background: linear-gradient(135deg, #1a3c5e, #2d6a9f);">
+                    <h5 class="modal-title text-white">
+                        <i class="bi bi-pencil me-2"></i>Modifier ma demande
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <form action="{{ route('etudiante.changement.modifier', $d->id) }}" method="POST" enctype="multipart/form-data">
+                    @csrf
+                    @method('PUT')
+                    <div class="modal-body">
+
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Bloc</label>
+                            <select class="form-select select-bloc" data-target="{{ $d->id }}" required>
+                                <option value="">-- Choisir --</option>
+                                @foreach($blocsDisponibles as $bloc)
+                                    <option value="{{ $bloc }}"
+                                        {{ optional($d->chambreDemandee)->bloc == $bloc ? 'selected' : '' }}>
+                                        Bloc {{ $bloc }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Type de chambre</label>
+                            <select class="form-select select-type" data-target="{{ $d->id }}" required>
+                                <option value="">-- Choisir --</option>
+                                <option value="individuelle" {{ optional($d->chambreDemandee)->type == 'individuelle' ? 'selected' : '' }}>Individuelle</option>
+                                <option value="double" {{ optional($d->chambreDemandee)->type == 'double' ? 'selected' : '' }}>Double</option>
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Étage</label>
+                            <select class="form-select select-etage" data-target="{{ $d->id }}" required>
+                                <option value="">-- Choisir bloc et type d'abord --</option>
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Chambre disponible</label>
+                            <select name="chambre_demandee_id" class="form-select select-chambre" data-target="{{ $d->id }}" required>
+                                <option value="">-- Choisir un étage d'abord --</option>
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Motif du changement</label>
+                            <textarea name="motif" class="form-control" rows="3" maxlength="500" required>{{ $d->motif }}</textarea>
+                        </div>
+
+                        <div class="mb-3 justificatif-bloc" data-target="{{ $d->id }}" style="display:none;">
+                            <label class="form-label fw-semibold">
+                                Justificatif <span class="badge bg-danger">Obligatoire pour une chambre individuelle</span>
+                            </label>
+                            <input type="file" name="justificatif" class="form-control" accept=".pdf">
+                            <div class="form-text">Laisser vide pour garder le fichier actuel.</div>
+                        </div>
+
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Fermer</button>
+                        <button type="submit" class="btn btn-sm text-white" style="background:#fd7e14;">
+                            <i class="bi bi-save me-1"></i> Enregistrer
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    @endif
+@endforeach
+
+{{-- Script recherche + cascade --}}
 <script>
 function toggleSection(id, carte) {
     const section = document.getElementById(id);
@@ -413,6 +444,98 @@ function toggleSection(id, carte) {
         searchNumero.value = '';
         searchBloc.value   = '';
         filtrer();
+    });
+
+    // ---- Sélection en cascade Bloc > Type > Étage > Chambre (modals d'édition) ----
+    const chambresData = [
+        @foreach($chambresDisponibles as $chambre)
+        { id: {{ $chambre->id }}, numero: "{{ $chambre->numero }}", bloc: "{{ $chambre->bloc }}", type: "{{ $chambre->type }}", etage: "{{ $chambre->etage }}" },
+        @endforeach
+    ];
+
+    function getModalElements(id) {
+        return {
+            bloc: document.querySelector(`.select-bloc[data-target="${id}"]`),
+            type: document.querySelector(`.select-type[data-target="${id}"]`),
+            etage: document.querySelector(`.select-etage[data-target="${id}"]`),
+            chambre: document.querySelector(`.select-chambre[data-target="${id}"]`),
+            justificatifBloc: document.querySelector(`.justificatif-bloc[data-target="${id}"]`),
+        };
+    }
+
+    function updateEtages(id, preselectEtage = null, preselectChambreId = null) {
+        const el = getModalElements(id);
+        const bloc = el.bloc.value;
+        const type = el.type.value;
+
+        el.etage.innerHTML = '<option value="">-- Choisir --</option>';
+        el.chambre.innerHTML = '<option value="">-- Choisir un étage d\'abord --</option>';
+
+        if (!bloc || !type) {
+            toggleJustificatif(id);
+            return;
+        }
+
+        const etages = [...new Set(
+            chambresData.filter(c => c.bloc === bloc && c.type === type).map(c => c.etage)
+        )];
+
+        etages.forEach(etage => {
+            const opt = document.createElement('option');
+            opt.value = etage;
+            opt.textContent = 'Étage ' + etage;
+            if (preselectEtage !== null && String(etage) === String(preselectEtage)) opt.selected = true;
+            el.etage.appendChild(opt);
+        });
+
+        toggleJustificatif(id);
+        updateChambres(id, preselectChambreId);
+    }
+
+    function updateChambres(id, preselectChambreId = null) {
+        const el = getModalElements(id);
+        const bloc = el.bloc.value;
+        const type = el.type.value;
+        const etage = el.etage.value;
+
+        el.chambre.innerHTML = '<option value="">-- Choisir --</option>';
+        if (!bloc || !type || !etage) return;
+
+        const chambres = chambresData.filter(c => c.bloc === bloc && c.type === type && String(c.etage) === String(etage));
+
+        chambres.forEach(c => {
+            const opt = document.createElement('option');
+            opt.value = c.id;
+            opt.textContent = 'Chambre ' + c.numero;
+            if (preselectChambreId !== null && String(c.id) === String(preselectChambreId)) opt.selected = true;
+            el.chambre.appendChild(opt);
+        });
+    }
+
+    function toggleJustificatif(id) {
+        const el = getModalElements(id);
+        if (!el.justificatifBloc) return;
+        el.justificatifBloc.style.display = el.type.value === 'individuelle' ? 'block' : 'none';
+    }
+
+    document.querySelectorAll('.select-bloc, .select-type').forEach(select => {
+        select.addEventListener('change', function () {
+            updateEtages(this.dataset.target);
+        });
+    });
+
+    document.querySelectorAll('.select-etage').forEach(select => {
+        select.addEventListener('change', function () {
+            updateChambres(this.dataset.target);
+        });
+    });
+
+    // Pré-remplissage à l'ouverture du modal (garde la chambre déjà choisie)
+    document.querySelectorAll('[id^="modalEdit"]').forEach(modal => {
+        modal.addEventListener('shown.bs.modal', function () {
+            const id = this.id.replace('modalEdit', '');
+            updateEtages(id, this.dataset.etage, this.dataset.chambreId);
+        });
     });
 </script>
 <style>

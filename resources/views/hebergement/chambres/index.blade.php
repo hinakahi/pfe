@@ -29,7 +29,8 @@
         <a href="{{ route('hebergement.chambres.index', array_merge(request()->query(), ['statut' => 'occupee'])) }}"
            class="text-decoration-none">
             <div class="stat-card {{ request('statut') == 'occupee' ? 'stat-card-active' : '' }}"
-                 style="background: linear-gradient(135deg,#fd7e14,#ffc107)">
+                
+                 style="background: linear-gradient(135deg,#dc3545,#e91e63)">
                 <div class="number">{{ $stats['occupees'] }}</div>
                 <div class="label"><i class="bi bi-person-fill me-1"></i>Occupées</div>
             </div>
@@ -39,7 +40,7 @@
         <a href="{{ route('hebergement.chambres.index', array_merge(request()->query(), ['statut' => 'partielle'])) }}"
            class="text-decoration-none">
             <div class="stat-card {{ request('statut') == 'partielle' ? 'stat-card-active' : '' }}"
-                 style="background: linear-gradient(135deg,#dc3545,#e91e63)">
+                  style="background: linear-gradient(135deg,#fd7e14,#ffc107)">
                 <div class="number">{{ $stats['une_place'] }}</div>
                 <div class="label"><i class="bi bi-exclamation-circle me-1"></i>1 place libre</div>
             </div>

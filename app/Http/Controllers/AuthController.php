@@ -81,11 +81,18 @@ class AuthController extends Controller
     public function resetPassword(Request $request)
     {
         // 1. Validation
-        $request->validate([
-            'token'    => 'required',
-            'email'    => 'required|email',
-            'password' => 'required|min:8|confirmed', 
-        ]);
+         $request->validate([
+    'token'    => 'required',
+    'email'    => 'required|email',
+    'password' => [
+        'required',
+        'min:8',
+        'confirmed',
+        'regex:/^[A-Z].*(?:\d.*\d)/',
+    ],
+], [
+    'password.regex' => 'Le mot de passe doit commencer par une majuscule et contenir au moins 2 chiffres.',
+]);
 
         // 2. Tentative de réinitialisation
         $status = Password::broker()->reset(

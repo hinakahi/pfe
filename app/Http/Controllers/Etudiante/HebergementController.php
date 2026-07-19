@@ -47,7 +47,6 @@ class HebergementController extends Controller
                      ->orWhere('etudiante_2', $user->matricule)
                      ->first();
 
-        // ✅ Les deux périodes récupérées
         $periodeRenouvellement = Periode::where('type', 'renouvellement')
                                 ->where('active', true)
                                 ->where('date_debut', '<=', now())
@@ -74,114 +73,113 @@ class HebergementController extends Controller
             'demandesChangement'
         ));
     }
+
     public function showRenouvellement()
-{
-    $user = auth()->user();
+    {
+        $user = auth()->user();
 
-    $maChambre = Chambre::where('etudiante_1', $user->matricule)
-                 ->orWhere('etudiante_2', $user->matricule)
-                 ->first();
+        $maChambre = Chambre::where('etudiante_1', $user->matricule)
+                     ->orWhere('etudiante_2', $user->matricule)
+                     ->first();
 
-    $periodeRenouvellement = Periode::where('type', 'renouvellement')
-                            ->where('active', true)
-                            ->where('date_debut', '<=', now())
-                            ->where('date_fin', '>=', now())
-                            ->first();
+        $periodeRenouvellement = Periode::where('type', 'renouvellement')
+                                ->where('active', true)
+                                ->where('date_debut', '<=', now())
+                                ->where('date_fin', '>=', now())
+                                ->first();
 
-    $demandesRenouvellement = DemandeRenouvellement::where('etudiante_id', $user->id)
-                              ->latest()->get();
+        $demandesRenouvellement = DemandeRenouvellement::where('etudiante_id', $user->id)
+                                  ->latest()->get();
 
-    return view('etudiante.hebergement.renouvellement', compact(
-        'maChambre',
-        'periodeRenouvellement',
-        'demandesRenouvellement'
-    ));
-}
-
-   public function renouveler(Request $request)
-{
-    $periode = Periode::where('type', 'renouvellement')
-              ->where('active', true)
-              ->where('date_debut', '<=', now())
-              ->where('date_fin', '>=', now())
-              ->first();
-
-    if (!$periode) {
-        return back()->with('error', 'La période de renouvellement est fermée.');
-    }
-
-   //  Bloquer les doublons uniquement dans la période actuelle
-   $dejaEnCours = DemandeRenouvellement::where('etudiante_id', auth()->id())
-      ->whereIn('statut', ['en_attente', 'validee'])
-      ->where('created_at', '>=', $periode->date_debut)
-      ->where('created_at', '<=', $periode->date_fin)
-     ->exists();
-
-    if ($dejaEnCours) {
-        return back()->with('error', 'Vous avez déjà une demande en cours.');
-    }
-
-    $request->validate([
-        'chambre_id'             => 'required|exists:chambres,id',
-        'justificatif_scolarite' => 'required|file|mimes:pdf,jpg,png|max:2048',
-        'justificatif_paiement'  => 'required|file|mimes:pdf,jpg,png|max:2048',
-    ]);
-
-    $scolarite = $request->file('justificatif_scolarite')->store('justificatifs', 'public');
-    $paiement  = $request->file('justificatif_paiement')->store('justificatifs', 'public');
-    $chambre   = Chambre::find($request->chambre_id);
-
-    DemandeRenouvellement::create([
-        'etudiante_id'           => auth()->id(),
-        'chambre_id'             => $request->chambre_id,
-        'justificatif_scolarite' => $scolarite,
-        'justificatif_paiement'  => $paiement,
-        'statut'                 => 'en_attente',
-    ]);
-
-    $responsable = User::where('role', 'resp_hebergement')->first();
-    if ($responsable) {
-        $responsable->notify(new NouvelleDemandeChambre(
-            'renouvellement',
-            auth()->user()->name,
-            $chambre->numero ?? '-'
+        return view('etudiante.hebergement.renouvellement', compact(
+            'maChambre',
+            'periodeRenouvellement',
+            'demandesRenouvellement'
         ));
     }
 
-    return redirect()->route('etudiante.hebergement.renouvellement')
-                     ->with('success', 'Demande envoyée avec succès.');
-}
+    public function renouveler(Request $request)
+    {
+        $periode = Periode::where('type', 'renouvellement')
+                  ->where('active', true)
+                  ->where('date_debut', '<=', now())
+                  ->where('date_fin', '>=', now())
+                  ->first();
 
-//  Modifier si refusée
-public function modifierRenouvellement(Request $request, DemandeRenouvellement $demande)
-{
-    if ($demande->etudiante_id !== auth()->id()) abort(403);
+        if (!$periode) {
+            return back()->with('error', 'La période de renouvellement est fermée.');
+        }
 
-    if ($demande->statut !== 'refusee') {
-        return back()->with('error', 'Modification impossible.');
+        $dejaEnCours = DemandeRenouvellement::where('etudiante_id', auth()->id())
+            ->whereIn('statut', ['en_attente', 'validee'])
+            ->where('created_at', '>=', $periode->date_debut)
+            ->where('created_at', '<=', $periode->date_fin)
+            ->exists();
+
+        if ($dejaEnCours) {
+            return back()->with('error', 'Vous avez déjà une demande en cours.');
+        }
+
+        $request->validate([
+            'chambre_id'             => 'required|exists:chambres,id',
+            'justificatif_scolarite' => 'required|file|mimes:pdf,jpg,png|max:2048',
+            'justificatif_paiement'  => 'required|file|mimes:pdf,jpg,png|max:2048',
+        ]);
+
+        $scolarite = $request->file('justificatif_scolarite')->store('justificatifs', 'public');
+        $paiement  = $request->file('justificatif_paiement')->store('justificatifs', 'public');
+        $chambre   = Chambre::find($request->chambre_id);
+
+        DemandeRenouvellement::create([
+            'etudiante_id'           => auth()->id(),
+            'chambre_id'             => $request->chambre_id,
+            'justificatif_scolarite' => $scolarite,
+            'justificatif_paiement'  => $paiement,
+            'statut'                 => 'en_attente',
+        ]);
+
+        $responsable = User::where('role', 'resp_hebergement')->first();
+        if ($responsable) {
+            $responsable->notify(new NouvelleDemandeChambre(
+                'renouvellement',
+                auth()->user()->name,
+                $chambre->numero ?? '-'
+            ));
+        }
+
+        return redirect()->route('etudiante.hebergement.renouvellement')
+                         ->with('success', 'Demande envoyée avec succès.');
     }
 
-    $request->validate([
-        'justificatif_scolarite' => 'nullable|file|mimes:pdf,jpg,png|max:2048',
-        'justificatif_paiement'  => 'nullable|file|mimes:pdf,jpg,png|max:2048',
-    ]);
+    public function modifierRenouvellement(Request $request, DemandeRenouvellement $demande)
+    {
+        if ($demande->etudiante_id !== auth()->id()) abort(403);
 
-    $data = ['statut' => 'en_attente', 'motif_refus' => null];
+        if ($demande->statut !== 'refusee') {
+            return back()->with('error', 'Modification impossible.');
+        }
 
-    if ($request->hasFile('justificatif_scolarite')) {
-        $data['justificatif_scolarite'] = $request->file('justificatif_scolarite')
-            ->store('justificatifs', 'public');
+        $request->validate([
+            'justificatif_scolarite' => 'nullable|file|mimes:pdf,jpg,png|max:2048',
+            'justificatif_paiement'  => 'nullable|file|mimes:pdf,jpg,png|max:2048',
+        ]);
+
+        $data = ['statut' => 'en_attente', 'motif_refus' => null];
+
+        if ($request->hasFile('justificatif_scolarite')) {
+            $data['justificatif_scolarite'] = $request->file('justificatif_scolarite')
+                ->store('justificatifs', 'public');
+        }
+
+        if ($request->hasFile('justificatif_paiement')) {
+            $data['justificatif_paiement'] = $request->file('justificatif_paiement')
+                ->store('justificatifs', 'public');
+        }
+
+        $demande->update($data);
+
+        return back()->with('success', 'Demande corrigée et renvoyée.');
     }
-
-    if ($request->hasFile('justificatif_paiement')) {
-        $data['justificatif_paiement'] = $request->file('justificatif_paiement')
-            ->store('justificatifs', 'public');
-    }
-
-    $demande->update($data);
-
-    return back()->with('success', 'Demande corrigée et renvoyée.');
-}
 
     public function showChangement()
     {
@@ -191,18 +189,16 @@ public function modifierRenouvellement(Request $request, DemandeRenouvellement $
                      ->orWhere('etudiante_2', $user->matricule)
                      ->first();
 
-        //  Vérification période pour afficher ou bloquer la page
         $periodeChangement = Periode::where('type', 'changement')
                             ->where('active', true)
                             ->where('date_debut', '<=', now())
                             ->where('date_fin', '>=', now())
                             ->first();
 
-       //  Inclure aussi les chambres avec une place libre (partielle)
-$chambresDisponibles = Chambre::whereIn('statut', ['libre', 'partielle'])
-                       ->where('publiee', true)
-                       ->where('id', '!=', $maChambre?->id)
-                       ->paginate(15);
+        $chambresDisponibles = Chambre::whereIn('statut', ['libre', 'partielle'])
+                               ->where('publiee', true)
+                               ->where('id', '!=', $maChambre?->id)
+                               ->paginate(15);
 
         $demandesChangement = DemandeChangement::where('etudiante_id', auth()->id())
                              ->latest()->get();
@@ -217,7 +213,6 @@ $chambresDisponibles = Chambre::whereIn('statut', ['libre', 'partielle'])
 
     public function demanderChangement(Request $request)
     {
-        //  Vérification période changement
         $periode = Periode::where('type', 'changement')
                   ->where('active', true)
                   ->where('date_debut', '<=', now())
@@ -226,6 +221,15 @@ $chambresDisponibles = Chambre::whereIn('statut', ['libre', 'partielle'])
 
         if (!$periode) {
             return back()->with('error', 'La période de changement est fermée.');
+        }
+
+        // ✅ Bloquer si une demande est déjà en attente
+        $dejaEnCours = DemandeChangement::where('etudiante_id', auth()->id())
+            ->where('statut', 'en_attente')
+            ->exists();
+
+        if ($dejaEnCours) {
+            return back()->with('error', 'Vous avez déjà une demande de changement en attente. Vous devez la supprimer avant d\'en faire une nouvelle.');
         }
 
         $rules = [
@@ -266,9 +270,9 @@ $chambresDisponibles = Chambre::whereIn('statut', ['libre', 'partielle'])
         }
 
         return redirect()->route('etudiante.changement')
-      ->with('success', 'Demande de changement envoyée avec succès.');
-      
+                         ->with('success', 'Demande de changement envoyée avec succès.');
     }
+
     public function modifierChangement(Request $request, DemandeChangement $demande)
     {
         if ($demande->etudiante_id !== auth()->id()) {

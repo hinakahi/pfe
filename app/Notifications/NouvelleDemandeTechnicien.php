@@ -14,8 +14,10 @@ class NouvelleDemandeTechnicien extends Notification
     public function toDatabase($notifiable): array
     {
         return [
-            'title'   => 'Nouvelle demande de maintenance',
-            'message' => $this->maintenance->type . ' - ' . Str::limit($this->maintenance->description, 80),
+            'title'          => 'Nouvelle demande de maintenance',
+            'message'        => $this->maintenance->type . ' - ' . Str::limit($this->maintenance->description, 80),
+            'maintenance_id' => $this->maintenance->id,
+            'url'            => route('technicien.demandes.show', $this->maintenance->id),
         ];
     }
 }

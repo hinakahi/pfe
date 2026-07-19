@@ -26,6 +26,7 @@ class RenouvellementTraite extends Notification
                 ? 'Votre demande de renouvellement a été validée.'
                 : 'Votre demande de renouvellement a été refusée. Motif : ' . $this->motif,
             'statut'  => $this->statut,
+            'url'     => route('etudiante.hebergement.demandes'),
         ];
     }
 }

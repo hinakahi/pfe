@@ -26,6 +26,7 @@ class AnnonceController extends Controller
             'titre'        => 'required|string|max:191',
             'contenu'      => 'required|string',
             'destinataire' => 'required|in:tous,etudiantes,staff',
+            'urgence'      => 'required|in:general,urgent',
         ]);
 
         $annonce = Annonce::create([
@@ -34,6 +35,8 @@ class AnnonceController extends Controller
             'contenu'      => $request->contenu,
             'categorie'    => 'generale',
             'destinataire' => $request->destinataire,
+            'urgence'      => $request->urgence,
+            'publiee'      => true,
         ]);
 
         // Notification automatique

@@ -28,6 +28,9 @@ class NouvelleDemandeChambre extends Notification
         return [
             'message' => "Nouvelle demande de {$typeLabel} de {$this->nomEtudiante} pour la chambre {$this->numeroChambre}.",
             'type'    => $this->type,
+            'url'     => $this->type === 'renouvellement'
+                ? route('hebergement.renouvellements.index')
+                : route('hebergement.changements.index'),
         ];
     }
 }

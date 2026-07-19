@@ -12,6 +12,7 @@ class StockEpuiseNotification extends Notification
         return [
             'title'   => '⚠️ Stock épuisé',
             'message' => $this->stock->designation . ' est en dessous du seuil minimum (' . $this->stock->quantite . ' restant)',
+            'url'     => route('technicien.stock.edit', $this->stock->id),
         ];
     }
 }

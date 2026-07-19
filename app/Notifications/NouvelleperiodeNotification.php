@@ -20,6 +20,7 @@ class NouvelleperiodeNotification extends Notification
             'titre'   => 'Nouvelle période ouverte',
             'message' => "La période de {$this->periode->type} \"{$this->periode->libelle}\" est ouverte du {$this->periode->date_debut->format('d/m/Y')} au {$this->periode->date_fin->format('d/m/Y')}.",
             'type'    => 'periode',
+            'url'     => route('admin.periodes.index'),
         ];
     }
 }
