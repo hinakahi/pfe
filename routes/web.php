@@ -274,6 +274,9 @@ Route::prefix('technicien')->middleware(['auth', 'role:technicien'])->group(func
 
         return view('technicien.annonces.index', compact('annonces', 'annoncesUrgentes'));
     })->name('technicien.annonces.index');
+
+  Route::get('/stock-historique/pdf', [StockController::class, 'historiqueGlobalPdf'])
+    ->name('technicien.stock.historique-global.pdf');
 });
 
 // ─── Responsable Foyer ────────────────────────────────────────

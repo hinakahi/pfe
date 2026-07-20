@@ -24,11 +24,12 @@
 </a>
 
 <a href="{{ route('technicien.stock.index') }}"
-   class="nav-link {{ request()->routeIs('technicien.stock*') ? 'active' : '' }}">
+   class="nav-link {{ request()->routeIs('technicien.stock*') && !request()->routeIs('technicien.stock.historique-global*') ? 'active' : '' }}">
     <i class="bi bi-box-seam"></i>
     <span>Stock</span>
 </a>
-<a href="{{ route('technicien.stock.historique-global') }}" class="nav-link">
+<a href="{{ route('technicien.stock.historique-global') }}"
+   class="nav-link {{ request()->routeIs('technicien.stock.historique-global*') ? 'active' : '' }}">
     <i class="bi bi-clock-history"></i>
     <span>Historique</span>
 </a>

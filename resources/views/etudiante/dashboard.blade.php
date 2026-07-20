@@ -93,8 +93,12 @@
                 <ul class="list-group list-group-flush">
                     @forelse($notifications as $notif)
                     <li class="list-group-item px-0 small">
-                        {{ $notif->data['message'] ?? 'Notification' }}
-                        <div class="text-muted" style="font-size:11px">{{ $notif->created_at->diffForHumans() }}</div>
+                        <a href="{{ route('etudiante.notifications') }}" class="text-decoration-none text-reset d-block">
+                            <div class="fw-semibold">
+                                {{ $notif->data['title'] ?? $notif->data['titre'] ?? \Illuminate\Support\Str::limit($notif->data['message'] ?? 'Notification', 60) }}
+                            </div>
+                            <div class="text-muted" style="font-size:11px">{{ $notif->created_at->diffForHumans() }}</div>
+                        </a>
                     </li>
                     @empty
                     <li class="list-group-item px-0 text-muted text-center">Aucune notification.</li>

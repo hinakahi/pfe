@@ -7,6 +7,7 @@ use App\Models\Stock;
 use App\Models\Materiel;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class StockController extends Controller
 {
@@ -120,4 +121,35 @@ class StockController extends Controller
 
         return view('technicien.stock.historique-global', compact('utilisations', 'stocks'));
     }
+    public function historiqueGlobalPdf(Request $request)
+{
+    $query = Materiel::with('stock', 'maintenance.technicien', 'maintenance.chambre');
+
+    if ($request->filled('stock_id')) {
+        $query->where('stock_id', $request->stock_id);
+    }
+
+    if ($request->filled('semestre')) {
+        $now = now();
+        $anneeDebut = $now->month >= 9 ? $now->year : $now->year - 1;
+
+        if ($request->semestre === 's1') {
+            $debut = \Carbon\Carbon::create($anneeDebut, 9, 1)->startOfDay();
+            $fin   = \Carbon\Carbon::create($anneeDebut + 1, 1, 31)->endOfDay();
+        } else { // s2
+            $debut = \Carbon\Carbon::create($anneeDebut + 1, 2, 1)->startOfDay();
+            $fin   = \Carbon\Carbon::create($anneeDebut + 1, 6, 30)->endOfDay();
+        }
+
+        $query->whereBetween('created_at', [$debut, $fin]);
+    }
+
+    // Pas de pagination pour le PDF : on veut tout le résultat filtré
+    $utilisations = $query->latest()->get();
+
+    $pdf = Pdf::loadView('technicien.stock.historique-global-pdf', compact('utilisations'))
+        ->setPaper('a4', 'landscape');
+
+    return $pdf->download('historique-stock-' . now()->format('Y-m-d') . '.pdf');
+}
 }

@@ -61,9 +61,16 @@
                                     <h5 class="modal-title fw-bold">{{ $annonce->titre }}</h5>
                                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                                 </div>
-                                <div class="modal-body">
-                                    <p>{{ $annonce->contenu }}</p>
-                                    <hr>
+                                 <div class="modal-body">
+    @php
+        $contenuFinal = nl2br(preg_replace(
+            '/(https?:\/\/[^\s]+)/',
+            '<a href="$1" target="_blank" rel="noopener noreferrer">$1</a>',
+            e($annonce->contenu)
+        ));
+    @endphp
+    <p style="white-space: pre-line;">{!! $contenuFinal !!}</p>
+    <hr>
                                     <small class="text-muted">
                                         <i class="bi bi-calendar"></i> {{ $annonce->created_at->format('d/m/Y H:i') }} - 
                                         <i class="bi bi-person"></i> {{ $annonce->user->name ?? 'Admin' }}
@@ -225,7 +232,14 @@
                     <span class="badge rounded-pill" style="background-color: {{ $cat['couleur'] }};">{{ $cat['label'] }}</span>
                     <span class="badge rounded-pill ms-1" style="background-color: {{ $urg['couleur'] }};">{{ $urg['label'] }}</span>
                 </div>
-                <p style="line-height: 1.8; font-size: 1.05rem;">{{ $annonce->contenu }}</p>
+                @php
+    $contenuFinal = nl2br(preg_replace(
+        '/(https?:\/\/[^\s]+)/',
+        '<a href="$1" target="_blank" rel="noopener noreferrer">$1</a>',
+        e($annonce->contenu)
+    ));
+@endphp
+<p style="line-height: 1.8; font-size: 1.05rem; white-space: pre-line;">{!! $contenuFinal !!}</p>
                 <hr>
                 <small class="text-muted">
                     {{ $annonce->created_at->format('d/m/Y à H:i') }} - {{ $annonce->user->name ?? 'Admin' }}

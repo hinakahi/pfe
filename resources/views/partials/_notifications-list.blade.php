@@ -1,9 +1,7 @@
 <div class="d-flex flex-column gap-2">
     @forelse($notifications as $n)
         @php
-            $url = $n->data['url'] ?? null;
-            $titre = $n->data['title'] ?? $n->data['titre'] ?? null;
-            $texte = $n->data['message'] ?? '';
+            $titre = $n->data['title'] ?? $n->data['titre'] ?? \Illuminate\Support\Str::limit($n->data['message'] ?? 'Notification', 60);
         @endphp
         <form method="POST" action="{{ route($readRouteName, $n->id) }}">
             @csrf
@@ -11,14 +9,9 @@
                     class="card w-100 text-start border-0 shadow-sm {{ $n->read_at ? '' : 'bg-light' }}"
                     style="border-left: 4px solid {{ $n->read_at ? '#dee2e6' : '#0d6efd' }} !important; cursor:pointer;">
                 <div class="card-body py-3">
-                    <div class="d-flex justify-content-between align-items-start gap-3">
-                        <div>
-                            @if($titre)
-                                <div class="fw-bold mb-1">{{ $titre }}</div>
-                            @endif
-                            <div class="{{ $titre ? 'text-muted' : 'fw-semibold' }}" style="font-size:.9rem;">
-                                {{ $texte }}
-                            </div>
+                    <div class="d-flex justify-content-between align-items-center gap-3">
+                        <div class="fw-bold">
+                            {{ $titre }}
                         </div>
                         <span class="text-muted flex-shrink-0" style="font-size:.75rem;">
                             {{ $n->created_at->diffForHumans() }}
