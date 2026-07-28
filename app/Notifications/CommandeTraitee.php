@@ -32,6 +32,7 @@ class CommandeTraitee extends Notification
             'message'     => $this->statut === 'acceptee'
                 ? "Votre commande a été acceptée."
                 : "Votre commande a été refusée." . ($this->motif ? " Motif : {$this->motif}" : ''),
+            'url'         => route('etudiante.foyer.reservations'),
         ];
     }
 }

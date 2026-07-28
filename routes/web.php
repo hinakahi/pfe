@@ -144,7 +144,7 @@ Route::middleware(['auth', 'role:etudiante'])->prefix('etudiante')->name('etudia
         Route::get('/', [HebergementController::class, 'index'])->name('index');
         Route::get('/renouvellement', [HebergementController::class, 'showRenouvellement'])->name('renouvellement');
         Route::post('/renouvellement', [HebergementController::class, 'renouveler'])->name('renouveller');
-        Route::get('/demandes', [HebergementController::class, 'statut'])->name('demandes');
+        Route::get('/demandes', [HebergementController::class, 'index'])->name('demandes');
     });
     Route::get('/hebergement/changement', [HebergementController::class, 'showChangement'])->name('changement');
     Route::post('/hebergement/changement', [HebergementController::class, 'demanderChangement'])->name('changement.store');
@@ -235,6 +235,8 @@ Route::prefix('technicien')->middleware(['auth', 'role:technicien'])->group(func
     Route::get('/demandes', [DemandeMaintController::class, 'index'])->name('technicien.demandes');
     Route::get('/demandes/{maintenance}', [DemandeMaintController::class, 'show'])->name('technicien.demandes.show');
     Route::post('/demandes/{maintenance}/traiter', [DemandeMaintController::class, 'traiter'])->name('technicien.demandes.traiter');
+    Route::get('/demandes/{maintenance}/voir', [DemandeMaintController::class, 'voir'])->name('technicien.demandes.voir');
+Route::delete('/materiels/{materiel}', [DemandeMaintController::class, 'supprimerMateriel'])->name('technicien.materiels.destroy');
     Route::post('/incidents', [IncidentController::class, 'store'])->name('technicien.incidents.store');
 
     Route::resource('stock', StockController::class)->names('technicien.stock');

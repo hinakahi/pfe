@@ -1,13 +1,12 @@
 @extends('layouts.app')
+@section('title', 'Mes Réclamations')
+@section('page-title', 'Mes Réclamations')
 
 @section('content')
 
 {{-- Header --}}
 <div class="d-flex justify-content-between align-items-center mb-4">
-    <div>
-        <h4 class="mb-1 fw-bold">Mes Réclamations</h4>
-        <p class="mb-0 small" style="opacity:0.6;">Suivez vos réclamations et les réponses de l'administration</p>
-    </div>
+    
     <a href="{{ route('etudiante.reclamations.create') }}"
        class="btn text-white px-4"
        style="background:linear-gradient(135deg,#1a3c5e,#2d6a9f);border-radius:8px;">
@@ -23,9 +22,7 @@
             
             {{-- Filtre par statut --}}
             <div class="flex-grow-1" style="min-width: 200px;">
-                <label class="form-label fw-semibold small mb-2">
-                    <i class="bi bi-funnel me-1"></i> Statut
-                </label>
+              
                 <select name="statut" class="form-select form-select-sm" onchange="this.form.submit()" style="border-radius:8px;border:0.5px solid #ddd;">
                     <option value="">Tous les statuts</option>
                     <option value="en_attente" {{ request('statut') === 'en_attente' ? 'selected' : '' }}> En attente</option>
@@ -37,9 +34,7 @@
 
             {{-- Filtre par date --}}
             <div class="flex-grow-1" style="min-width: 200px;">
-                <label class="form-label fw-semibold small mb-2">
-                    <i class="bi bi-calendar me-1"></i> Période
-                </label>
+                
                 <select name="periode" class="form-select form-select-sm" onchange="this.form.submit()" style="border-radius:8px;border:0.5px solid #ddd;">
                     <option value="">Toutes les périodes</option>
                     <option value="7" {{ request('periode') === '7' ? 'selected' : '' }}>Derniers 7 jours</option>
@@ -51,9 +46,7 @@
 
             {{-- Filtre par réponse --}}
             <div class="flex-grow-1" style="min-width: 200px;">
-                <label class="form-label fw-semibold small mb-2">
-                    <i class="bi bi-reply me-1"></i> Réponse
-                </label>
+                
                 <select name="reponse" class="form-select form-select-sm" onchange="this.form.submit()" style="border-radius:8px;border:0.5px solid #ddd;">
                     <option value="">Tous</option>
                     <option value="avec" {{ request('reponse') === 'avec' ? 'selected' : '' }}>Avec réponse</option>

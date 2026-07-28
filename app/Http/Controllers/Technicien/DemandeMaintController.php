@@ -64,9 +64,18 @@ class DemandeMaintController extends Controller
 
     public function show(Maintenance $maintenance)
     {
-        $maintenance->load('etudiante', 'chambre', 'materiels');
+        $maintenance->load('etudiante', 'chambre', 'materiels.stock');
         $stocks = Stock::orderBy('designation')->get();
         return view('technicien.demandes.show', compact('maintenance', 'stocks'));
+    }
+
+    /**
+     * Vue en lecture seule (consultation uniquement, aucun formulaire).
+     */
+    public function voir(Maintenance $maintenance)
+    {
+        $maintenance->load('etudiante', 'chambre', 'technicien', 'materiels.stock');
+        return view('technicien.demandes.voir', compact('maintenance'));
     }
 
     public function traiter(Request $request, Maintenance $maintenance)
@@ -106,6 +115,8 @@ class DemandeMaintController extends Controller
     }
 
     // Enregistrer le matériel utilisé + décrémenter le stock
+    // Si le même matériel est déjà utilisé sur cette demande, on additionne la quantité
+    // au lieu de créer une nouvelle ligne en double.
     if ($request->filled('materiels')) {
         foreach ($request->materiels as $mat) {
             if (empty($mat['stock_id'])) continue;
@@ -113,13 +124,21 @@ class DemandeMaintController extends Controller
             $quantite = $mat['quantite'] ?? 1;
             $stock = Stock::find($mat['stock_id']);
 
-            Materiel::create([
-                'maintenance_id'       => $maintenance->id,
-                'stock_id'             => $mat['stock_id'],
-                'quantite'             => $quantite,
-                'stock_epuise'         => $request->boolean('stock_epuise'),
-                'description_incident' => null,
-            ]);
+            $materielExistant = Materiel::where('maintenance_id', $maintenance->id)
+                ->where('stock_id', $mat['stock_id'])
+                ->first();
+
+            if ($materielExistant) {
+                $materielExistant->increment('quantite', $quantite);
+            } else {
+                Materiel::create([
+                    'maintenance_id'       => $maintenance->id,
+                    'stock_id'             => $mat['stock_id'],
+                    'quantite'             => $quantite,
+                    'stock_epuise'         => $request->boolean('stock_epuise'),
+                    'description_incident' => null,
+                ]);
+            }
 
             if ($stock) {
                 $stock->quantite = max(0, $stock->quantite - $quantite);
@@ -139,4 +158,23 @@ class DemandeMaintController extends Controller
     return redirect()->route('technicien.demandes')
                      ->with('success', 'Demande mise à jour avec succès.');
  }
+
+    /**
+     * Supprime une ligne de matériel ajoutée par erreur et remet la quantité en stock.
+     */
+    public function supprimerMateriel(Materiel $materiel)
+    {
+        $maintenance = $materiel->maintenance;
+
+        // Remettre la quantité dans le stock
+        $stock = Stock::find($materiel->stock_id);
+        if ($stock) {
+            $stock->quantite += $materiel->quantite;
+            $stock->save();
+        }
+
+        $materiel->delete();
+
+        return back()->with('success', 'Matériel retiré de la demande.');
+    }
 }

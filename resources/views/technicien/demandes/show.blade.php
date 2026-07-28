@@ -32,37 +32,34 @@
                     </span>
                 @endif
             </div>
-            <h5 class="fw-bold mb-2">{{ $maintenance->description }}</h5>
-
-{{-- Photo si présente --}}
-@if($maintenance->photo)
-<div class="mb-3">
-    <div class="text-muted mb-2" style="font-size:.75rem;font-weight:700;text-transform:uppercase;">
-        Photo
-    </div>
-    <a href="{{ asset('storage/' . $maintenance->photo) }}" target="_blank">
-        <img src="{{ asset('storage/' . $maintenance->photo) }}" alt="Photo de la demande"
-             style="max-height:220px;border-radius:.5rem;" class="border">
-    </a>
-</div>
-@endif
-
-<div class="d-flex flex-wrap gap-3 text-muted" style="font-size:.85rem;">
 
             <h5 class="fw-bold mb-2">{{ $maintenance->description }}</h5>
+
+            {{-- Photo si présente --}}
+            @if($maintenance->photo)
+            <div class="mb-3">
+                <div class="text-muted mb-2" style="font-size:.75rem;font-weight:700;text-transform:uppercase;">
+                    Photo
+                </div>
+                <a href="{{ asset('storage/' . $maintenance->photo) }}" target="_blank">
+                    <img src="{{ asset('storage/' . $maintenance->photo) }}" alt="Photo de la demande"
+                         style="max-height:220px;border-radius:.5rem;" class="border">
+                </a>
+            </div>
+            @endif
 
             <div class="d-flex flex-wrap gap-3 text-muted" style="font-size:.85rem;">
                 <span><i class="bi bi-person me-1"></i>{{ $maintenance->etudiante->name ?? '-' }}</span>
-<span><i class="bi bi-envelope me-1"></i>{{ $maintenance->etudiante->email ?? '-' }}</span>
+                <span><i class="bi bi-envelope me-1"></i>{{ $maintenance->etudiante->email ?? '-' }}</span>
 
-@if($maintenance->chambre)
-    <span><i class="bi bi-door-closed me-1"></i>Chambre {{ $maintenance->chambre->numero }}</span>
-    <span><i class="bi bi-building me-1"></i>Bloc {{ $maintenance->chambre->bloc }}</span>
-    <span><i class="bi bi-layers me-1"></i>Étage {{ $maintenance->chambre->etage }}</span>
-@elseif($maintenance->lieu_commun)
-    <span><i class="bi bi-geo-alt me-1"></i>{{ $maintenance->lieu_commun }}</span>
-@endif
-                
+                @if($maintenance->chambre)
+                    <span><i class="bi bi-door-closed me-1"></i>Chambre {{ $maintenance->chambre->numero }}</span>
+                    <span><i class="bi bi-building me-1"></i>Bloc {{ $maintenance->chambre->bloc }}</span>
+                    <span><i class="bi bi-layers me-1"></i>Étage {{ $maintenance->chambre->etage }}</span>
+                @elseif($maintenance->lieu_commun)
+                    <span><i class="bi bi-geo-alt me-1"></i>{{ $maintenance->lieu_commun }}</span>
+                @endif
+
                 <span><i class="bi bi-calendar me-1"></i>{{ $maintenance->date_signalement?->format('d/m/Y') }}</span>
                 <span><i class="bi bi-tools me-1"></i>{{ ucfirst($maintenance->type) }}</span>
             </div>
@@ -79,7 +76,7 @@
             </div>
             @endif
 
-            {{-- Matériels déjà utilisés --}}
+            {{-- Matériels déjà utilisés (avec suppression possible) --}}
             @if($maintenance->materiels->count())
             <div class="mt-3 pt-3 border-top">
                 <div class="text-muted mb-2" style="font-size:.75rem;font-weight:700;text-transform:uppercase;">
@@ -87,11 +84,20 @@
                 </div>
                 <div class="d-flex flex-wrap gap-2">
                     @foreach($maintenance->materiels as $m)
-                    <span class="badge bg-light text-dark border" style="font-size:.78rem;">
+                    <span class="badge bg-light text-dark border d-inline-flex align-items-center" style="font-size:.78rem;">
                         <i class="bi bi-box me-1"></i>{{ $m->stock->designation ?? 'Matériel supprimé' }} ×{{ $m->quantite }}
                         @if($m->stock_epuise)
                             <span class="text-danger ms-1">⚠ épuisé</span>
                         @endif
+                        <form method="POST" action="{{ route('technicien.materiels.destroy', $m->id) }}"
+                              class="d-inline ms-2 mb-0"
+                              onsubmit="return confirm('Retirer ce matériel de la demande ?');">
+                            @csrf
+                            @method('DELETE')
+                            <button type="submit" class="btn btn-sm p-0 border-0 text-danger" style="line-height:1; background:none;" title="Retirer">
+                                <i class="bi bi-x-circle"></i>
+                            </button>
+                        </form>
                     </span>
                     @endforeach
                 </div>
@@ -136,8 +142,6 @@
                             <div class="form-text">Visible par tous les techniciens pour qu'ils puissent reprendre la demande.</div>
                         </div>
 
-                       
-
                     </div>
                 </div>
             </div>
@@ -150,7 +154,7 @@
                             <i class="bi bi-box-seam me-2 text-warning"></i>Matériel utilisé
                             <small class="text-muted fw-normal">(optionnel)</small>
                         </h6>
-                        
+                    </div>
                     <div class="card-body">
 
                         <div class="mb-3">
@@ -167,7 +171,6 @@
                                 </option>
                                 @endforeach
                             </select>
-                            
                         </div>
 
                         <div class="mb-3">
@@ -175,8 +178,6 @@
                             <input type="number" name="materiels[0][quantite]"
                                    class="form-control" min="1" value="1">
                         </div>
-
-                     
 
                     </div>
                 </div>
@@ -208,20 +209,19 @@
 
                 <div class="row g-3">
                     <div class="col-md-4">
-    <label class="form-label fw-semibold">Matériel concerné</label>
-    <select name="stock_id" class="form-select" id="incidentStockSelect" required>
-        <option value="">-- Sélectionner un matériel --</option>
-        @foreach($stocks as $s)
-        <option value="{{ $s->id }}"
-                data-nom="{{ $s->designation }}">
-            {{ $s->designation }}
-            ({{ $s->quantite }} {{ $s->unite }})
-            {{ $s->est_epuise ? '⚠ Épuisé' : ($s->est_faible ? '⚠ Stock faible' : '') }}
-        </option>
-        @endforeach
-    </select>
-    
-</div>
+                        <label class="form-label fw-semibold">Matériel concerné</label>
+                        <select name="stock_id" class="form-select" id="incidentStockSelect" required>
+                            <option value="">-- Sélectionner un matériel --</option>
+                            @foreach($stocks as $s)
+                            <option value="{{ $s->id }}"
+                                    data-nom="{{ $s->designation }}">
+                                {{ $s->designation }}
+                                ({{ $s->quantite }} {{ $s->unite }})
+                                {{ $s->est_epuise ? '⚠ Épuisé' : ($s->est_faible ? '⚠ Stock faible' : '') }}
+                            </option>
+                            @endforeach
+                        </select>
+                    </div>
                     <div class="col-md-2">
                         <label class="form-label fw-semibold">Quantité</label>
                         <input type="number" name="quantite"
@@ -245,8 +245,6 @@
 </div>
 
 <script>
-
-
 const selectStatut = document.getElementById('selectStatut');
 const blocCommentaire = document.getElementById('blocCommentaire');
 
