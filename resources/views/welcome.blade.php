@@ -296,7 +296,7 @@
                 <h4>Adresse</h4>
                 <p>Pôle universitaire de Tamda<br />Tizi Ouzou, Algérie</p>
               </div>
-              <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d573.6880237066865!2d4.196465435229105!3d36.710720906407225!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x128dbb0044c1c6a7%3A0x871fca11d9bc1e6!2sR%C3%A9sidence%20fille%20tamda%201!5e1!3m2!1sfr!2sdz!4v1779619757932!5m2!1sfr!2sdz" width="300" height="300" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+              <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d573.6880237066865!2d4.196465435229105!3d36.710720906407225!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x128dbb0044c1c6a7%3A0x871fca11d9bc1e6!2sR%C3%A9sidence%20fille%20tamda%201!5e1!3m2!1sfr!2sdz!4v1779619757932!5m2!1sfr!2sdz" style="border:0; width:100%; max-width:300px; height:300px;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
             </div>
             <div class="contact-item">
               <div class="contact-icon"><i class="fas fa-university"></i></div>
@@ -452,6 +452,11 @@
       ];
 
       /* ══════════ SLIDER LOGIC ══════════ */
+      // ─── FIX MOBILE : on détecte si on est sur un petit écran ───
+      // Sur mobile, on désactive l'effet "cube 3D à tranches" (trop lourd,
+      // provoque un effet de damier) et on le remplace par un simple fondu.
+      const IS_MOBILE = window.innerWidth <= 768;
+
       class SiOuakliSlider {
         constructor() {
           this.idx = 0;
@@ -472,6 +477,25 @@
         }
         buildSlices() {
           const st = document.getElementById("sliderStage");
+
+          // FIX MOBILE : une seule image pleine largeur, pas de découpage
+          // en tranches (qui créait des coutures/lignes verticales visibles).
+          if (IS_MOBILE) {
+            const sc = document.createElement("div");
+            sc.className = "slice-container mobile-full";
+            const cube = document.createElement("div");
+            cube.className = "slice-cube";
+            const face = document.createElement("div");
+            face.className = "slice-face face-1";
+            const img = document.createElement("div");
+            img.className = "slice-image mobile-full-image";
+            face.appendChild(img);
+            cube.appendChild(face);
+            sc.appendChild(cube);
+            st.appendChild(sc);
+            return;
+          }
+
           for (let i = 0; i < this.slices; i++) {
             const sc = document.createElement("div");
             sc.className = "slice-container";
@@ -492,8 +516,14 @@
           }
         }
         setImage(faceIdx, slideIdx) {
-          const faces = document.querySelectorAll(`.slice-face.face-${faceIdx + 1} .slice-image`);
           const url = SLIDES[slideIdx].url;
+          if (IS_MOBILE) {
+            // FIX MOBILE : une seule image, pas de recherche par face
+            const img = document.querySelector(".mobile-full-image");
+            if (img) img.style.backgroundImage = `url(${url})`;
+            return;
+          }
+          const faces = document.querySelectorAll(`.slice-face.face-${faceIdx + 1} .slice-image`);
           faces.forEach((img) => (img.style.backgroundImage = `url(${url})`));
         }
         loadImages() {
@@ -506,6 +536,19 @@
         rotate() {
           if (this.anim) return;
           this.anim = true;
+
+          // FIX MOBILE : fondu simple (opacité) sur l'unique image pleine largeur
+          if (IS_MOBILE) {
+            const cube = document.querySelector(".slice-cube");
+            if (cube) cube.style.opacity = "0";
+            setTimeout(() => {
+              this.setImage(0, this.idx);
+              if (cube) cube.style.opacity = "1";
+              this.anim = false;
+            }, 300);
+            return;
+          }
+
           const nextFace = (this.face + 1) % 4;
           this.setImage(nextFace, this.idx);
           const cubes = document.querySelectorAll(".slice-cube");
