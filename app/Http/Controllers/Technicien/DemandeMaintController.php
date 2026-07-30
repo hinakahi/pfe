@@ -57,6 +57,10 @@ class DemandeMaintController extends Controller
             $query->where('type', $request->type);
         }
 
+        if ($request->urgence && $request->urgence !== 'tous') {
+            $query->where('urgence', $request->urgence);
+        }
+
         $demandes = $query->get();
 
         return view('technicien.demandes.index', compact('demandes'));

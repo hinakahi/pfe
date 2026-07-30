@@ -8,28 +8,36 @@
     {{-- Stats --}}
     <div class="row g-3 mb-4">
         <div class="col-6 col-xl-3">
-            <div class="stat-card" style="background:linear-gradient(135deg,#f59e0b,#d97706);">
-                <div class="number">{{ $stats['en_attente'] }}</div>
-                <div class="label"><i class="bi bi-clock me-1"></i>En attente</div>
-            </div>
+            <a href="{{ route('technicien.demandes', ['statut' => 'en_attente']) }}" class="text-decoration-none">
+                <div class="stat-card stat-card-clickable" style="background:linear-gradient(135deg,#f59e0b,#d97706);">
+                    <div class="number">{{ $stats['en_attente'] }}</div>
+                    <div class="label"><i class="bi bi-clock me-1"></i>En attente</div>
+                </div>
+            </a>
         </div>
         <div class="col-6 col-xl-3">
-            <div class="stat-card" style="background:linear-gradient(135deg,#3b82f6,#2563eb);">
-                <div class="number">{{ $stats['en_cours'] }}</div>
-                <div class="label"><i class="bi bi-tools me-1"></i>En cours</div>
-            </div>
+            <a href="{{ route('technicien.demandes', ['statut' => 'en_cours']) }}" class="text-decoration-none">
+                <div class="stat-card stat-card-clickable" style="background:linear-gradient(135deg,#3b82f6,#2563eb);">
+                    <div class="number">{{ $stats['en_cours'] }}</div>
+                    <div class="label"><i class="bi bi-tools me-1"></i>En cours</div>
+                </div>
+            </a>
         </div>
         <div class="col-6 col-xl-3">
-            <div class="stat-card" style="background:linear-gradient(135deg,#22c55e,#16a34a);">
-                <div class="number">{{ $stats['terminees'] }}</div>
-                <div class="label"><i class="bi bi-check-circle me-1"></i>Terminées</div>
-            </div>
+            <a href="{{ route('technicien.demandes', ['statut' => 'terminee']) }}" class="text-decoration-none">
+                <div class="stat-card stat-card-clickable" style="background:linear-gradient(135deg,#22c55e,#16a34a);">
+                    <div class="number">{{ $stats['terminees'] }}</div>
+                    <div class="label"><i class="bi bi-check-circle me-1"></i>Terminées</div>
+                </div>
+            </a>
         </div>
         <div class="col-6 col-xl-3">
-            <div class="stat-card" style="background:linear-gradient(135deg,#ef4444,#dc2626);">
-                <div class="number">{{ $stats['urgentes'] }}</div>
-                <div class="label"><i class="bi bi-exclamation-triangle me-1"></i>Urgentes</div>
-            </div>
+            <a href="{{ route('technicien.demandes', ['urgence' => 'urgente']) }}" class="text-decoration-none">
+                <div class="stat-card stat-card-clickable" style="background:linear-gradient(135deg,#ef4444,#dc2626);">
+                    <div class="number">{{ $stats['urgentes'] }}</div>
+                    <div class="label"><i class="bi bi-exclamation-triangle me-1"></i>Urgentes</div>
+                </div>
+            </a>
         </div>
     </div>
 
@@ -104,4 +112,17 @@
     </div>
 
 </div>
+
+@push('styles')
+<style>
+.stat-card-clickable {
+    cursor: pointer;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+.stat-card-clickable:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 16px rgba(0,0,0,0.2);
+}
+</style>
+@endpush
 @endsection

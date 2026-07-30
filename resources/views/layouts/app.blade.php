@@ -3,9 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>@yield('title', 'Résidence Si Ouakli')</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+     <meta name="csrf-token" content="{{ csrf_token() }}">
+<title>@yield('title', 'Résidence Si Ouakli')</title>
+<link rel="icon" type="image/jpeg" href="{{ asset('photo/mon_logo.jpg') }}">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
     <style>
         :root {
@@ -25,6 +26,10 @@
             --text-main: #e9ecef;
             --text-muted: #adb5bd;
             --shadow: 0 2px 8px rgba(0,0,0,0.3);
+        }
+        html, body {
+            overflow-x: hidden;
+            max-width: 100%;
         }
         body {
             background-color: var(--bg-body);
@@ -104,6 +109,8 @@
             margin-left: 250px;
             padding: 20px 20px 20px 50px;
             transition: margin-left 0.3s;
+            max-width: 100%;
+            overflow-x: hidden;
         }
         .main-content.expanded { 
             margin-left: 80px; 
@@ -115,6 +122,8 @@
             margin-bottom: 20px;
             box-shadow: var(--shadow);
             display: flex;
+            flex-wrap: wrap;
+            row-gap: 8px;
             justify-content: space-between;
             align-items: center;
         }
@@ -212,7 +221,23 @@
                 display: block; 
             }
             .main-content { 
-                margin-left: 0 ; 
+                margin-left: 0 ;
+                padding: 15px;
+            }
+            .topbar h5 {
+                font-size: 1rem;
+                white-space: normal;
+            }
+            .topbar .d-flex.align-items-center.gap-2 {
+                flex-wrap: wrap;
+                justify-content: flex-end;
+                row-gap: 6px;
+            }
+            .topbar .badge {
+                font-size: 0.7rem;
+            }
+            .topbar strong {
+                font-size: 0.85rem;
             }
             .hamburger { 
                 display: block; 
