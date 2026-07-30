@@ -244,8 +244,6 @@
             <option value="Couloir">Couloir</option>
             <option value="Sanitaires">Sanitaires</option>
             <option value="Douches">Douches</option>
-            <option value="Cuisine commune">Cuisine commune</option>
-            <option value="Salle commune">Salle commune</option>
             <option value="Autre">Autre</option>
         </select>
     </div>

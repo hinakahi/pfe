@@ -179,11 +179,17 @@
 
                     {{-- Bouton action --}}
                     @if($d->statut === 'terminee')
-                        <a href="{{ route('technicien.demandes.show', $d->id) }}"
-                           class="btn btn-sm btn-outline-secondary align-self-start">
-                            <i class="bi bi-eye me-1"></i>Voir
-                        </a>
-                    @else
+    <div class="d-flex gap-2 align-self-start">
+        <a href="{{ route('technicien.demandes.voir', $d->id) }}"
+           class="btn btn-sm btn-outline-secondary">
+            <i class="bi bi-eye me-1"></i>Voir
+        </a>
+        <a href="{{ route('technicien.demandes.show', $d->id) }}"
+           class="btn btn-sm btn-outline-primary">
+            <i class="bi bi-pencil me-1"></i>Modifier
+        </a>
+    </div>
+@else
                         <a href="{{ route('technicien.demandes.show', $d->id) }}"
                            class="btn btn-sm btn-primary align-self-start">
                             <i class="bi bi-wrench me-1"></i>Traiter
