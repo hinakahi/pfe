@@ -247,7 +247,7 @@
         </button>
     </div>
     <span class="text-muted small" id="countLabel" style="white-space:nowrap;">
-        {{ $articles->count() }} article(s)
+        {{ $articles->total() }} article(s)
     </span>
 </div>
 

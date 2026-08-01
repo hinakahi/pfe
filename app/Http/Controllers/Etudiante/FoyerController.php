@@ -25,7 +25,7 @@ class FoyerController extends Controller
             $query->where('statut', $request->statut);
         }
         
-        $reservations = $query->latest()->get();
+        $reservations = $query->latest()->paginate(10)->withQueryString();
         
         $totalReservations = Reservation::where('etudiante_id', $user->id)
          ->where('statut', 'en_attente')
@@ -90,13 +90,26 @@ $promotions = ArticleFoyer::where('promo_active', true)
 }
 
     public function reservations()
-    {
-        $reservations = Reservation::where('etudiante_id', auth()->user()->id)
-            ->with('article')
-            ->get();
-        $promotions = [];
-        return view('etudiante.foyer.reservations', compact('reservations', 'promotions'));
-    }
+{
+    $user = auth()->user();
+
+    $reservations = Reservation::where('etudiante_id', $user->id)
+        ->with('article')
+        ->latest()
+        ->paginate(10);
+
+    $total     = Reservation::where('etudiante_id', $user->id)->count();
+    $enAttente = Reservation::where('etudiante_id', $user->id)->where('statut', 'en_attente')->count();
+    $validees  = Reservation::where('etudiante_id', $user->id)->where('statut', 'validee')->count();
+    $refusees  = Reservation::where('etudiante_id', $user->id)->where('statut', 'refusee')->count();
+    $annulees  = Reservation::where('etudiante_id', $user->id)->where('statut', 'annulee')->count();
+
+    $promotions = [];
+
+    return view('etudiante.foyer.reservations', compact(
+        'reservations', 'promotions', 'total', 'enAttente', 'validees', 'refusees', 'annulees'
+    ));
+}
 
     public function promotions()
 {

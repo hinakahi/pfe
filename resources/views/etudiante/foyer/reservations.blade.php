@@ -103,13 +103,7 @@
     </a>
 </div>
 
-@php
-    $total      = $reservations->count();
-    $enAttente  = $reservations->where('statut','en_attente')->count();
-    $validees   = $reservations->where('statut','validee')->count();
-    $refusees   = $reservations->where('statut','refusee')->count();
-    $annulees   = $reservations->where('statut','annulee')->count();
-@endphp
+
 
 <div class="row g-3 mb-4">
     <div class="col-6 col-md filter-card active" data-filter="all">
@@ -232,6 +226,10 @@
             </div>
             @endif
         @endforeach
+    </div>
+
+    <div class="mt-4">
+        {{ $reservations->links() }}
     </div>
 @endif
 

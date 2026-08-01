@@ -51,6 +51,8 @@
             @endforelse
             </tbody>
         </table>
+
+        {{ $periodes->links() }}
     </div>
 </div>
 @endsection

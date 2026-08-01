@@ -10,7 +10,7 @@
     </div>
     <span class="badge rounded-pill px-3 py-2 fs-6"
           style="background: linear-gradient(135deg,#1a3c5e,#2d6a9f); color:#fff;">
-        {{ $messages->count() }} message(s)
+        {{ $messages->total() }} message(s)
     </span>
 </div>
 
@@ -76,6 +76,10 @@
             </div>
         </div>
         @endforeach
+    </div>
+
+    <div class="mt-4">
+        {{ $messages->links() }}
     </div>
 @endif
 

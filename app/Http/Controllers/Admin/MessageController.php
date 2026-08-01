@@ -25,7 +25,7 @@ class MessageController extends Controller
         $query->where('lu', false);
     }
 
-    $messages = $query->get();
+    $messages = $query->paginate(15)->withQueryString();
     return view('admin.messages.index', compact('messages'));
 }
 

@@ -73,6 +73,10 @@
                     &nbsp;·&nbsp;
                     <strong>Clôturée le :</strong> {{ $maintenance->date_resolution->format('d/m/Y') }}
                 @endif
+                @if($maintenance->date_resolution && $maintenance->updated_at->gt($maintenance->date_resolution))
+                    &nbsp;·&nbsp;
+                    <strong class="text-warning">Modifiée le :</strong> {{ $maintenance->updated_at->format('d/m/Y à H:i') }}
+                @endif
             </div>
             @endif
 

@@ -10,7 +10,7 @@ class ParametreController extends Controller
 {
     public function index()
     {
-        $periodes = Periode::latest()->get();
+        $periodes = Periode::latest()->paginate(15);
         return view('admin.parametres.index', compact('periodes'));
     }
 

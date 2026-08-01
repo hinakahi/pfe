@@ -12,7 +12,7 @@ class PeriodeController extends Controller
 {
     public function index()
     {
-        $periodes = Periode::latest()->get();
+        $periodes = Periode::latest()->paginate(15);
         return view('admin.periodes.index', compact('periodes'));
     }
 

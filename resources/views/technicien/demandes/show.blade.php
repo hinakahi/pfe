@@ -6,6 +6,7 @@
 
 @section('content')
 <div class="container-fluid">
+    
 
     {{-- Retour --}}
     <a href="{{ route('technicien.demandes') }}" class="btn btn-sm btn-outline-secondary rounded-pill mb-4">
@@ -187,7 +188,7 @@
 
         {{-- Bouton --}}
         <div class="mt-4">
-            <button type="submit" class="btn btn-primary px-5">
+            <button type="submit" id="btnEnregistrer" class="btn btn-primary px-5" disabled>
                 <i class="bi bi-floppy me-1"></i>Enregistrer
             </button>
         </div>
@@ -247,13 +248,23 @@
 <script>
 const selectStatut = document.getElementById('selectStatut');
 const blocCommentaire = document.getElementById('blocCommentaire');
+const btnEnregistrer = document.getElementById('btnEnregistrer');
+const formulaire = selectStatut.closest('form');
 
 function toggleCommentaire() {
     blocCommentaire.style.display = selectStatut.value === 'en_cours' ? 'block' : 'none';
 }
-
 selectStatut.addEventListener('change', toggleCommentaire);
 toggleCommentaire();
+
+let modifie = false;
+formulaire.addEventListener('input', () => { modifie = true; btnEnregistrer.disabled = false; });
+formulaire.addEventListener('change', () => { modifie = true; btnEnregistrer.disabled = false; });
+
+window.addEventListener('beforeunload', (e) => {
+    if (modifie) { e.preventDefault(); e.returnValue = ''; }
+});
+formulaire.addEventListener('submit', () => { modifie = false; });
 </script>
 
 @endsection

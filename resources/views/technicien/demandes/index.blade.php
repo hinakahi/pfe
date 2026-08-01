@@ -5,10 +5,7 @@
 @section('content')
 <div class="container-fluid">
     {{-- Cartes statistiques --}}
-@php
-    $nonTraitees = $demandes->whereIn('statut', ['en_attente', 'en_cours'])->count();
-    $terminees = $demandes->where('statut', 'terminee')->count();
-@endphp
+
 <div class="row g-3 mb-4">
     <div class="col-md-6">
        <a href="?statut=non_traitees" style="text-decoration:none;">
@@ -157,10 +154,15 @@
                                 </span>
                             @endif
                             @if($d->statut === 'terminee')
-                                <span class="text-success">
-                                    <i class="bi bi-check-circle me-1"></i>Clôturée le {{ $d->updated_at->format('d/m/Y') }}
-                                </span>
-                            @endif
+    <span class="text-success">
+        <i class="bi bi-check-circle me-1"></i>Clôturée le {{ $d->date_resolution?->format('d/m/Y') ?? $d->updated_at->format('d/m/Y') }}
+    </span>
+    @if($d->date_resolution && $d->updated_at->gt($d->date_resolution))
+        <span class="text-warning">
+            <i class="bi bi-pencil-square me-1"></i>Modifiée le {{ $d->updated_at->format('d/m/Y à H:i') }}
+        </span>
+    @endif
+@endif
                         </div>
                         @endif
 
@@ -208,6 +210,10 @@
             </div>
         </div>
     @endforelse
+    </div>
+
+    <div class="mt-4">
+        {{ $demandes->links() }}
     </div>
 
 </div>

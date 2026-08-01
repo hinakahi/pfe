@@ -12,32 +12,33 @@
     <!-- ===== CAROUSEL ANNONCES URGENTES ===== -->
   
     @if($annoncesUrgentes->count() > 0)
-    <div class="row justify-content-center" style="margin-top: 2rem; margin-bottom: 3rem; padding: 0 1rem;">
+    <div class="container" style="margin-top: 2rem; margin-bottom: 3rem;">
+        <div class="row justify-content-center">
         <div class="col-lg-12">
             <div id="carouselUrgent" class="carousel slide" data-bs-ride="carousel" data-bs-interval="5000">
                 <div class="carousel-inner">
                     @foreach($annoncesUrgentes as $index => $annonce)
                     <div class="carousel-item {{ $index === 0 ? 'active' : '' }}">
-<div style="position: relative; height: 320px; background: url('{{ asset('photo/7.jpg') }}') center/cover no-repeat; border-radius: 12px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.3);">
+<div class="carousel-slide-box" style="position: relative; background: url('{{ asset('photo/7.jpg') }}') center/cover no-repeat; border-radius: 12px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.3);">
     <!-- Overlay sombre pour lisibilité -->
     <div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: linear-gradient(to bottom, rgba(0,0,0,0.4) 0%, rgba(0,0,0,0.65) 100%);"></div>
 
     <!-- Contenu -->
-    <div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; display: flex; flex-direction: column; justify-content: center; align-items: center; color: white; text-align: center; padding: 2rem;">
+    <div class="carousel-slide-content" style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; display: flex; flex-direction: column; justify-content: center; align-items: center; color: white; text-align: center; padding: 2rem;">
         
         <!-- Badge -->
-        <span style="background: rgba(239,68,68,0.95); padding: 0.5rem 1.2rem; border-radius: 50px; font-weight: bold; font-size: 0.9rem; margin-bottom: 1rem; display: inline-flex; align-items: center; gap: 0.4rem; box-shadow: 0 2px 8px rgba(239,68,68,0.5);">
+        <span class="badge-urgent" style="background: rgba(239,68,68,0.95); padding: 0.5rem 1.2rem; border-radius: 50px; font-weight: bold; font-size: 0.9rem; margin-bottom: 1rem; display: inline-flex; align-items: center; gap: 0.4rem; box-shadow: 0 2px 8px rgba(239,68,68,0.5);">
             🔴 URGENT
         </span>
 
         <!-- Titre -->
-        <h2 style="font-size: 1.8rem; font-weight: bold; margin-bottom: 0.8rem; text-shadow: 2px 2px 8px rgba(0,0,0,0.8); line-height: 1.3;">
-            {{ Str::limit($annonce->titre, 80) }}
+        <h2 class="carousel-slide-title" style="font-weight: bold; margin-bottom: 0.8rem; text-shadow: 2px 2px 8px rgba(0,0,0,0.8); line-height: 1.3;">
+            {{ Str::limit($annonce->titre, 45) }}
         </h2>
 
         <!-- Description -->
         <p style="font-size: 1rem; text-shadow: 1px 1px 4px rgba(0,0,0,0.8); max-width: 600px; opacity: 0.9;">
-            {{ Str::limit($annonce->contenu, 150, '...') }}
+            {{ Str::limit($annonce->contenu, 100, '...') }}
         </p>
 
         <!-- Bouton -->
@@ -98,6 +99,7 @@
                 </div>
             </div>
         </div>
+        </div>
     </div>
     @endif
 
@@ -127,27 +129,34 @@
 
                         {{-- Tri --}}
                         <div class="col-md-3">
-                            <select name="tri" class="form-select">
-                                <option value="recent" {{ request('tri', 'recent') == 'recent' ? 'selected' : '' }}>
-                                     Plus récent
-                                </option>
-                                <option value="ancien" {{ request('tri') == 'ancien' ? 'selected' : '' }}>
-                                     Plus ancien
-                                </option>
-                            </select>
+                            <input type="hidden" name="tri" id="triInput" value="{{ request('tri', 'recent') }}">
+                            <div class="dropdown">
+                                <button class="btn btn-outline-secondary dropdown-toggle w-100 text-start" type="button" data-bs-toggle="dropdown">
+                                    {{ request('tri', 'recent') == 'ancien' ? 'Plus ancien' : 'Plus récent' }}
+                                </button>
+                                <ul class="dropdown-menu w-100">
+                                    <li><a class="dropdown-item tri-option" href="#" data-value="recent">Plus récent</a></li>
+                                    <li><a class="dropdown-item tri-option" href="#" data-value="ancien">Plus ancien</a></li>
+                                </ul>
+                            </div>
                         </div>
 
                         {{-- Filtre auteur --}}
                         <div class="col-md-3">
-                            <select name="auteur" class="form-select">
-                                <option value=""> Tous les auteurs</option>
-                                <option value="admin" {{ request('auteur') == 'admin' ? 'selected' : '' }}>
-                                    Administrateur
-                                </option>
-                                <option value="resp_foyer" {{ request('auteur') == 'resp_foyer' ? 'selected' : '' }}>
-                                    Responsable Foyer
-                                </option>
-                            </select>
+                            @php
+                                $auteurLabels = ['' => 'Tous les auteurs', 'admin' => 'Administrateur', 'resp_foyer' => 'Responsable Foyer'];
+                            @endphp
+                            <input type="hidden" name="auteur" id="auteurInput" value="{{ request('auteur', '') }}">
+                            <div class="dropdown">
+                                <button class="btn btn-outline-secondary dropdown-toggle w-100 text-start" type="button" data-bs-toggle="dropdown">
+                                    {{ $auteurLabels[request('auteur', '')] }}
+                                </button>
+                                <ul class="dropdown-menu w-100">
+                                    @foreach($auteurLabels as $val => $label)
+                                    <li><a class="dropdown-item auteur-option" href="#" data-value="{{ $val }}">{{ $label }}</a></li>
+                                    @endforeach
+                                </ul>
+                            </div>
                         </div>
 
                         {{-- Bouton --}}
@@ -269,6 +278,38 @@
 </div>
 
 <style>
+    .carousel-slide-box {
+        height: 320px;
+    }
+    .carousel-slide-title {
+        font-size: 1.8rem;
+    }
+    @media (max-width: 576px) {
+        .carousel-slide-box {
+            height: 300px;
+        }
+        .carousel-slide-content {
+            padding: 1rem 2.2rem !important;
+        }
+        .carousel-slide-title {
+            font-size: 1.1rem;
+            margin-bottom: 0.4rem !important;
+        }
+        .carousel-slide-box p {
+            font-size: 0.78rem !important;
+            margin-bottom: 0 !important;
+        }
+        .carousel-slide-box .badge-urgent {
+            font-size: 0.7rem !important;
+            padding: 0.3rem 0.8rem !important;
+            margin-bottom: 0.4rem !important;
+        }
+        .carousel-slide-box button {
+            margin-top: 0.6rem !important;
+            padding: 0.4rem 1rem !important;
+            font-size: 0.8rem !important;
+        }
+    }
     .hover-card {
         transition: transform 0.2s, box-shadow 0.2s;
     }
@@ -306,4 +347,21 @@
         filter: invert(1);
     }
 </style>
+
+<script>
+document.querySelectorAll('.tri-option').forEach(el => {
+    el.addEventListener('click', function(e) {
+        e.preventDefault();
+        document.getElementById('triInput').value = this.dataset.value;
+        this.closest('form').submit();
+    });
+});
+document.querySelectorAll('.auteur-option').forEach(el => {
+    el.addEventListener('click', function(e) {
+        e.preventDefault();
+        document.getElementById('auteurInput').value = this.dataset.value;
+        this.closest('form').submit();
+    });
+});
+</script>
 @endsection

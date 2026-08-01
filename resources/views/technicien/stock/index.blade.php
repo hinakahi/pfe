@@ -6,7 +6,7 @@
 <div class="container-fluid">
 
     {{-- Header --}}
-    <div class="d-flex justify-content-between align-items-center mb-4">
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-2 mb-4">
         <div>
             <h5 class="mb-0">Matériels en stock</h5>
             <small class="text-muted" id="compteur">{{ $stocks->count() }} matériel(s) enregistré(s)</small>
@@ -47,29 +47,43 @@
                 </div>
 
                 {{-- Filtre Catégorie --}}
-                <div class="col-6 col-md-3">
-                    <select id="filtreCategorie" class="form-select" onchange="filtrerStock()">
-                        <option value="">Toutes les catégories</option>
-                        <option value="electricite">Électricité</option>
-                        <option value="plomberie">Plomberie</option>
-                        <option value="menuiserie">Menuiserie</option>
-                        <option value="autre">Autre</option>
-                    </select>
+                <div class="col-5 col-md-3">
+                    <div class="dropdown">
+                        <button class="btn btn-outline-secondary dropdown-toggle w-100 text-start text-truncate" type="button"
+                                data-bs-toggle="dropdown" id="btnCategorie">
+                            Toutes les catégories
+                        </button>
+                        <ul class="dropdown-menu w-100">
+                            <li><a class="dropdown-item" href="#" onclick="setFiltre('categorie','','Toutes les catégories')">Toutes les catégories</a></li>
+                            <li><a class="dropdown-item" href="#" onclick="setFiltre('categorie','electricite','Électricité')">Électricité</a></li>
+                            <li><a class="dropdown-item" href="#" onclick="setFiltre('categorie','plomberie','Plomberie')">Plomberie</a></li>
+                            <li><a class="dropdown-item" href="#" onclick="setFiltre('categorie','menuiserie','Menuiserie')">Menuiserie</a></li>
+                            <li><a class="dropdown-item" href="#" onclick="setFiltre('categorie','autre','Autre')">Autre</a></li>
+                        </ul>
+                        <input type="hidden" id="filtreCategorie" value="">
+                    </div>
                 </div>
 
                 {{-- Filtre Statut --}}
-                <div class="col-6 col-md-3">
-                    <select id="filtreStatut" class="form-select" onchange="filtrerStock()">
-                        <option value="">Tous les statuts</option>
-                        <option value="disponible">Disponible</option>
-                        <option value="faible">Stock faible</option>
-                        <option value="epuise">Épuisé</option>
-                    </select>
+                <div class="col-5 col-md-3">
+                    <div class="dropdown">
+                        <button class="btn btn-outline-secondary dropdown-toggle w-100 text-start text-truncate" type="button"
+                                data-bs-toggle="dropdown" id="btnStatut">
+                            Tous les statuts
+                        </button>
+                        <ul class="dropdown-menu w-100">
+                            <li><a class="dropdown-item" href="#" onclick="setFiltre('statut','','Tous les statuts')">Tous les statuts</a></li>
+                            <li><a class="dropdown-item" href="#" onclick="setFiltre('statut','disponible','Disponible')">Disponible</a></li>
+                            <li><a class="dropdown-item" href="#" onclick="setFiltre('statut','faible','Stock faible')">Stock faible</a></li>
+                            <li><a class="dropdown-item" href="#" onclick="setFiltre('statut','epuise','Épuisé')">Épuisé</a></li>
+                        </ul>
+                        <input type="hidden" id="filtreStatut" value="">
+                    </div>
                 </div>
 
                 {{-- Bouton Reset --}}
-                <div class="col-12 col-md-1 text-end">
-                    <button class="btn btn-outline-secondary w-100" onclick="resetFiltres()" title="Réinitialiser">
+                <div class="col-2 col-md-1 text-end">
+                    <button class="btn btn-outline-secondary w-100 px-2" onclick="resetFiltres()" title="Réinitialiser">
                         <i class="bi bi-x-lg"></i>
                     </button>
                 </div>
@@ -96,7 +110,7 @@
     ══════════════════════════════════════════ --}}
     <div class="row g-3" id="stockGrid">
     @forelse($stocks as $stock)
-        <div class="col-md-6 col-xl-4 stock-item"
+        <div class="col-12 col-md-6 col-xl-4 stock-item"
              data-nom="{{ strtolower($stock->designation) }}"
              data-categorie="{{ $stock->categorie }}"
              data-statut="{{ $stock->est_epuise ? 'epuise' : ($stock->est_faible ? 'faible' : 'disponible') }}">
@@ -145,7 +159,7 @@
                     <p class="text-muted" style="font-size:.8rem;">{{ $stock->description }}</p>
                     @endif
 
-                    <div class="d-flex gap-2 mt-auto">
+                    <div class="d-flex flex-wrap gap-2 mt-auto">
                         <a href="{{ route('technicien.stock.edit', $stock->id) }}"
                            class="btn btn-sm btn-outline-primary w-100">
                             <i class="bi bi-pencil me-1"></i>Modifier
@@ -236,10 +250,20 @@ function filtrerStock() {
     document.getElementById('stockGrid').classList.toggle('d-none', nbVisible === 0);
 }
 
+function setFiltre(type, valeur, libelle) {
+    const idInput = type === 'categorie' ? 'filtreCategorie' : 'filtreStatut';
+    const idBtn   = type === 'categorie' ? 'btnCategorie'   : 'btnStatut';
+    document.getElementById(idInput).value = valeur;
+    document.getElementById(idBtn).textContent = libelle;
+    filtrerStock();
+}
+
 function resetFiltres() {
     document.getElementById('searchInput').value     = '';
     document.getElementById('filtreCategorie').value = '';
     document.getElementById('filtreStatut').value    = '';
+    document.getElementById('btnCategorie').textContent = 'Toutes les catégories';
+    document.getElementById('btnStatut').textContent    = 'Tous les statuts';
     filtrerStock();
 }
 </script>

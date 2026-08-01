@@ -61,9 +61,13 @@ class DemandeMaintController extends Controller
             $query->where('urgence', $request->urgence);
         }
 
-        $demandes = $query->get();
+        $demandes = $query->paginate(10)->withQueryString();
 
-        return view('technicien.demandes.index', compact('demandes'));
+        // KPI globaux, indépendants du filtre appliqué
+        $nonTraitees = Maintenance::whereIn('statut', ['en_attente', 'en_cours'])->count();
+        $terminees   = Maintenance::where('statut', 'terminee')->count();
+
+        return view('technicien.demandes.index', compact('demandes', 'nonTraitees', 'terminees'));
     }
 
     public function show(Maintenance $maintenance)
@@ -83,85 +87,94 @@ class DemandeMaintController extends Controller
     }
 
     public function traiter(Request $request, Maintenance $maintenance)
- {
-    $request->validate([
-        'statut'                   => 'required|in:en_attente,en_cours,terminee',
-        'commentaire_technicien'   => 'nullable|string|max:500',
-        'materiels'                => 'nullable|array',
-        'materiels.*.stock_id'     => 'nullable|exists:stocks,id',
-        'materiels.*.quantite'     => 'nullable|integer|min:1',
-        'stock_epuise'             => 'nullable|boolean',
-    ]);
-
-    $maintenance->update([
-        'statut'                 => $request->statut,
-        'technicien_id'          => auth()->id(),
-        'commentaire_technicien' => $request->statut === 'en_cours'
-                                    ? $request->commentaire_technicien
-                                    : $maintenance->commentaire_technicien,
-    ]);
-
-    // Notifier les techniciens quand une demande est prise en cours
-    if ($request->statut === 'en_cours') {
-        $techniciens = User::where('role', 'technicien')->get();
-        foreach ($techniciens as $tech) {
-            $tech->notify(new NouvelleDemandeTechnicien($maintenance));
-        }
-    }
-
-    // Si terminée : date de résolution + notification étudiante
-    if ($request->statut === 'terminee') {
-        $maintenance->update([
-            'date_resolution'        => now(),
-            'commentaire_technicien' => null,
+    {
+        $request->validate([
+            'statut'                   => 'required|in:en_attente,en_cours,terminee',
+            'commentaire_technicien'   => 'nullable|string|max:500',
+            'materiels'                => 'nullable|array',
+            'materiels.*.stock_id'     => 'nullable|exists:stocks,id',
+            'materiels.*.quantite'     => 'nullable|integer|min:1',
+            'stock_epuise'             => 'nullable|boolean',
         ]);
-        $maintenance->etudiante->notify(new MaintenanceTermineeNotification($maintenance));
-    }
 
-    // Enregistrer le matériel utilisé + décrémenter le stock
-    // Si le même matériel est déjà utilisé sur cette demande, on additionne la quantité
-    // au lieu de créer une nouvelle ligne en double.
-    if ($request->filled('materiels')) {
-        foreach ($request->materiels as $mat) {
-            if (empty($mat['stock_id'])) continue;
+        // On teste AVANT le premier update, tant que $maintenance->date_resolution
+        // reflète encore l'état en base (avant modification).
+        $premiereFoisTerminee = $request->statut === 'terminee' && !$maintenance->date_resolution;
 
-            $quantite = $mat['quantite'] ?? 1;
-            $stock = Stock::find($mat['stock_id']);
+        $maintenance->update([
+            'statut'                 => $request->statut,
+            'technicien_id'          => auth()->id(),
+            'commentaire_technicien' => $request->statut === 'en_cours'
+                                        ? $request->commentaire_technicien
+                                        : $maintenance->commentaire_technicien,
+        ]);
 
-            $materielExistant = Materiel::where('maintenance_id', $maintenance->id)
-                ->where('stock_id', $mat['stock_id'])
-                ->first();
-
-            if ($materielExistant) {
-                $materielExistant->increment('quantite', $quantite);
-            } else {
-                Materiel::create([
-                    'maintenance_id'       => $maintenance->id,
-                    'stock_id'             => $mat['stock_id'],
-                    'quantite'             => $quantite,
-                    'stock_epuise'         => $request->boolean('stock_epuise'),
-                    'description_incident' => null,
-                ]);
+        // Notifier les techniciens quand une demande est prise en cours
+        if ($request->statut === 'en_cours') {
+            $techniciens = User::where('role', 'technicien')->get();
+            foreach ($techniciens as $tech) {
+                $tech->notify(new NouvelleDemandeTechnicien($maintenance));
             }
+        }
 
-            if ($stock) {
-                $stock->quantite = max(0, $stock->quantite - $quantite);
-                $stock->save();
+        // Si terminée POUR LA PREMIÈRE FOIS : date de résolution + notification étudiante
+        // (évite d'écraser date_resolution et de renotifier à chaque modification ultérieure)
+        if ($premiereFoisTerminee) {
+            $maintenance->update([
+                'date_resolution'        => now(),
+                'commentaire_technicien' => null,
+            ]);
+            $maintenance->etudiante->notify(new MaintenanceTermineeNotification($maintenance));
+        }
 
-                // Notifier si stock sous le seuil minimum
-                if ($stock->quantite <= $stock->seuil_minimum) {
-                    $techniciens = User::where('role', 'technicien')->get();
-                    foreach ($techniciens as $tech) {
-                        $tech->notify(new StockEpuiseNotification($stock));
+        // Enregistrer le matériel utilisé + décrémenter le stock
+        // Si le même matériel est déjà utilisé sur cette demande, on additionne la quantité
+        // au lieu de créer une nouvelle ligne en double.
+        if ($request->filled('materiels')) {
+            foreach ($request->materiels as $mat) {
+                if (empty($mat['stock_id'])) continue;
+
+                $quantite = $mat['quantite'] ?? 1;
+                $stock = Stock::find($mat['stock_id']);
+
+                $materielExistant = Materiel::where('maintenance_id', $maintenance->id)
+                    ->where('stock_id', $mat['stock_id'])
+                    ->first();
+
+                if ($materielExistant) {
+                    $materielExistant->increment('quantite', $quantite);
+                } else {
+                    Materiel::create([
+                        'maintenance_id'       => $maintenance->id,
+                        'stock_id'             => $mat['stock_id'],
+                        'quantite'             => $quantite,
+                        'stock_epuise'         => $request->boolean('stock_epuise'),
+                        'description_incident' => null,
+                    ]);
+                }
+
+                if ($stock) {
+                    $stock->quantite = max(0, $stock->quantite - $quantite);
+                    $stock->save();
+
+                    // Notifier si stock sous le seuil minimum
+                    if ($stock->quantite <= $stock->seuil_minimum) {
+                        $techniciens = User::where('role', 'technicien')->get();
+                        foreach ($techniciens as $tech) {
+                            $tech->notify(new StockEpuiseNotification($stock));
+                        }
                     }
                 }
             }
         }
-    }
 
-    return redirect()->route('technicien.demandes')
-                     ->with('success', 'Demande mise à jour avec succès.');
- }
+        // Force la mise à jour de updated_at même si aucun champ de la demande
+        // elle-même n'a changé (ex: seul le matériel a été modifié).
+        $maintenance->touch();
+
+        return redirect()->route('technicien.demandes')
+                         ->with('success', 'Demande mise à jour avec succès.');
+    }
 
     /**
      * Supprime une ligne de matériel ajoutée par erreur et remet la quantité en stock.
@@ -178,6 +191,9 @@ class DemandeMaintController extends Controller
         }
 
         $materiel->delete();
+
+        // Force la mise à jour de updated_at de la demande liée
+        $maintenance->touch();
 
         return back()->with('success', 'Matériel retiré de la demande.');
     }
