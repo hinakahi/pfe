@@ -70,6 +70,7 @@
 <div class="card mb-4" id="enAttente">
     <div class="card-body">
         <h6 class="fw-bold mb-3"><i class="bi bi-hourglass-split me-2 text-warning"></i>En attente</h6>
+        <div class="table-responsive">
         <table class="table table-hover mb-0">
             <thead class="table-light">
                 <tr>
@@ -246,6 +247,7 @@
                 @endforelse
             </tbody>
         </table>
+        </div>
     </div>
 </div>
 
@@ -253,6 +255,7 @@
 <div class="card" id="traitees">
     <div class="card-body">
         <h6 class="fw-bold mb-3"><i class="bi bi-clock-history me-2 text-secondary"></i>Traitées récemment</h6>
+        <div class="table-responsive">
         <table class="table table-hover mb-0">
             <thead class="table-light">
     <tr>
@@ -416,6 +419,7 @@
                 @endforelse
             </tbody>
         </table>
+        </div>
     </div>
 </div>
 

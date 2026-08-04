@@ -9,47 +9,34 @@
         <i class="bi bi-arrow-left me-1"></i>Retour au stock
     </a>
 
+ 
+
     <div class="card mb-4">
     <div class="card-body py-3">
-        <form method="GET" action="{{ route('technicien.stock.historique-global') }}" id="filtreForm">
+        <form method="GET" action="{{ route('technicien.stock.historique-global') }}">
             <div class="row g-2 align-items-center">
                 <div class="col-md-4">
-                    <div class="dropdown">
-                        <button class="btn btn-outline-secondary dropdown-toggle w-100 text-start text-truncate" type="button"
-                                data-bs-toggle="dropdown" id="btnStockId">
-                            {{ request('stock_id') ? ($stocks->firstWhere('id', request('stock_id'))->designation ?? 'Tous les matériels') : 'Tous les matériels' }}
-                        </button>
-                        <ul class="dropdown-menu w-100">
-                            <li><a class="dropdown-item" href="#" onclick="submitFiltre('stock_id','')">Tous les matériels</a></li>
-                            @foreach($stocks as $s)
-                                <li><a class="dropdown-item" href="#" onclick="submitFiltre('stock_id','{{ $s->id }}')">{{ $s->designation }}</a></li>
-                            @endforeach
-                        </ul>
-                        <input type="hidden" name="stock_id" id="input_stock_id" value="{{ request('stock_id') }}">
-                    </div>
+                    <select name="stock_id" class="form-select" onchange="this.form.submit()">
+                        <option value="">Tous les matériels</option>
+                        @foreach($stocks as $s)
+                            <option value="{{ $s->id }}" {{ request('stock_id') == $s->id ? 'selected' : '' }}>
+                                {{ $s->designation }}
+                            </option>
+                        @endforeach
+                    </select>
                 </div>
-
                 <div class="col-md-3">
-                    <div class="dropdown">
-                        <button class="btn btn-outline-secondary dropdown-toggle w-100 text-start text-truncate" type="button"
-                                data-bs-toggle="dropdown" id="btnSemestre">
-                            {{ request('semestre') === 's1' ? 'Semestre 1 (Sept - Jan)' : (request('semestre') === 's2' ? 'Semestre 2 (Fév - Juin)' : 'Tous les semestres') }}
-                        </button>
-                        <ul class="dropdown-menu w-100">
-                            <li><a class="dropdown-item" href="#" onclick="submitFiltre('semestre','')">Tous les semestres</a></li>
-                            <li><a class="dropdown-item" href="#" onclick="submitFiltre('semestre','s1')">Semestre 1 (Sept - Jan)</a></li>
-                            <li><a class="dropdown-item" href="#" onclick="submitFiltre('semestre','s2')">Semestre 2 (Fév - Juin)</a></li>
-                        </ul>
-                        <input type="hidden" name="semestre" id="input_semestre" value="{{ request('semestre') }}">
-                    </div>
+                    <select name="semestre" class="form-select" onchange="this.form.submit()">
+                        <option value="">Tous les semestres</option>
+                        <option value="s1" {{ request('semestre') === 's1' ? 'selected' : '' }}>Semestre 1 (Sept - Jan)</option>
+                        <option value="s2" {{ request('semestre') === 's2' ? 'selected' : '' }}>Semestre 2 (Fév - Juin)</option>
+                    </select>
                 </div>
-
-                <div class="col-md-3 text-end">
-                    <a href="{{ route('technicien.stock.historique-global.pdf', request()->query()) }}" class="btn btn-outline-danger text-nowrap">
-                        <i class="bi bi-file-earmark-pdf me-1"></i>Exporter en PDF
-                    </a>
-                </div>
-
+                   <div class="col-md-3 text-end">
+    <a href="{{ route('technicien.stock.historique-global.pdf', request()->query()) }}" class="btn btn-outline-danger text-nowrap">
+        <i class="bi bi-file-earmark-pdf me-1"></i>Exporter en PDF
+    </a>
+</div>
                 <div class="col-md-3">
                     @if(request('stock_id') || request('semestre'))
                         <a href="{{ route('technicien.stock.historique-global') }}" class="btn btn-outline-secondary w-100">
@@ -57,11 +44,11 @@
                         </a>
                     @endif
                 </div>
-
+              
             </div>
         </form>
     </div>
-    </div>
+</div>
 
     @if($utilisations->count())
     <div class="table-responsive">
@@ -134,12 +121,4 @@
     @endif
 
 </div>
-
-<script>
-function submitFiltre(name, value) {
-    document.getElementById('input_' + name).value = value;
-    document.getElementById('filtreForm').submit();
-}
-</script>
-
 @endsection

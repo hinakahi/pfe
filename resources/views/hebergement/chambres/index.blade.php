@@ -52,16 +52,47 @@
 .stat-card-active {
     box-shadow: 0 0 0 3px #fff, 0 0 0 5px rgba(0,0,0,0.3);
 }
+.filters-row {
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: center;
+    gap: 10px;
+    overflow-x: auto;
+    padding-bottom: 4px;
+}
+.filters-row > * {
+    flex-shrink: 0;
+}
+.filters-row select,
+.filters-row input[type="text"] {
+    min-width: 160px;
+}
+@media (max-width: 768px) {
+    .filters-row {
+        flex-direction: column;
+        align-items: stretch;
+        overflow-x: visible;
+    }
+    .filters-row form,
+    .filters-row > div {
+        width: 100%;
+    }
+    .filters-row select,
+    .filters-row input[type="text"] {
+        width: 100%;
+        min-width: 0;
+    }
+}
 </style>
 
 {{-- Filtres + Actions --}}
 <div class="card mb-4">
     <div class="card-body">
-        <div class="row g-2 align-items-center">
+        <div class="filters-row">
 
             {{-- Formulaire GET filtres --}}
             <form method="GET" action="{{ route('hebergement.chambres.index') }}" id="filterForm"
-                  class="col-md-7 d-flex gap-2 align-items-center p-0">
+      class="d-flex gap-2 align-items-center p-0" style="flex-shrink:0;">
                   <input type="hidden" name="statut" value="{{ request('statut') }}">
                 <select class="form-select form-select-sm" name="categorie" onchange="this.form.submit()">
                     <option value="">Toutes catégories</option>
@@ -83,7 +114,7 @@
             </form>
 
             {{-- Boutons actions --}}
-            <div class="col-md-5 text-end d-flex gap-2 justify-content-end">
+            <div class="d-flex gap-2" style="flex-shrink:0;">
                 <a href="{{ route('hebergement.chambres.import') }}" class="btn btn-sm btn-outline-success">
                     <i class="bi bi-file-earmark-excel me-1"></i> Importer Excel
                 </a>
@@ -105,6 +136,7 @@
 {{-- Tableau --}}
 <div class="card">
     <div class="card-body p-0">
+        <div class="table-responsive">
         <table class="table table-hover mb-0">
             <thead class="table-light">
                 <tr>
@@ -214,6 +246,7 @@
                 @endforelse
             </tbody>
         </table>
+        </div>
     </div>
 </div>
 

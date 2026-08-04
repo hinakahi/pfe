@@ -68,6 +68,7 @@
         <h6 class="fw-bold mb-3">
             <i class="bi bi-hourglass-split me-2 text-warning"></i>En attente
         </h6>
+        <div class="table-responsive">
         <table class="table table-hover mb-0" id="tableAttente">
             <thead class="table-light">
                 <tr>
@@ -242,6 +243,7 @@
                 @endforelse
             </tbody>
         </table>
+        </div>
         <div id="noResultAttente" class="text-center text-muted py-3" style="display:none;">
             <i class="bi bi-search me-1"></i> Aucun résultat trouvé.
         </div>
@@ -254,6 +256,7 @@
         <h6 class="fw-bold mb-3">
             <i class="bi bi-clock-history me-2 text-secondary"></i>Traitées récemment
         </h6>
+        <div class="table-responsive">
         <table class="table table-hover mb-0" id="tableTraitees">
             <thead class="table-light">
                 <tr>
@@ -414,6 +417,7 @@
 @endforelse
             </tbody>
         </table>
+        </div>
         <div id="noResultTraitees" class="text-center text-muted py-3" style="display:none;">
             <i class="bi bi-search me-1"></i> Aucun résultat trouvé.
         </div>

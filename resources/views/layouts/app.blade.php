@@ -292,7 +292,95 @@
         [data-theme="dark"] .btn-close {
             filter: invert(1);
         }
+        @media (max-width: 480px) {
+            .form-select,
+            select {
+                padding: 8px 12px;
+                font-size: 0.85rem;
+            }
+            img {
+                max-width: 100%;
+                height: auto;
+            }
+            .form-control {
+                padding: 8px 12px;
+                font-size: 0.85rem;
+            }
+        }
+        /* ══════════ CUSTOM SELECT (auto, tous les selects) ══════════ */
+        .cs-wrap {
+            position: relative;
+        }
+        select.cs-hidden {
+            position: absolute;
+            opacity: 0;
+            pointer-events: none;
+            height: 0;
+            width: 0;
+        }
+        .cs-trigger {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 100%;
+            padding: 8px 14px;
+            border: 1px solid #ced4da;
+            border-radius: 6px;
+            background: var(--bg-card);
+            color: var(--text-main);
+            cursor: pointer;
+            font-size: 0.95rem;
+        }
+        .cs-trigger i {
+            font-size: 0.8rem;
+            color: #6c757d;
+            transition: transform 0.2s;
+        }
+        .cs-wrap.open .cs-trigger i {
+            transform: rotate(180deg);
+        }
+        .cs-options {
+            display: none;
+            position: absolute;
+            top: calc(100% + 4px);
+            left: 0;
+            right: 0;
+            background: var(--bg-card);
+            border: 1px solid #ced4da;
+            border-radius: 8px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+            z-index: 500;
+            max-height: 240px;
+            overflow-y: auto;
+        }
+        .cs-wrap.open .cs-options {
+            display: block;
+        }
+        .cs-option {
+            padding: 10px 14px;
+            cursor: pointer;
+            color: var(--text-main);
+            font-size: 0.95rem;
+        }
+        .cs-option:hover {
+            background: rgba(45, 106, 159, 0.1);
+        }
+        .cs-option.selected {
+            background: #2d6a9f;
+            color: #fff;
+        }
+        @media (max-width: 480px) {
+            .cs-trigger, .cs-option {
+                padding: 8px 12px;
+                font-size: 0.85rem;
+            }
+            img {
+                max-width: 100%;
+                height: auto;
+            }
+        }
     </style>
+    
     @yield('styles')
 </head>
 <body>
@@ -471,7 +559,73 @@
         sidebar.classList.remove('open');
         overlay.classList.remove('open');
     });
+    // ── Custom select générique (mobile uniquement) ──
+    (function () {
+        const IS_MOBILE = window.innerWidth <= 768;
+        if (!IS_MOBILE) return; // desktop : select natif inchangé
+
+        function buildCustomSelect(select) {
+            if (select.dataset.csInit) return;
+            select.dataset.csInit = "1";
+
+            const wrap = document.createElement("div");
+            wrap.className = "cs-wrap";
+
+            const trigger = document.createElement("div");
+            trigger.className = "cs-trigger";
+            const label = document.createElement("span");
+            const icon = document.createElement("i");
+            icon.className = "bi bi-chevron-down";
+            trigger.appendChild(label);
+            trigger.appendChild(icon);
+
+            const optionsBox = document.createElement("div");
+            optionsBox.className = "cs-options";
+
+            function refresh() {
+                label.textContent = select.options[select.selectedIndex]?.text || "";
+                optionsBox.innerHTML = "";
+                Array.from(select.options).forEach((opt) => {
+                    const o = document.createElement("div");
+                    o.className = "cs-option" + (opt.selected ? " selected" : "");
+                    o.textContent = opt.text;
+                    o.addEventListener("click", () => {
+                        select.value = opt.value;
+                        select.dispatchEvent(new Event("change", { bubbles: true }));
+                        refresh();
+                        wrap.classList.remove("open");
+                    });
+                    optionsBox.appendChild(o);
+                });
+            }
+            refresh();
+
+            trigger.addEventListener("click", () => {
+                document.querySelectorAll(".cs-wrap.open").forEach((w) => {
+                    if (w !== wrap) w.classList.remove("open");
+                });
+                wrap.classList.toggle("open");
+            });
+
+            select.classList.add("cs-hidden");
+            select.parentNode.insertBefore(wrap, select);
+            wrap.appendChild(trigger);
+            wrap.appendChild(optionsBox);
+            wrap.appendChild(select);
+
+            select.addEventListener("change", refresh);
+        }
+
+        document.querySelectorAll("select").forEach(buildCustomSelect);
+
+        document.addEventListener("click", (e) => {
+            if (!e.target.closest(".cs-wrap")) {
+                document.querySelectorAll(".cs-wrap.open").forEach((w) => w.classList.remove("open"));
+            }
+        });
+    })();
 </script>
+
 @yield('scripts')
 
 </body>

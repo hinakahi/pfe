@@ -49,7 +49,7 @@
                         <label class="form-label">Capacité</label>
                         <input type="number" name="capacite"
                                class="form-control @error('capacite') is-invalid @enderror"
-                               value="{{ old('capacite', 1) }}" min="1" max="2">
+                               value="{{ old('capacite', 1) }}" min="1" max="2" readonly>
                         @error('capacite')<div class="invalid-feedback">{{ $message }}</div>@enderror
                     </div>
 
@@ -64,5 +64,25 @@
         </div>
     </div>
 </div>
+
+@section('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const typeSelect = document.querySelector('select[name="type"]');
+    const capaciteInput = document.querySelector('input[name="capacite"]');
+
+    function updateCapacite() {
+        if (typeSelect.value === 'individuelle') {
+            capaciteInput.value = 1;
+        } else if (typeSelect.value === 'double') {
+            capaciteInput.value = 2;
+        }
+    }
+
+    typeSelect.addEventListener('change', updateCapacite);
+    updateCapacite();
+});
+</script>
+@endsection
 
 @endsection

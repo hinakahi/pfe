@@ -77,6 +77,7 @@
             <h6 class="fw-bold mb-0">Dernières chambres ajoutées</h6>
             <a href="{{ route('hebergement.chambres.index') }}" class="btn btn-sm btn-outline-secondary">Voir tout</a>
         </div>
+        <div class="table-responsive">
         <table class="table table-hover mb-0">
             <thead class="table-light">
                 <tr>
@@ -111,6 +112,7 @@
                 @endforelse
             </tbody>
         </table>
+        </div>
     </div>
 </div>
 
