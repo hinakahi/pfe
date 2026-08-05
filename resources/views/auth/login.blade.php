@@ -68,9 +68,48 @@ body::before {
             width: 100%;
         }
         .btn-login:hover { opacity: 0.9; color: #fff; }
+
+        .btn-back-home {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 2;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(255,255,255,0.15);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            border: 1px solid rgba(255,255,255,0.35);
+            padding: 8px 16px;
+            border-radius: 30px;
+            color: #fff;
+            font-weight: 500;
+            font-size: 0.85rem;
+            text-decoration: none;
+            transition: background .2s, transform .2s;
+        }
+        .btn-back-home:hover {
+            background: rgba(255,255,255,0.28);
+            color: #fff;
+            transform: translateX(-2px);
+        }
+        @media (max-width: 480px) {
+            .btn-back-home {
+                top: 12px;
+                left: 12px;
+                padding: 6px 14px;
+                font-size: 0.8rem;
+            }
+        }
     </style>
 </head>
 <body>
+
+    <a href="{{ route('welcome') }}" class="btn-back-home">
+        <i class="bi bi-arrow-left"></i> Accueil
+    </a>
+
     <div class="login-card">
         <div class="login-logo">
            <img src="{{ asset('photo/mon_logo.jpg') }}" alt="Logo" style="width:100px; height:auto; border-radius:10px;">

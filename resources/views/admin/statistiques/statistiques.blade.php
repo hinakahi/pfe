@@ -12,14 +12,13 @@
 @endsection
 
 @section('content')
-@section('content')
 <div class="container-fluid">
 
     {{-- Barre filtre + export --}}
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+
         {{-- Filtre période --}}
-        <div class="d-flex align-items-center gap-2">
+        <div class="d-flex align-items-center gap-2 flex-wrap">
             <span class="text-muted me-2">Période :</span>
             <a href="{{ route('admin.statistiques', ['periode' => 'semaine']) }}"
                class="btn btn-sm {{ $periode === 'semaine' ? 'btn-primary' : 'btn-outline-secondary' }}">
@@ -36,7 +35,7 @@
         </div>
 
         {{-- Boutons export --}}
-        <div class="d-flex gap-2">
+        <div class="d-flex gap-2 flex-wrap">
             <a href="{{ route('admin.statistiques.pdf', ['periode' => $periode]) }}"
                class="btn btn-sm btn-outline-danger">
                 <i class="bi bi-file-earmark-pdf me-1"></i> Exporter PDF
@@ -49,10 +48,6 @@
 
     </div>
 
-
-    {{-- reste du contenu... --}}
-<div class="container-fluid">
-
     <h5 class="mb-4 fw-bold"><i class="bi bi-tools me-2"></i>Statistiques Maintenance</h5>
 
     <div class="row g-4">
@@ -63,7 +58,9 @@
                 <h6 class="card-title fw-semibold mb-3">
                     <i class="bi bi-bar-chart-fill me-2 text-primary"></i>Taux de pannes par type
                 </h6>
-                <canvas id="pannesTypeChart" height="250"></canvas>
+                <div style="position:relative; height:250px;">
+                    <canvas id="pannesTypeChart"></canvas>
+                </div>
             </div>
         </div>
 
@@ -73,7 +70,9 @@
                 <h6 class="card-title fw-semibold mb-3">
                     <i class="bi bi-clock-history me-2 text-warning"></i>Délai moyen de résolution (heures)
                 </h6>
-                <canvas id="delaiChart" height="250"></canvas>
+                <div style="position:relative; height:250px;">
+                    <canvas id="delaiChart"></canvas>
+                </div>
             </div>
         </div>
 
@@ -83,7 +82,9 @@
                 <h6 class="card-title fw-semibold mb-3">
                     <i class="bi bi-door-closed-fill me-2 text-danger"></i>Chambres les plus problématiques (Top 5)
                 </h6>
-                <canvas id="chambresChart" height="250"></canvas>
+                <div style="position:relative; height:250px;">
+                    <canvas id="chambresChart"></canvas>
+                </div>
             </div>
         </div>
 
@@ -93,7 +94,9 @@
                 <h6 class="card-title fw-semibold mb-3">
                     <i class="bi bi-graph-up me-2 text-success"></i>Évolution des pannes (12 mois)
                 </h6>
-                <canvas id="pannesMoisChart" height="250"></canvas>
+                <div style="position:relative; height:250px;">
+                    <canvas id="pannesMoisChart"></canvas>
+                </div>
             </div>
         </div>
 
@@ -109,6 +112,8 @@
     const gridColor = isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)';
 
     const defaultOptions = {
+        responsive: true,
+        maintainAspectRatio: false,
         plugins: { legend: { labels: { color: textColor } } },
         scales: {
             x: { ticks: { color: textColor }, grid: { color: gridColor } },
@@ -168,6 +173,8 @@
             }]
         },
         options: {
+            responsive: true,
+            maintainAspectRatio: false,
             plugins: { legend: { labels: { color: textColor } } }
         }
     });

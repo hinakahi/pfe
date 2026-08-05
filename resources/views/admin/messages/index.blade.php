@@ -3,7 +3,7 @@
 
 @section('content')
 
-<div class="d-flex justify-content-between align-items-center mb-4">
+<div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
     <div>
         <h4 class="mb-1 fw-bold"> Boîte de réception</h4>
         <p class="mb-0 small" style="opacity:0.6;">Messages envoyés depuis la page publique</p>
@@ -22,10 +22,10 @@
 @else
     <div class="d-flex flex-column gap-3">
         @foreach($messages as $msg)
-        <div class="card border-0 shadow-sm"
+        <div class="card border-0 shadow-sm msg-card"
              style="border-left: 4px solid {{ $msg->lu ? '#dee2e6' : '#2d6a9f' }} !important;
                     border-radius:12px; overflow:hidden;">
-            <div class="card-body d-flex align-items-center gap-3 py-3">
+            <div class="card-body d-flex align-items-center gap-3 py-3 flex-wrap">
 
                 {{-- Avatar initiale --}}
                 <div class="rounded-circle d-flex align-items-center justify-content-center flex-shrink-0"
@@ -37,8 +37,8 @@
                 </div>
 
                 {{-- Contenu --}}
-                <div class="flex-grow-1 overflow-hidden">
-                    <div class="d-flex align-items-center gap-2 mb-1">
+                <div class="flex-grow-1 overflow-hidden" style="min-width:200px;">
+                    <div class="d-flex align-items-center gap-2 mb-1 flex-wrap">
                         <span class="fw-bold {{ $msg->lu ? 'text-muted' : '' }}">
                             {{ $msg->nom ?? '—' }}
                         </span>
@@ -50,15 +50,15 @@
                         </span>
                     </div>
                     <div class="small text-truncate" style="opacity:0.7;">
-    {{ $msg->email }} · {{ $msg->created_at->format('d/m/Y à H:i') }}
-</div>
-<div class="small mt-1 text-truncate" style="opacity:0.6;">
-    {{ Str::limit($msg->message, 80) }}
-</div>
+                        {{ $msg->email }} · {{ $msg->created_at->format('d/m/Y à H:i') }}
+                    </div>
+                    <div class="small mt-1 text-truncate" style="opacity:0.6;">
+                        {{ Str::limit($msg->message, 80) }}
+                    </div>
                 </div>
 
                 {{-- Actions --}}
-                <div class="d-flex gap-2 flex-shrink-0">
+                <div class="d-flex gap-2 flex-shrink-0 msg-actions">
                     <a href="{{ route('admin.messages.show', $msg) }}"
                        class="btn btn-sm px-3"
                        style="background:linear-gradient(135deg,#1a3c5e,#2d6a9f);color:#fff;border-radius:8px;">
@@ -82,5 +82,15 @@
         {{ $messages->links() }}
     </div>
 @endif
+
+@push('styles')
+<style>
+@media (max-width: 575.98px) {
+    .msg-card .card-body { flex-direction: column; align-items: flex-start !important; }
+    .msg-actions { width: 100%; }
+    .msg-actions a, .msg-actions form, .msg-actions button { flex: 1; }
+}
+</style>
+@endpush
 
 @endsection
