@@ -225,7 +225,7 @@ Route::post('/notifications/{id}/read', function ($id) {
     $notification = auth()->user()->notifications()->findOrFail($id);
     $notification->markAsRead();
     return redirect($notification->data['url'] ?? url()->previous());
-})->name('notifications.read');
+})->name('hebergement.notifications.read');
 
 });
 

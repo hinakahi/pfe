@@ -9,20 +9,22 @@
         {{-- Header coloré --}}
         <div class="p-4 text-white"
              style="background: linear-gradient(135deg,#1a3c5e,#2d6a9f);">
-            <div class="d-flex align-items-center gap-3">
-                <div class="rounded-circle bg-white d-flex align-items-center justify-content-center"
-                     style="width:52px;height:52px;color:#1a3c5e;font-weight:700;font-size:1.3rem;flex-shrink:0;">
-                    {{ strtoupper(substr($message->nom ?? $message->email, 0, 1)) }}
-                </div>
-                <div>
-                    <h5 class="mb-0 fw-bold">{{ $message->nom ?? '—' }}</h5>
-                    <small class="opacity-75">{{ $message->email }}</small>
-                </div>
-                <span class="badge bg-white ms-auto"
-                      style="color:#1a3c5e;font-size:0.8rem;">
-                    {{ $message->objet }}
-                </span>
-            </div>
+           <div class="d-flex flex-column flex-md-row align-items-start align-items-md-center gap-3">
+    <div class="d-flex align-items-center gap-3 w-100">
+        <div class="rounded-circle bg-white d-flex align-items-center justify-content-center"
+             style="width:52px;height:52px;color:#1a3c5e;font-weight:700;font-size:1.3rem;flex-shrink:0;">
+            {{ strtoupper(substr($message->nom ?? $message->email, 0, 1)) }}
+        </div>
+        <div>
+            <h5 class="mb-0 fw-bold">{{ $message->nom ?? '—' }}</h5>
+            <small class="opacity-75">{{ $message->email }}</small>
+        </div>
+    </div>
+    <span class="badge bg-white text-break ms-md-auto"
+          style="color:#1a3c5e;font-size:0.8rem;">
+        {{ $message->objet }}
+    </span>
+</div>
         </div>
 
         {{-- Corps --}}
@@ -32,7 +34,7 @@
                 Reçu le {{ $message->created_at->format('d/m/Y à H:i') }}
             </div>
 
-            <div class="p-3 rounded-3 mb-4"
+            <div class="p-3 rounded-3 mb-4 message-box"
                  style="background:#f8f9fa; border-left:4px solid #2d6a9f; line-height:1.8;">
                 {{ $message->message }}
             </div>
@@ -52,5 +54,10 @@
     </div>
 </div>
 
-
+<style>
+[data-theme="dark"] .message-box {
+    background: #2d3139 !important;
+    color: #e9ecef !important;
+}
+</style>
 @endsection

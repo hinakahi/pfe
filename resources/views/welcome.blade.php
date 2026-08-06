@@ -4,6 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>SiOuakli — Résidence Universitaire Si Ouakli · Tamda, Tizi Ouzou</title>
+    <link rel="icon" type="image/jpeg" href="{{ asset('photo/mon_logo.jpg') }}">
     <link rel="stylesheet" href="{{ asset('css/welcome.css') }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
   </head>
@@ -402,7 +403,7 @@
       const SLIDES = [
         {
           url: "{{ asset('photo/7.jpg') }}",
-          thumb: "{{ asset('photo/577790172_821772173946876_8246481439298717551_n.jpg') }}",
+          thumb: "{{ asset('photo/7.jpg') }}",
           badge: "Résidence Si Ouakli",
           title: "Bienvenue à la Résidence Si Ouakli",
           description: "2000 lits, 8 pavillons modernes — votre espace de vie universitaire à Tamda, Tizi Ouzou.",

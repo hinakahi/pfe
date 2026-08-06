@@ -96,7 +96,7 @@
         <h4 class="fw-bold mb-1">
             <i class="bi bi-cart-check me-2" style="color:#2d6a9f;"></i>Mes Réservations
         </h4>
-        <p class="text-muted small mb-0">Suivi de toutes vos réservations du foyer</p>
+        
     </div>
     <a href="{{ route('etudiante.foyer.dashboard') }}" class="btn btn-outline-primary btn-sm">
         <i class="bi bi-shop me-1"></i>Retour au catalogue
@@ -134,13 +134,7 @@
             <i class="bi bi-x-circle bg-icon"></i>
         </div>
     </div>
-    <div class="col-6 col-md filter-card" data-filter="annulee">
-        <div class="stat-foyer" style="background: linear-gradient(135deg,#41464b,#6c757d);">
-            <div class="big-num">{{ $annulees }}</div>
-            <div class="lbl">Annulées</div>
-            <i class="bi bi-slash-circle bg-icon"></i>
-        </div>
-    </div>
+   
 </div>
 
 {{-- Liste des réservations --}}

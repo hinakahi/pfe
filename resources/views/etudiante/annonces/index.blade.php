@@ -294,10 +294,16 @@
         .carousel-slide-title {
             font-size: 1.1rem;
             margin-bottom: 0.4rem !important;
+            overflow-wrap: break-word;
+            word-wrap: break-word;
+            word-break: break-word;
         }
         .carousel-slide-box p {
             font-size: 0.78rem !important;
             margin-bottom: 0 !important;
+            overflow-wrap: break-word;
+            word-wrap: break-word;
+            word-break: break-word;
         }
         .carousel-slide-box .badge-urgent {
             font-size: 0.7rem !important;
@@ -321,6 +327,87 @@
 
     .carousel-item {
         transition: opacity 0.8s ease-in-out !important;
+    }
+
+    /* ── Adaptation MOBILE uniquement (tablette/desktop non touchés) ── */
+    @media (max-width: 576px) {
+
+        /* Barre recherche / tri / filtre : empiler les colonnes */
+        .row.g-2.align-items-center > [class*="col-md-"] {
+            flex: 0 0 100% !important;
+            max-width: 100% !important;
+            margin-bottom: 0.5rem;
+        }
+        .row.g-2.align-items-center > [class*="col-md-"]:last-child {
+            margin-bottom: 0;
+        }
+
+        /* Empêcher le bouton "Filtrer" d'être coupé en bas de la carte */
+        .row.mb-4 .card.shadow-sm.border-0.p-3 {
+            padding-bottom: 1.25rem !important;
+            overflow: visible;
+        }
+        .row.mb-4 .btn-primary.w-100 {
+            padding-top: 0.6rem;
+            padding-bottom: 0.6rem;
+        }
+
+        /* Cartes d'annonces : empiler contenu + bouton "Voir" */
+        .hover-card .card-body .d-flex {
+            flex-direction: column;
+            align-items: flex-start !important;
+        }
+        .hover-card .card-body .d-flex .btn {
+            margin-left: 0 !important;
+            margin-top: 0.75rem;
+            width: 100%;
+        }
+
+        /* Empêcher le débordement des mots longs sans espaces (ex: #Annonce_avec_underscores) */
+        .hover-card h5.fw-bold,
+        .hover-card p.text-muted {
+            font-size: 1rem;
+            overflow-wrap: break-word;
+            word-wrap: break-word;
+            word-break: break-word;
+            max-width: 100%;
+        }
+        .hover-card p.text-muted {
+            font-size: 0.85rem;
+        }
+
+        /* Modales : marges réduites + empêcher le débordement du texte/liens */
+        .modal-dialog.modal-lg {
+            margin: 0.5rem;
+        }
+        .modal-body,
+        .modal-body p {
+            overflow-wrap: break-word;
+            word-wrap: break-word;
+            word-break: break-word;
+            max-width: 100%;
+        }
+        .modal-body a {
+            overflow-wrap: break-word;
+            word-break: break-all;
+            display: inline-block;
+            max-width: 100%;
+        }
+        .modal-title {
+            overflow-wrap: break-word;
+            word-wrap: break-word;
+            font-size: 1.1rem;
+        }
+
+        /* Titre "Toutes les annonces" plus compact */
+        h5.fw-bold.mb-3 {
+            font-size: 1rem;
+        }
+        h5.fw-bold.mb-3 .fs-6 {
+            display: block;
+            margin-left: 0 !important;
+            margin-top: 0.2rem;
+        }
     }
 
     /* ── Mode nuit ── */

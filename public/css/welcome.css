@@ -1277,6 +1277,7 @@ body {
         margin-top: 16px;
     }
 }
+
 @media (max-width: 480px) {
     .section { padding: 70px 15px; }
     .section-title { font-size: 28px; }
@@ -1285,15 +1286,12 @@ body {
     .stats-grid { grid-template-columns: 1fr; }
 }
 
-/* ══════════ FIX SLIDER MOBILE ══════════
-   Désactive l'effet cube 3D à tranches (source du damier visuel)
-   et le remplace par un simple fondu, plus fiable sur mobile. */
+/* ══════════ FIX SLIDER MOBILE ══════════*/
 @media (max-width: 768px) {
     .slider-stage {
         perspective: none;
     }
-    /* Le JS ne crée qu'un seul .slice-container "mobile-full" sur mobile,
-       qui occupe toute la largeur (au lieu des 10 tranches côte à côte). */
+   
     .slice-container.mobile-full {
         flex: none;
         width: 100%;
@@ -1316,5 +1314,18 @@ body {
     .mobile-full-image {
         width: 100% !important;
         left: 0 !important;
+    }
+}
+/* ══════════ FIX MOBILE : select "Objet" du formulaire contact ══════════ */
+@media (max-width: 768px) {
+    .form-group select {
+        font-size: 16px;
+        padding: 12px 40px 12px 16px;
+        -webkit-appearance: none;
+        appearance: none;
+        background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='8'><path d='M1 1l5 5 5-5' stroke='%230ea5e9' stroke-width='2' fill='none'/></svg>");
+        background-repeat: no-repeat;
+        background-position: right 16px center;
+        background-size: 12px;
     }
 }

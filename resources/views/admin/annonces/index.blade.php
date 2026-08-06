@@ -12,7 +12,7 @@
 {{-- Toolbar --}}
 <div class="card mb-4">
     <div class="card-body py-3">
-        <div class="d-flex flex-wrap align-items-center gap-3">
+        <div class="d-flex flex-column flex-md-row align-items-stretch align-items-md-center gap-3">
 
             <input type="text" id="annSearch" class="form-control"
                    style="max-width:320px;"
@@ -29,10 +29,9 @@
             <span class="text-muted" style="font-size:.85rem;">
                 {{ $annonces->total() }} annonce(s)
             </span>
-
-            <a href="{{ route('admin.annonces.create') }}" class="btn btn-primary ms-auto">
-                <i class="bi bi-plus-lg me-1"></i>Nouvelle annonce
-            </a>
+<a href="{{ route('admin.annonces.create') }}" class="btn btn-primary w-100 w-md-auto ms-md-auto">
+    <i class="bi bi-plus-lg me-1"></i>Nouvelle annonce
+</a>
         </div>
     </div>
 </div>
@@ -59,7 +58,7 @@
          data-titre="{{ strtolower($a->titre) }}"
          data-contenu="{{ strtolower(Str::limit($a->contenu, 300)) }}">
         <div class="card-body">
-            <div class="d-flex justify-content-between align-items-start gap-3">
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-start gap-3">
 
                 <div style="flex:1;">
                     {{-- Badges --}}
@@ -74,9 +73,9 @@
                     </div>
 
                     {{-- Contenu --}}
-                    <div class="text-muted mb-2" style="font-size:.88rem; line-height:1.5;">
-                        {{ Str::limit($a->contenu, 200) }}
-                    </div>
+                    <div class="text-muted mb-2 text-break" style="font-size:.88rem; line-height:1.5;">
+    {{ Str::limit($a->contenu, 200) }}
+</div>
 
                     {{-- Meta --}}
                     <div class="d-flex flex-wrap gap-3 text-muted" style="font-size:.78rem;">
