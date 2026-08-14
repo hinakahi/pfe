@@ -79,7 +79,7 @@
 
                     {{-- Meta --}}
                     <div class="d-flex flex-wrap gap-3 text-muted" style="font-size:.78rem;">
-                        <span><i class="bi bi-person me-1"></i>{{ $a->user->name ?? '—' }}</span>
+                        <span><i class="bi bi-person me-e1"></i>{{ $a->user->name ?? '—' }}</span>
                         <span><i class="bi bi-clock me-1"></i>{{ $a->created_at->diffForHumans() }}</span>
                         <span><i class="bi bi-calendar me-1"></i>{{ $a->created_at->format('d/m/Y H:i') }}</span>
                     </div>
