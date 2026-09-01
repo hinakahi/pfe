@@ -295,7 +295,7 @@ Route::prefix('foyer')->middleware(['auth', 'role:resp_foyer'])->group(function 
     Route::post('/annonces', [\App\Http\Controllers\ResponsableFoyer\AnnonceController::class, 'store'])->name('foyer.annonces.store');
     Route::delete('/annonces/{annonce}', [\App\Http\Controllers\ResponsableFoyer\AnnonceController::class, 'destroy'])->name('foyer.annonces.destroy');
     Route::get('/annonces/{annonce}/edit', [\App\Http\Controllers\ResponsableFoyer\AnnonceController::class, 'edit'])->name('foyer.annonces.edit');
-    Route::post('/annonces/{annonce}/update', [\App\Http\Controllers\ResponsableFoyer\AnnonceController::class, 'update'])->name('foyer.annonces.update');
+    Route::put('/annonces/{annonce}/update', [\App\Http\Controllers\ResponsableFoyer\AnnonceController::class, 'update'])->name('foyer.annonces.update');
     Route::post('reservations/{reservation}/recuperee', [ReservationController::class, 'recuperee'])->name('foyer.reservations.recuperee');
     Route::post('foyer/notifications/mark-all-read', function () {
         auth()->user()->unreadNotifications->markAsRead();
