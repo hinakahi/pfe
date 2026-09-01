@@ -29,7 +29,7 @@
         <a href="{{ route('hebergement.chambres.index', array_merge(request()->query(), ['statut' => 'occupee'])) }}"
            class="text-decoration-none">
             <div class="stat-card {{ request('statut') == 'occupee' ? 'stat-card-active' : '' }}"
-                
+
                  style="background: linear-gradient(135deg,#dc3545,#e91e63)">
                 <div class="number">{{ $stats['occupees'] }}</div>
                 <div class="label"><i class="bi bi-person-fill me-1"></i>Occupées</div>
@@ -118,9 +118,14 @@
                 <a href="{{ route('hebergement.chambres.import') }}" class="btn btn-sm btn-outline-success">
                     <i class="bi bi-file-earmark-excel me-1"></i> Importer Excel
                 </a>
-                <form method="POST" action="{{ route('hebergement.chambres.publier') }}" class="d-inline">
+                <form method="POST" action="{{ route('hebergement.chambres.publier') }}" class="d-inline"
+                      onsubmit="return !document.getElementById('btnPublierVides').disabled;">
                     @csrf
-                    <button class="btn btn-sm btn-primary">
+                    <button type="submit"
+                            id="btnPublierVides"
+                            class="btn btn-sm btn-primary"
+                            {{ !request('vides') ? 'disabled' : '' }}
+                            title="{{ !request('vides') ? 'Cochez « Vides uniquement » pour activer la publication' : '' }}">
                         <i class="bi bi-megaphone me-1"></i> Publier la liste des vides
                     </button>
                 </form>

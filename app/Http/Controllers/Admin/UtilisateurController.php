@@ -87,6 +87,8 @@ class UtilisateurController extends Controller
             'photo'     => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
         ]);
 
+        $ancienMatricule = $utilisateur->matricule;
+
         $data = $request->only('name', 'matricule', 'email', 'phone');
         $data['role'] = $this->deriveRoleFromMatricule($request->matricule) ?? $utilisateur->role;
 
@@ -102,6 +104,14 @@ class UtilisateurController extends Controller
         }
 
         $utilisateur->update($data);
+
+        if ($ancienMatricule !== $request->matricule) {
+            \App\Models\MatriculeAutorise::where('matricule', $ancienMatricule)
+                ->update(['utilise' => false]);
+
+            \App\Models\MatriculeAutorise::where('matricule', strtoupper($request->matricule))
+                ->update(['utilise' => true]);
+        }
 
         return redirect()->route('admin.utilisateurs.index')
             ->with('success', 'Utilisateur modifié avec succès.');

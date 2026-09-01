@@ -22,7 +22,7 @@
                     Matricules <span class="text-muted small">(un par ligne)</span>
                 </label>
                 <textarea name="matricules" rows="6" class="form-control font-monospace @error('matricules') is-invalid @enderror"
-                          placeholder="ETU123456&#10;ETU123457&#10;FOY001&#10;TEC002&#10;ADM001"
+                          
                           required>{{ old('matricules') }}</textarea>
                 @error('matricules')
                     <div class="invalid-feedback">{{ $message }}</div>
@@ -50,11 +50,12 @@
                     <i class="bi bi-search text-muted"></i>
                 </span>
                 <input type="text" name="search" class="form-control border-start-0 ps-0"
-                       placeholder="Rechercher un matricule..."
-                       value="{{ request('search') }}">
+                 placeholder="Rechercher un matricule..."
+                 value="{{ request('search') }}"
+                 onkeydown="if(event.key==='Enter'){this.form.submit();}">
             </div>
 
-            <select name="statut" class="form-select" style="max-width:180px; flex:1 1 140px;">
+            <select name="statut" class="form-select" style="max-width:180px; flex:1 1 140px;" onchange="this.form.submit()">
                 <option value="">Tous les statuts</option>
                 <option value="disponible" {{ request('statut') == 'disponible' ? 'selected' : '' }}>
                     Disponibles
@@ -64,7 +65,7 @@
                 </option>
             </select>
 
-            <select name="role" class="form-select" style="max-width:200px; flex:1 1 160px;">
+            <select name="role" class="form-select" style="max-width:200px; flex:1 1 160px;" onchange="this.form.submit()">
                 <option value="">Tous les rôles</option>
                 <option value="etudiante"       {{ request('role') == 'etudiante'       ? 'selected' : '' }}> Étudiant(e)</option>
                 <option value="technicien"      {{ request('role') == 'technicien'      ? 'selected' : '' }}> Technicien</option>
@@ -73,17 +74,7 @@
                 <option value="admin"           {{ request('role') == 'admin'           ? 'selected' : '' }}> Admin</option>
             </select>
 
-            <button type="submit" class="btn text-white px-4"
-                    style="background:linear-gradient(135deg,#1a3c5e,#2d6a9f);border-radius:8px;">
-                Filtrer
-            </button>
-
-            @if(request('search') || request('statut') || request('role'))
-                <a href="{{ route('admin.matricules.index') }}"
-                   class="btn btn-outline-secondary" style="border-radius:8px;">
-                    Réinitialiser
-                </a>
-            @endif
+            
         </form>
     </div>
 </div>

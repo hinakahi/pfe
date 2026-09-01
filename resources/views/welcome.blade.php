@@ -269,15 +269,29 @@
             @error('email')<span style="color:#ef4444;font-size:0.85rem;">{{ $message }}</span>@enderror
         </div>
 
-        <div class="form-group">
-            <label>Objet</label>
-            <select name="objet">
-                <option value="Information hébergement"   {{ old('objet') == 'Information hébergement'   ? 'selected' : '' }}>Information hébergement</option>
-                <option value="Problème technique"        {{ old('objet') == 'Problème technique'        ? 'selected' : '' }}>Problème technique</option>
-                <option value="Accès compte"              {{ old('objet') == 'Accès compte'              ? 'selected' : '' }}>Accès compte</option>
-                <option value="Autre"                     {{ old('objet') == 'Autre'                     ? 'selected' : '' }}>Autre</option>
-            </select>
-        </div>
+       @php
+    $objets = ['Information hébergement', 'Problème technique', 'Accès compte', 'Autre'];
+    $objetActuel = old('objet', $objets[0]);
+@endphp
+<div class="form-group">
+    <label>Objet</label>
+    <select name="objet" id="objetSelect" class="native-select">
+        @foreach($objets as $o)
+            <option value="{{ $o }}" {{ $objetActuel == $o ? 'selected' : '' }}>{{ $o }}</option>
+        @endforeach
+    </select>
+    <div class="custom-select-mobile">
+        <button type="button" class="custom-select-trigger" id="customSelectTrigger">
+            <span id="customSelectLabel">{{ $objetActuel }}</span>
+            <i class="fas fa-chevron-down"></i>
+        </button>
+        <ul class="custom-select-options" id="customSelectOptions">
+            @foreach($objets as $o)
+                <li data-value="{{ $o }}" class="{{ $objetActuel == $o ? 'selected' : '' }}">{{ $o }}</li>
+            @endforeach
+        </ul>
+    </div>
+</div>
 
         <div class="form-group">
             <label>Message</label>
@@ -684,6 +698,34 @@
         { threshold: 0.12 }
       );
       document.querySelectorAll(".reveal,.reveal-left,.reveal-right").forEach((el) => obs.observe(el));
+
+      (function () {
+        const trigger = document.getElementById("customSelectTrigger");
+        const options = document.getElementById("customSelectOptions");
+        const label = document.getElementById("customSelectLabel");
+        const nativeSelect = document.getElementById("objetSelect");
+        if (!trigger) return;
+        trigger.onclick = function () {
+          trigger.classList.toggle("open");
+          options.classList.toggle("open");
+        };
+        options.querySelectorAll("li").forEach((li) => {
+          li.onclick = function () {
+            options.querySelectorAll("li").forEach((el) => el.classList.remove("selected"));
+            this.classList.add("selected");
+            label.textContent = this.dataset.value;
+            nativeSelect.value = this.dataset.value;
+            trigger.classList.remove("open");
+            options.classList.remove("open");
+          };
+        });
+        document.addEventListener("click", function (e) {
+          if (!trigger.contains(e.target) && !options.contains(e.target)) {
+            trigger.classList.remove("open");
+            options.classList.remove("open");
+          }
+        });
+      })();
     </script>
   </body>
 </html>

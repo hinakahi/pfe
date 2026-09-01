@@ -95,7 +95,7 @@
                 <div class="card shadow-sm border-0 p-3">
                     <div class="row g-2 align-items-center">
 
-                        <div class="col-md-5">
+                        <div class="col-md-8">
                             <div class="input-group">
                                 <span class="input-group-text bg-white border-end-0">
                                     <i class="bi bi-search"></i>
@@ -119,22 +119,10 @@
                             </select>
                         </div>
 
-                        <div class="col-md-3">
-                            <select name="auteur" class="form-select">
-                                <option value=""> Tous les auteurs</option>
-                                <option value="admin" {{ request('auteur') == 'admin' ? 'selected' : '' }}>
-                                    Administrateur
-                                </option>
-                                <option value="resp_foyer" {{ request('auteur') == 'resp_foyer' ? 'selected' : '' }}>
-                                    Responsable Foyer
-                                </option>
-                            </select>
-                        </div>
-
                         <div class="col-md-1">
                             <button type="submit" class="btn btn-primary w-100">
-    Filtrer
-</button>
+                                Filtrer
+                            </button>
                         </div>
 
                     </div>
@@ -277,6 +265,17 @@
 
     [data-theme="dark"] .btn-close {
         filter: invert(1);
+    }
+
+    [data-theme="dark"] .form-control,
+    [data-theme="dark"] .form-select {
+        background-color: #2d3139;
+        color: var(--text-main);
+        border-color: #444;
+    }
+
+    [data-theme="dark"] .form-control::placeholder {
+        color: #8a8f98;
     }
 </style>
 @endsection

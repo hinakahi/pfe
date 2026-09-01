@@ -3,74 +3,87 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\MatriculeAutorise;
+use App\Models\User;
 use Illuminate\Http\Request;
 
 class MatriculeController extends Controller
 {
     public function index(Request $request)
-{
-    $query = MatriculeAutorise::latest();
+    {
+        // Synchronise automatiquement le statut "utilise" avec la réalité de la table users
+        MatriculeAutorise::whereIn('matricule', User::pluck('matricule'))
+            ->where('utilise', false)
+            ->update(['utilise' => true]);
 
-    if ($request->filled('search')) {
-        $query->where('matricule', 'like', '%' . $request->search . '%');
-    }
+        MatriculeAutorise::whereNotIn('matricule', User::pluck('matricule'))
+            ->where('utilise', true)
+            ->update(['utilise' => false]);
 
-    if ($request->statut === 'utilise') {
-        $query->where('utilise', true);
-    } elseif ($request->statut === 'disponible') {
-        $query->where('utilise', false);
-    }
+        $query = MatriculeAutorise::latest();
 
-    $matricules = $query->paginate(20)->withQueryString();
-    return view('admin.matricules.index', compact('matricules'));
-}
-
-public function store(Request $request)
-{
-    $request->validate([
-        'matricules' => 'required|string',
-    ]);
-
-    $liste = array_filter(array_map('trim', explode("\n", $request->matricules)));
-    $count = 0;
-    $doublons = 0;
-
-    foreach ($liste as $m) {
-        $role = $this->detectRoleFromMatricule($m);
-
-        $result = MatriculeAutorise::firstOrCreate(
-            ['matricule' => strtoupper($m)],
-            ['role' => $role]
-        );
-
-        if ($result->wasRecentlyCreated) {
-            $count++;
-        } else {
-            $doublons++;
+        if ($request->filled('search')) {
+            $query->where('matricule', 'like', '%' . $request->search . '%');
         }
+
+        if ($request->statut === 'utilise') {
+            $query->where('utilise', true);
+        } elseif ($request->statut === 'disponible') {
+            $query->where('utilise', false);
+        }
+        if ($request->filled('role')) {
+            $query->where('role', $request->role);
+        }
+
+        $matricules = $query->paginate(20)->withQueryString();
+        return view('admin.matricules.index', compact('matricules'));
     }
 
-    $msg = "$count matricule(s) ajouté(s).";
-    if ($doublons > 0) {
-        $msg .= " $doublons déjà existant(s) ignoré(s).";
+    public function store(Request $request)
+    {
+        $request->validate([
+            'matricules' => 'required|string',
+        ]);
+
+        $liste = array_filter(array_map('trim', explode("\n", $request->matricules)));
+        $count = 0;
+        $doublons = 0;
+
+        foreach ($liste as $m) {
+            $role = $this->detectRoleFromMatricule($m);
+
+            $result = MatriculeAutorise::firstOrCreate(
+                ['matricule' => strtoupper($m)],
+                ['role' => $role]
+            );
+
+            if ($result->wasRecentlyCreated) {
+                $count++;
+            } else {
+                $doublons++;
+            }
+        }
+
+        $msg = "$count matricule(s) ajouté(s).";
+        if ($doublons > 0) {
+            $msg .= " $doublons déjà existant(s) ignoré(s).";
+        }
+
+        return back()->with('success', $msg);
     }
 
-    return back()->with('success', $msg);
-}
-// AJOUTE CETTE FONCTION (en bas du contrôleur)
-private function detectRoleFromMatricule($matricule)
-{
-    $prefix = strtoupper(substr($matricule, 0, 3));
-    
-    return match($prefix) {
-        'ETU' => 'etudiante',
-        'FOY' => 'resp_foyer',
-        'TEC' => 'technicien',
-        'ADM' => 'admin',
-        'HEB' => 'resp_hebergement',
-        default => 'etudiante',
-    };
-}
+    private function detectRoleFromMatricule($matricule)
+    {
+        $prefix = strtoupper(substr($matricule, 0, 3));
+
+        return match($prefix) {
+            'ETU' => 'etudiante',
+            'FOY' => 'resp_foyer',
+            'TEC' => 'technicien',
+            'ADM' => 'admin',
+            'HEB' => 'resp_hebergement',
+            default => 'etudiante',
+        };
+    }
 
     public function destroy(MatriculeAutorise $matricule)
     {
