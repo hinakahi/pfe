@@ -6,6 +6,25 @@
     <title>SiOuakli — Résidence Universitaire Si Ouakli · Tamda, Tizi Ouzou</title>
     <link rel="icon" type="image/jpeg" href="{{ asset('photo/mon_logo.jpg') }}">
     <link rel="stylesheet" href="{{ asset('css/welcome.css') }}">
+    <style>
+    select#objetSelect {
+        width: 100% !important;
+        padding: 14px 18px !important;
+        font-size: 18px !important;
+        border: 2px solid #ccc !important;
+        border-radius: 12px !important;
+        background: white !important;
+        appearance: auto !important;
+        -webkit-appearance: auto !important;
+        -moz-appearance: auto !important;
+    }
+    @media (max-width: 768px) {
+        select#objetSelect {
+            font-size: 20px !important;
+            padding: 16px 20px !important;
+        }
+    }
+</style>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
   </head>
   <body>
