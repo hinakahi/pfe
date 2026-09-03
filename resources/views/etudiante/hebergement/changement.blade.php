@@ -122,7 +122,8 @@
                 </div>
             </div>
 
-            <table class="table table-hover mb-0" id="tableChambres">
+            <div class="table-responsive">
+    <table class="table table-hover mb-0" id="tableChambres">
                 <thead class="table-light">
                     <tr>
                         <th>Numéro</th>
@@ -160,7 +161,8 @@
                     </tr>
                     @endforeach
                 </tbody>
-            </table>
+        </table>
+</div>
 
             {{-- Modals "Demander un changement" — HORS du tableau --}}
             @foreach($chambresDisponibles as $chambre)
@@ -227,7 +229,8 @@
         <h6 class="fw-bold mb-3">
             <i class="bi bi-clock-history me-2 text-secondary"></i>Mes demandes de changement
         </h6>
-        <table class="table table-sm table-hover mb-0">
+        <div class="table-responsive">
+    <table class="table table-sm table-hover mb-0">
             <thead class="table-light">
                 <tr>
                     <th>Date</th>
@@ -310,6 +313,7 @@
                 @endforelse
             </tbody>
         </table>
+</div>
     </div>
 </div>
 </div> {{-- ferme section-demandes --}}
