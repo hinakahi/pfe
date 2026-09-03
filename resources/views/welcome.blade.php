@@ -273,26 +273,15 @@
     $objets = ['Information hébergement', 'Problème technique', 'Accès compte', 'Autre'];
     $objetActuel = old('objet', $objets[0]);
 @endphp
+
 <div class="form-group">
     <label>Objet</label>
-    <select name="objet" id="objetSelect" class="native-select">
+    <select name="objet" id="objetSelect" class="form-control">
         @foreach($objets as $o)
             <option value="{{ $o }}" {{ $objetActuel == $o ? 'selected' : '' }}>{{ $o }}</option>
         @endforeach
     </select>
-    <div class="custom-select-mobile">
-        <button type="button" class="custom-select-trigger" id="customSelectTrigger">
-            <span id="customSelectLabel">{{ $objetActuel }}</span>
-            <i class="fas fa-chevron-down"></i>
-        </button>
-        <ul class="custom-select-options" id="customSelectOptions">
-            @foreach($objets as $o)
-                <li data-value="{{ $o }}" class="{{ $objetActuel == $o ? 'selected' : '' }}">{{ $o }}</li>
-            @endforeach
-        </ul>
-    </div>
 </div>
-
         <div class="form-group">
             <label>Message</label>
             <textarea name="message" placeholder="Décrivez votre demande…">{{ old('message') }}</textarea>
