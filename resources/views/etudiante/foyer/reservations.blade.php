@@ -85,6 +85,7 @@
         box-shadow: 0 6px 16px rgba(0,0,0,0.15);
     }
     [data-theme="dark"] .prix-total { color: #7eb3e8; }
+    .statut-expiree { background: #f8d7da; color: #58151c; }
 </style>
 @endsection
 
@@ -176,14 +177,29 @@
                                         {{ $resa->date_reservation->format('d/m/Y à H:i') }}
                                     </div>
                                 </div>
-                                <span class="statut-pill statut-{{ $resa->statut }}">
-                                    @switch($resa->statut)
-                                        @case('en_attente') <i class="bi bi-clock me-1"></i>En attente @break
-                                        @case('validee')    <i class="bi bi-check-circle me-1"></i>Validée @break
-                                        @case('refusee')    <i class="bi bi-x-circle me-1"></i>Refusée @break
-                                        @case('annulee')    <i class="bi bi-slash-circle me-1"></i>Annulée @break
-                                    @endswitch
-                                </span>
+                                @php
+    // Déterminer si la réservation est expirée (validée depuis plus de 4h)
+    $estExpiree = false;
+    if ($resa->statut === 'validee' && !empty($resa->validee_at)) {
+        $expireAt = \Carbon\Carbon::parse($resa->validee_at)->addHours(4);
+        $estExpiree = now()->greaterThan($expireAt);
+    }
+    $statutAffiche = $estExpiree ? 'expiree' : $resa->statut;
+@endphp
+
+<span class="statut-pill statut-{{ $statutAffiche }}">
+    @if($estExpiree)
+        <i class="bi bi-clock me-1"></i>Expirée
+    @else
+        @switch($resa->statut)
+            @case('en_attente') <i class="bi bi-clock me-1"></i>En attente @break
+            @case('validee')    <i class="bi bi-check-circle me-1"></i>Validée @break
+            @case('refusee')    <i class="bi bi-x-circle me-1"></i>Refusée @break
+            @case('annulee')    <i class="bi bi-slash-circle me-1"></i>Annulée @break
+            @case('recuperee')  <i class="bi bi-bag-check me-1"></i>Récupérée @break
+        @endswitch
+    @endif
+</span>
                             </div>
 
                             <div class="d-flex align-items-center justify-content-between mt-2 flex-wrap gap-2">
