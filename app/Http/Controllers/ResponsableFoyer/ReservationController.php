@@ -10,18 +10,26 @@ use Illuminate\Http\Request;
 class ReservationController extends Controller
 {
     public function index(Request $request)
-    {
-        $filtre = $request->query('statut', 'tous');
+{
+    $filtre = $request->query('statut', 'tous');
+    $search = $request->query('search');
 
-        $query = Reservation::with('etudiante', 'article')
-                    ->where('statut', '!=', 'panier') //  cacher les paniers
-                    ->latest();
+    $query = Reservation::with('etudiante', 'article')
+                ->where('statut', '!=', 'panier') //  cacher les paniers
+                ->latest();
 
-        if ($filtre !== 'tous') {
-            $query->where('statut', $filtre);
-        }
+    if ($filtre !== 'tous') {
+        $query->where('statut', $filtre);
+    }
 
-        $reservations = $query->paginate(15)->withQueryString();
+    if ($search) {
+        $query->whereHas('etudiante', function ($q) use ($search) {
+            $q->where('name', 'like', '%' . $search . '%');
+        });
+    }
+
+    $reservations = $query->paginate(15)->withQueryString();
+            $groupes = $reservations->getCollection()->groupBy(fn($r) => $r->commande_id ?? 'seul-'.$r->id);
 
         $compteurs = [
             'en_attente' => Reservation::where('statut', 'en_attente')->count(),
@@ -30,7 +38,7 @@ class ReservationController extends Controller
             'recuperee'  => Reservation::where('statut', 'recuperee')->count(),
         ];
 
-        return view('foyer.reservations.index', compact('reservations', 'filtre', 'compteurs'));
+                    return view('foyer.reservations.index', compact('reservations', 'filtre', 'compteurs', 'groupes', 'search'));
     }
 
     public function valider(Request $request, Reservation $reservation)

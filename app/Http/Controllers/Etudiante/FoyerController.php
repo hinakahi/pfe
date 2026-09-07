@@ -160,8 +160,9 @@ $promotions = ArticleFoyer::where('promo_active', true)
             return back()->with('error', 'Votre panier est vide');
         }
         
-         foreach ($panier as $item) {
-    $item->update(['statut' => 'en_attente']);
+         $commandeId = \Illuminate\Support\Str::uuid();
+foreach ($panier as $item) {
+    $item->update(['statut' => 'en_attente', 'commande_id' => $commandeId]);
 }
 
 // Notifier le resp_foyer

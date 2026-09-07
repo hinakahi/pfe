@@ -37,6 +37,21 @@ class ArticleFoyer extends Model
         'date_peremption'=> 'date',     
          'promo_date_fin' => 'date',
     ];
+    protected static function boot()
+{
+    parent::boot();
+
+    static::retrieved(function ($article) {
+        if (
+            $article->promo_active &&
+            $article->promo_date_fin &&
+            $article->promo_date_fin->isPast()
+        ) {
+            $article->promo_active = false;
+            $article->saveQuietly(); // met à jour en base sans redéclencher d'événements
+        }
+    });
+}
     
     // ─── RELATIONS ──────────────────────────────────────
     

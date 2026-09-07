@@ -215,6 +215,27 @@
 {{-- ── MAIN CARD ── --}}
 <div class="res-card">
 
+    {{-- Barre de recherche --}}
+    <div style="padding:1rem 1.5rem; border-bottom:1.5px solid #e2e8f0;">
+        <form method="GET" action="{{ route('foyer.reservations') }}" style="display:flex; gap:8px;">
+            @if($filtre !== 'tous')
+                <input type="hidden" name="statut" value="{{ $filtre }}">
+            @endif
+            <input type="text" name="search" value="{{ $search ?? '' }}"
+                   class="form-control" placeholder="Rechercher par nom d'étudiante..."
+                   style="max-width:320px; border-radius:8px;">
+            <button type="submit" class="action-btn" style="border-color:#1a4fa0; color:#1a4fa0; background:#eff6ff;">
+                <i class="bi bi-search"></i> Rechercher
+            </button>
+            @if($search)
+                <a href="{{ route('foyer.reservations', $filtre !== 'tous' ? ['statut' => $filtre] : []) }}"
+                   class="action-btn" style="border-color:#94a3b8; color:#64748b;">
+                    <i class="bi bi-x-lg"></i> Effacer
+                </a>
+            @endif
+        </form>
+    </div>
+
     {{-- Bandeau filtre actif --}}
     @if($filtre !== 'tous')
     <div style="padding:0.85rem 1.5rem; border-bottom:1.5px solid #e2e8f0; background:var(--bg-body);">
@@ -249,149 +270,128 @@
                 </tr>
             </thead>
             <tbody>
-            @forelse($reservations as $r)
-                <tr>
-                    {{-- Référence --}}
-                    <td>
-                        <span class="ref-badge">#{{ str_pad($r->id, 4, '0', STR_PAD_LEFT) }}</span>
-                    </td>
+@forelse($groupes as $groupeId => $items)
+    @php $premier = $items->first(); @endphp
 
-                    {{-- Article --}}
-                    <td>
-                        <div style="display:flex; align-items:center; gap:10px;">
-                            @if($r->article && $r->article->photo)
-                                <img src="{{ asset('storage/' . $r->article->photo) }}"
-                                     class="article-thumb"
-                                     alt="{{ $r->article->nom_article }}">
-                            @else
-                                <div class="article-thumb-placeholder">
-                                    <i class="bi bi-box-seam"></i>
-                                </div>
-                            @endif
-                            <div>
-                                <div style="font-weight:600; font-size:0.9rem;">
-                                    {{ $r->article->nom_article ?? '—' }}
-                                </div>
-                                <div style="font-size:0.75rem; color:#64748b;">
-                                    {{ number_format($r->article->prix ?? 0, 2) }} DA
-                                    &nbsp;·&nbsp;
-                                    Stock : {{ $r->article->stock ?? '—' }}
-                                </div>
-                            </div>
-                        </div>
-                    </td>
+    {{-- Ligne d'en-tête de commande (si plusieurs articles) --}}
+    @if($items->count() > 1)
+    <tr style="background:var(--bg-body);">
+        <td colspan="7" style="padding:0.6rem 1.1rem; font-weight:700; font-size:0.85rem; color:#1a4fa0;">
+            <i class="bi bi-bag-fill me-1"></i> Commande groupée — {{ $items->count() }} article(s)
+            — {{ $premier->etudiante->name ?? '—' }}
+        </td>
+    </tr>
+    @endif
 
-                    {{-- Étudiant --}}
-                    <td>
-                        <div style="font-weight:600; font-size:0.9rem;">
-                            {{ $r->etudiante->name ?? '—' }}
-                        </div>
-                        <div style="font-size:0.75rem; color:#64748b;">
-                            {{ $r->etudiante->matricule ?? $r->etudiante->email ?? '' }}
-                        </div>
-                    </td>
+    @foreach($items as $r)
+    <tr>
+        {{-- Référence --}}
+        <td><span class="ref-badge">#{{ str_pad($r->id, 4, '0', STR_PAD_LEFT) }}</span></td>
 
-                    {{-- Quantité --}}
-                    <td><span class="qty-badge">{{ $r->quantite }}</span></td>
+        {{-- Article --}}
+        <td>
+            <div style="display:flex; align-items:center; gap:10px;">
+                @if($r->article && $r->article->photo)
+                    <img src="{{ asset('storage/' . $r->article->photo) }}" class="article-thumb" alt="{{ $r->article->nom_article }}">
+                @else
+                    <div class="article-thumb-placeholder"><i class="bi bi-box-seam"></i></div>
+                @endif
+                <div>
+                    <div style="font-weight:600; font-size:0.9rem;">{{ $r->article->nom_article ?? '—' }}</div>
+                    <div style="font-size:0.75rem; color:#64748b;">
+                        {{ number_format($r->article->prix ?? 0, 2) }} DA &nbsp;·&nbsp; Stock : {{ $r->article->stock ?? '—' }}
+                    </div>
+                </div>
+            </div>
+        </td>
 
-                    {{-- Date --}}
-                    <td>
-                        @php $date = \Carbon\Carbon::parse($r->date_reservation); @endphp
-                        <div style="font-size:0.88rem; font-weight:500;">
-                            {{ $date->format('d/m/Y') }}
-                        </div>
-                        <div style="font-size:0.75rem; color:#64748b;">
-                            {{ $date->format('H:i') }}
-                        </div>
-                    </td>
+        {{-- Étudiant --}}
+        <td>
+            <div style="font-weight:600; font-size:0.9rem;">{{ $r->etudiante->name ?? '—' }}</div>
+            <div style="font-size:0.75rem; color:#64748b;">{{ $r->etudiante->matricule ?? $r->etudiante->email ?? '' }}</div>
+        </td>
 
-                    {{-- Statut --}}
-                    <td>
+        {{-- Quantité --}}
+        <td><span class="qty-badge">{{ $r->quantite }}</span></td>
+
+        {{-- Date --}}
+        <td>
+            @php $date = \Carbon\Carbon::parse($r->date_reservation); @endphp
+            <div style="font-size:0.88rem; font-weight:500;">{{ $date->format('d/m/Y') }}</div>
+            <div style="font-size:0.75rem; color:#64748b;">{{ $date->format('H:i') }}</div>
+        </td>
+
+        {{-- Statut --}}
+        <td>
+            @php
+                $info = match($r->statut) {
+                    'en_attente' => ['bi-hourglass-split', 'En attente'],
+                    'validee'    => ['bi-check-circle',    'Validée'],
+                    'refusee'    => ['bi-x-circle',        'Refusée'],
+                    'annulee'    => ['bi-slash-circle',    'Annulée'],
+                    'recuperee'  => ['bi-bag-check',       'Récupérée'],
+                    'panier'     => ['bi-cart',            'Panier'],
+                    default      => ['bi-question',        $r->statut],
+                };
+            @endphp
+            <span class="status-badge status-{{ $r->statut }}">
+                <i class="bi {{ $info[0] }}"></i> {{ $info[1] }}
+            </span>
+        </td>
+
+        {{-- Actions --}}
+        <td>
+            @if($r->statut === 'en_attente')
+                <div style="display:flex; gap:6px; flex-wrap:wrap;">
+                    <form method="POST" action="{{ route('foyer.reservations.valider', $r) }}" onsubmit="return confirm('Valider cette réservation ?')">
+                        @csrf
+                        <button type="submit" class="action-btn btn-valider"><i class="bi bi-check-lg"></i> Valider</button>
+                    </form>
+                    <button class="action-btn btn-refuser" onclick="ouvrirModalRefus({{ $r->id }}, '{{ route('foyer.reservations.refuser', $r) }}')">
+                        <i class="bi bi-x-lg"></i> Refuser
+                    </button>
+                </div>
+            @elseif($r->statut === 'validee')
+                <div style="display:flex; flex-direction:column; gap:4px;">
+                    <form method="POST" action="{{ route('foyer.reservations.recuperee', $r) }}" onsubmit="return confirm('Confirmer la récupération ?')">
+                        @csrf
+                        <button type="submit" class="action-btn" style="border-color:#7c3aed; color:#7c3aed; background:#f5f3ff;">
+                            <i class="bi bi-bag-check"></i> Récupérée
+                        </button>
+                    </form>
+                    @if($r->validee_at)
                         @php
-                            $info = match($r->statut) {
-                                'en_attente' => ['bi-hourglass-split', 'En attente'],
-                                'validee'    => ['bi-check-circle',    'Validée'],
-                                'refusee'    => ['bi-x-circle',        'Refusée'],
-                                'annulee'    => ['bi-slash-circle',    'Annulée'],
-                                'recuperee'  => ['bi-bag-check',       'Récupérée'],
-                                'panier'     => ['bi-cart',            'Panier'],
-                                default      => ['bi-question',        $r->statut],
-                            };
+                            $expireAt = \Carbon\Carbon::parse($r->validee_at)->addHours(4);
+                            $restant  = now()->diffInMinutes($expireAt, false);
                         @endphp
-                        <span class="status-badge status-{{ $r->statut }}">
-                            <i class="bi {{ $info[0] }}"></i> {{ $info[1] }}
-                        </span>
-                    </td>
-
-                    {{-- Actions --}}
-                    <td>
-                        @if($r->statut === 'en_attente')
-                            <div style="display:flex; gap:6px; flex-wrap:wrap;">
-                                <form method="POST"
-                                      action="{{ route('foyer.reservations.valider', $r) }}"
-                                      onsubmit="return confirm('Valider cette réservation ?')">
-                                    @csrf
-                                    <button type="submit" class="action-btn btn-valider">
-                                        <i class="bi bi-check-lg"></i> Valider
-                                    </button>
-                                </form>
-                                <button class="action-btn btn-refuser"
-                                        onclick="ouvrirModalRefus({{ $r->id }}, '{{ route('foyer.reservations.refuser', $r) }}')">
-                                    <i class="bi bi-x-lg"></i> Refuser
-                                </button>
-                            </div>
-
-                        @elseif($r->statut === 'validee')
-                            <div style="display:flex; flex-direction:column; gap:4px;">
-                                <form method="POST"
-                                      action="{{ route('foyer.reservations.recuperee', $r) }}"
-                                      onsubmit="return confirm('Confirmer la récupération ?')">
-                                    @csrf
-                                    <button type="submit" class="action-btn"
-                                            style="border-color:#7c3aed; color:#7c3aed; background:#f5f3ff;">
-                                        <i class="bi bi-bag-check"></i> Récupérée
-                                    </button>
-                                </form>
-                                {{-- Countdown 4h --}}
-                                @if($r->validee_at)
-                                    @php
-                                        $expireAt = \Carbon\Carbon::parse($r->validee_at)->addHours(4);
-                                        $restant  = now()->diffInMinutes($expireAt, false);
-                                    @endphp
-                                    @if($restant > 0)
-                                        <span style="font-size:0.75rem; color:#b45309;">
-                                            <i class="bi bi-clock me-1"></i>Expire dans {{ gmdate('H\hi', $restant * 60) }}
-                                        </span>
-                                    @else
-                                        <span style="font-size:0.75rem; color:#b91c1c;">
-                                            <i class="bi bi-clock me-1"></i>Expirée
-                                        </span>
-                                    @endif
-                                @endif
-                            </div>
-
+                        @if($restant > 0)
+                            <span style="font-size:0.75rem; color:#b45309;"><i class="bi bi-clock me-1"></i>Expire dans {{ gmdate('H\hi', $restant * 60) }}</span>
                         @else
-                            {{-- recuperee, refusee, annulee → juste la date --}}
-                            <span style="font-size:0.8rem; color:#94a3b8;
-                                         display:flex; align-items:center; gap:5px;">
-                                <i class="bi bi-clock-history"></i>
-                                {{ \Carbon\Carbon::parse($r->updated_at)->format('d/m/Y') }}
-                            </span>
+                            <span style="font-size:0.75rem; color:#b91c1c;"><i class="bi bi-clock me-1"></i>Expirée</span>
                         @endif
-                    </td>
+                    @endif
+                </div>
+            @else
+                <span style="font-size:0.8rem; color:#94a3b8; display:flex; align-items:center; gap:5px;">
+                    <i class="bi bi-clock-history"></i>
+                    {{ \Carbon\Carbon::parse($r->updated_at)->format('d/m/Y') }}
+                </span>
+            @endif
+        </td>
+    </tr>
+    @endforeach
 
-                </tr>
-            @empty
-                <tr>
-                    <td colspan="7">
-                        <div class="empty-state">
-                            <i class="bi bi-inbox"></i>
-                            Aucune réservation{{ $filtre !== 'tous' ? ' dans cette catégorie' : '' }}.
-                        </div>
-                    </td>
-                </tr>
-            @endforelse
-            </tbody>
+@empty
+    <tr>
+        <td colspan="7">
+            <div class="empty-state">
+                <i class="bi bi-inbox"></i>
+                Aucune réservation{{ $filtre !== 'tous' ? ' dans cette catégorie' : '' }}.
+            </div>
+        </td>
+    </tr>
+@endforelse
+</tbody>
         </table>
     </div>
 

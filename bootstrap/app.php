@@ -1,5 +1,5 @@
 <?php
-
+use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -18,8 +18,12 @@ return Application::configure(basePath: dirname(__DIR__))
     })
     ->withExceptions(function (Exceptions $exceptions) {
         $exceptions->render(function (PostTooLargeException $e, $request) {
-    return back()
-        ->withInput()
-        ->with('error', 'Le fichier que vous essayez d\'envoyer est trop volumineux. Merci de réduire sa taille et réessayer.');
-      });
-    })->create();
+            return back()
+                ->withInput()
+                ->with('error', 'Le fichier que vous essayez d\'envoyer est trop volumineux. Merci de réduire sa taille et réessayer.');
+        });
+    })
+    ->withSchedule(function (Schedule $schedule) {
+        $schedule->command('reservations:annuler-expirees')->everyMinute();
+    })
+    ->create();

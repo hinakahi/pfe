@@ -18,6 +18,7 @@ class Reservation extends Model
        'statut',
        'date_reservation',
        'validee_at',
+       'commande_id',
     ];
     
     protected $casts = [
