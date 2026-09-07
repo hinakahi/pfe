@@ -16,12 +16,12 @@ class AnnulerReservationsExpirees extends Command
          
         // 1️⃣ Annuler les "en_attente" après  3h
         $count1 = Reservation::where('statut', 'en_attente')
-            ->where('created_at', '<=', Carbon::now()->subHours(3))
+            ->where('created_at', '<=', Carbon::now()->subMinutes(2))
             ->update(['statut' => 'annulee']);
 
         // 2️⃣ Annuler les "validee" non récupérées après 3h
         $expirees = Reservation::where('statut', 'validee')
-            ->where('validee_at', '<=', Carbon::now()->subHours(3))
+            ->where('validee_at', '<=', Carbon::now()->subMinutes(2))
             ->get();
 
         foreach ($expirees as $reservation) {
