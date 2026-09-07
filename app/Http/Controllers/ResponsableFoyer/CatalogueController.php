@@ -154,12 +154,14 @@ public function update(Request $request, ArticleFoyer $catalogue)
     public function updatePromo(Request $request, ArticleFoyer $article)
 {
      $request->validate([
-        'prix_promo'      => 'nullable|numeric|min:0',
-        'promo_remarque'  => 'nullable|string|max:255',
-        'promo_date_fin'  => 'nullable|date',
-        'promo_qte_lot'   => 'nullable|integer|min:1',
-        'promo_prix_lot'  => 'nullable|numeric|min:0',
-    ]);
+    'prix_promo'      => 'nullable|numeric|min:0|lt:' . $article->prix,
+    'promo_remarque'  => 'nullable|string|max:255',
+    'promo_date_fin'  => 'nullable|date',
+    'promo_qte_lot'   => 'nullable|integer|min:1',
+    'promo_prix_lot'  => 'nullable|numeric|min:0',
+], [
+    'prix_promo.lt' => 'Le prix promotionnel doit être inférieur au prix normal (' . number_format($article->prix, 2) . ' DA).',
+]);
 
     $article->update([
         'promo_active'    => $request->boolean('promo_active'),
