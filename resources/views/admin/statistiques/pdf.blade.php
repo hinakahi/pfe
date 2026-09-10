@@ -30,12 +30,12 @@
     </table>
 
     {{-- 2. Délai moyen --}}
-    <h2> Délai moyen de résolution (heures)</h2>
+    <h2> Délai moyen de résolution</h2>
     <table>
-        <thead><tr><th>Type de panne</th><th>Délai moyen (h)</th></tr></thead>
+        <thead><tr><th>Type de panne</th><th>Délai moyen</th></tr></thead>
         <tbody>
             @foreach($delaiParType as $type => $heures)
-            <tr><td>{{ $type }}</td><td>{{ $heures }}h</td></tr>
+            <tr><td>{{ $type }}</td><td>{{ $heures }}</td></tr>
             @endforeach
         </tbody>
     </table>
