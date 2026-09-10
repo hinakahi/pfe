@@ -68,7 +68,7 @@
         <div class="col-md-6">
             <div class="card p-3 shadow-sm h-100">
                 <h6 class="card-title fw-semibold mb-3">
-                    <i class="bi bi-clock-history me-2 text-warning"></i>Délai moyen de résolution (heures)
+                    <i class="bi bi-clock-history me-2 text-warning"></i>Délai moyen de résolution 
                 </h6>
                 <div style="position:relative; height:250px;">
                     <canvas id="delaiChart"></canvas>

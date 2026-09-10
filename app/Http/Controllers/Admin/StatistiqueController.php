@@ -14,13 +14,14 @@ class StatistiqueController extends Controller
 {
     private function getData(string $periode): array
     {
+        // Code en base => Libellé affiché
         $types = [
-            'Électricité',
-            'Plomberie',
-            'Menuiserie',
-            'Chauffage',
-            'Réseaux informatiques et Internet',
-            'Sécurité incendie et vidéosurveillance',
+            'electricite' => 'Électricité',
+            'plomberie'   => 'Plomberie',
+            'menuiserie'  => 'Menuiserie',
+            'chauffage'   => 'Chauffage',
+            'reseaux'     => 'Réseaux informatiques et Internet',
+            'securite'    => 'Sécurité incendie et vidéosurveillance',
         ];
 
         $dateDebut = match($periode) {
@@ -31,38 +32,57 @@ class StatistiqueController extends Controller
 
         // 1. Pannes par type
         $pannesParType = [];
-        foreach ($types as $type) {
-            $pannesParType[$type] = Maintenance::where('type', $type)
+        foreach ($types as $code => $libelle) {
+            $pannesParType[$libelle] = Maintenance::where('type', $code)
                 ->where('date_signalement', '>=', $dateDebut)
                 ->count();
         }
 
-        // 2. Délai moyen de résolution (heures)
+        // 2. Délai moyen de résolution (en minutes, affiché en "Xh XXmin" ou "Xj XXh")
         $delaiParType = [];
-        foreach ($types as $type) {
-            $avg = Maintenance::where('type', $type)
+        foreach ($types as $code => $libelle) {
+            $avg = Maintenance::where('type', $code)
                 ->where('statut', 'terminee')
                 ->whereNotNull('date_resolution')
                 ->where('date_signalement', '>=', $dateDebut)
-                ->select(DB::raw('AVG(TIMESTAMPDIFF(HOUR, date_signalement, date_resolution)) as avg_heures'))
-                ->value('avg_heures');
-            $delaiParType[$type] = round($avg ?? 0, 1);
+                ->whereRaw('date_resolution > date_signalement')
+                ->select(DB::raw('AVG(TIMESTAMPDIFF(MINUTE, date_signalement, date_resolution)) as avg_minutes'))
+                ->value('avg_minutes');
+
+            if ($avg === null) {
+                $delaiParType[$libelle] = '—';
+                continue;
+            }
+
+            $minutes = round($avg);
+            if ($minutes >= 1440) {
+                $jours = intdiv($minutes, 1440);
+                $heures = intdiv($minutes % 1440, 60);
+                $delaiParType[$libelle] = $jours . 'j ' . $heures . 'h';
+            } elseif ($minutes >= 60) {
+                $delaiParType[$libelle] = intdiv($minutes, 60) . 'h ' . str_pad($minutes % 60, 2, '0', STR_PAD_LEFT) . 'min';
+            } else {
+                $delaiParType[$libelle] = $minutes . 'min';
+            }
         }
 
-        // 3. Chambres les plus problématiques (top 5)
+        // 3. Chambres les plus problématiques (top 5) — uniquement les chambres réelles
         $chambresProblematiques = Maintenance::select('chambre_id', DB::raw('COUNT(*) as total'))
             ->with('chambre')
             ->where('date_signalement', '>=', $dateDebut)
+            ->whereNotNull('chambre_id')
             ->groupBy('chambre_id')
             ->orderByDesc('total')
             ->take(5)
             ->get()
+            ->filter(fn($m) => $m->chambre !== null)
             ->map(function ($m) {
                 return [
-                    'chambre' => $m->chambre ? 'Chambre ' . $m->chambre->numero : 'Inconnue',
+                    'chambre' => 'Chambre ' . $m->chambre->numero,
                     'total'   => $m->total,
                 ];
-            });
+            })
+            ->values();
 
         // 4. Évolution des pannes par mois
         $pannesParMois = Maintenance::select(
