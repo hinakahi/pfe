@@ -38,33 +38,39 @@ class StatistiqueController extends Controller
                 ->count();
         }
 
-        // 2. Délai moyen de résolution (en minutes, affiché en "Xh XXmin" ou "Xj XXh")
-        $delaiParType = [];
-        foreach ($types as $code => $libelle) {
-            $avg = Maintenance::where('type', $code)
-                ->where('statut', 'terminee')
-                ->whereNotNull('date_resolution')
-                ->where('date_signalement', '>=', $dateDebut)
-                ->whereRaw('date_resolution > date_signalement')
-                ->select(DB::raw('AVG(TIMESTAMPDIFF(MINUTE, date_signalement, date_resolution)) as avg_minutes'))
-                ->value('avg_minutes');
+        // 2. Délai moyen de résolution
+$delaiParType = [];         // Valeurs numériques en minutes (pour Chart.js)
+$delaiParTypeFormatted = []; // Valeurs formatées (pour les tooltips)
 
-            if ($avg === null) {
-                $delaiParType[$libelle] = '—';
-                continue;
-            }
+foreach ($types as $code => $libelle) {
+    $avg = Maintenance::where('type', $code)
+        ->where('statut', 'terminee')
+        ->whereNotNull('date_resolution')
+        ->where('date_signalement', '>=', $dateDebut)
+        ->whereRaw('date_resolution > date_signalement')
+        ->select(DB::raw('AVG(TIMESTAMPDIFF(MINUTE, date_signalement, date_resolution)) as avg_minutes'))
+        ->value('avg_minutes');
 
-            $minutes = round($avg);
-            if ($minutes >= 1440) {
-                $jours = intdiv($minutes, 1440);
-                $heures = intdiv($minutes % 1440, 60);
-                $delaiParType[$libelle] = $jours . 'j ' . $heures . 'h';
-            } elseif ($minutes >= 60) {
-                $delaiParType[$libelle] = intdiv($minutes, 60) . 'h ' . str_pad($minutes % 60, 2, '0', STR_PAD_LEFT) . 'min';
-            } else {
-                $delaiParType[$libelle] = $minutes . 'min';
-            }
-        }
+    if ($avg === null) {
+        $delaiParType[$libelle] = 0;
+        $delaiParTypeFormatted[$libelle] = '—';
+        continue;
+    }
+
+    $minutes = round($avg);
+    $delaiParType[$libelle] = $minutes; // ✅ Nombre pour Chart.js
+
+    // Version formatée pour l'affichage
+    if ($minutes >= 1440) {
+        $jours = intdiv($minutes, 1440);
+        $heures = intdiv($minutes % 1440, 60);
+        $delaiParTypeFormatted[$libelle] = $jours . 'j ' . $heures . 'h';
+    } elseif ($minutes >= 60) {
+        $delaiParTypeFormatted[$libelle] = intdiv($minutes, 60) . 'h ' . str_pad($minutes % 60, 2, '0', STR_PAD_LEFT) . 'min';
+    } else {
+        $delaiParTypeFormatted[$libelle] = $minutes . 'min';
+    }
+}
 
         // 3. Chambres les plus problématiques (top 5) — uniquement les chambres réelles
         $chambresProblematiques = Maintenance::select('chambre_id', DB::raw('COUNT(*) as total'))
@@ -95,7 +101,7 @@ class StatistiqueController extends Controller
             ->get()
             ->mapWithKeys(fn($m) => [$m->mois => $m->total]);
 
-        return compact('pannesParType', 'delaiParType', 'chambresProblematiques', 'pannesParMois');
+        return compact('pannesParType', 'delaiParType', 'delaiParTypeFormatted', 'chambresProblematiques', 'pannesParMois');
     }
 
     public function index(Request $request)

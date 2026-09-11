@@ -16,8 +16,6 @@
 
     {{-- Barre filtre + export --}}
     <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
-
-        {{-- Filtre période --}}
         <div class="d-flex align-items-center gap-2 flex-wrap">
             <span class="text-muted me-2">Période :</span>
             <a href="{{ route('admin.statistiques', ['periode' => 'semaine']) }}"
@@ -34,7 +32,6 @@
             </a>
         </div>
 
-        {{-- Boutons export --}}
         <div class="d-flex gap-2 flex-wrap">
             <a href="{{ route('admin.statistiques.pdf', ['periode' => $periode]) }}"
                class="btn btn-sm btn-outline-danger">
@@ -45,7 +42,6 @@
                 <i class="bi bi-file-earmark-excel me-1"></i> Exporter Excel
             </a>
         </div>
-
     </div>
 
     <h5 class="mb-4 fw-bold"><i class="bi bi-tools me-2"></i>Statistiques Maintenance</h5>
@@ -68,7 +64,7 @@
         <div class="col-md-6">
             <div class="card p-3 shadow-sm h-100">
                 <h6 class="card-title fw-semibold mb-3">
-                    <i class="bi bi-clock-history me-2 text-warning"></i>Délai moyen de résolution 
+                    <i class="bi bi-clock-history me-2 text-warning"></i>Délai moyen de résolution
                 </h6>
                 <div style="position:relative; height:250px;">
                     <canvas id="delaiChart"></canvas>
@@ -129,10 +125,7 @@
             datasets: [{
                 label: 'Nombre de pannes',
                 data: {!! json_encode(array_values($pannesParType)) !!},
-                backgroundColor: [
-                    '#f59e0b','#3b82f6','#8b5cf6',
-                    '#ef4444','#10b981','#6366f1'
-                ],
+                backgroundColor: ['#f59e0b','#3b82f6','#8b5cf6','#ef4444','#10b981','#6366f1'],
                 borderRadius: 6,
             }]
         },
@@ -143,12 +136,14 @@
     });
 
     // 2. Délai moyen
+    const delaiFormatted = {!! json_encode($delaiParTypeFormatted ?? []) !!};
+
     new Chart(document.getElementById('delaiChart'), {
         type: 'bar',
         data: {
             labels: {!! json_encode(array_keys($delaiParType)) !!},
             datasets: [{
-                label: 'Heures moyennes',
+                label: 'Délai moyen (minutes)',
                 data: {!! json_encode(array_values($delaiParType)) !!},
                 backgroundColor: 'rgba(245,158,11,0.7)',
                 borderColor: '#f59e0b',
@@ -158,7 +153,16 @@
         },
         options: {
             ...defaultOptions,
-            plugins: { legend: { display: false } }
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return 'Délai : ' + (delaiFormatted[context.label] || '—');
+                        }
+                    }
+                }
+            }
         }
     });
 
