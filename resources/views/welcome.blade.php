@@ -93,8 +93,8 @@
           <span class="section-tag">Ce que nous offrons</span>
           <h2 class="section-title">Tous vos services, en un clic</h2>
           <p class="section-subtitle">
-            La résidence Si Ouakli met à votre disposition une gamme complète de
-            services pour un séjour universitaire serein et confortable.
+            La résidence Si Ouakli met à votre disposition une plateforme complète
+            pour un séjour universitaire serein : hébergement, maintenance et foyer.
           </p>
         </div>
         <div class="services-container">
@@ -104,25 +104,15 @@
               <h3>Hébergement</h3>
               <p>Chambres doubles & individuelles</p>
             </div>
-            <div class="service-tab" data-service="restauration">
-              <span class="service-tab-icon">🍽️</span>
-              <h3>Restauration</h3>
-              <p>3 repas par jour, menus variés</p>
+            <div class="service-tab" data-service="maintenance">
+              <span class="service-tab-icon">🔧</span>
+              <h3>Maintenance</h3>
+              <p>Signalement & suivi des pannes</p>
             </div>
-            <div class="service-tab" data-service="bibliotheque">
-              <span class="service-tab-icon">📚</span>
-              <h3>Bibliothèque</h3>
-              <p>Catalogue & prêt de livres en ligne</p>
-            </div>
-            <div class="service-tab" data-service="activites">
-              <span class="service-tab-icon">🎭</span>
-              <h3>Activités culturelles</h3>
-              <p>Sport, culturel, mussala</p>
-            </div>
-            <div class="service-tab" data-service="sante">
-              <span class="service-tab-icon">🩺</span>
-              <h3>Santé</h3>
-              <p>RDV médecin & psychologue</p>
+            <div class="service-tab" data-service="foyer">
+              <span class="service-tab-icon">🛍️</span>
+              <h3>Foyer</h3>
+              <p>Catalogue & réservation d'articles</p>
             </div>
           </div>
           <div class="services-content reveal-right">
@@ -130,65 +120,39 @@
               <div class="service-content-icon">🏠</div>
               <h2>Hébergement <span>confortable</span></h2>
               <p>La résidence Si Ouakli dispose de <strong>2000 lits</strong> répartis dans 8 pavillons modernes. Chaque résidente bénéficie d'un espace sécurisé et bien équipé.</p>
-              <p>Via l'application, vous pouvez demander un changement de chambre, signaler un problème ou suivre vos demandes en temps réel.</p>
+              <p>Via l'application, vous pouvez demander un changement de chambre, un renouvellement, ou suivre vos demandes en temps réel.</p>
               <ul class="service-features">
                 <li>Chambres doubles et individuelles (cas exceptionnels)</li>
                 <li>Demande de changement de chambre en ligne</li>
-                <li>Signalement de pannes & maintenance numérique</li>
+                <li>Demande de renouvellement de chambre en ligne</li>
                 <li>Suivi en temps réel du statut de vos demandes</li>
                 <li>Attribution selon critères ONOU (distance, dossier social)</li>
               </ul>
             </div>
-            <div class="service-content" id="restauration">
-              <div class="service-content-icon">🍽️</div>
-              <h2>Restauration <span>universitaire</span></h2>
-              <p>La cantine de la résidence propose trois repas équilibrés par jour. Consultez les menus hebdomadaires et les horaires directement depuis votre espace étudiant.</p>
-              <p>Le responsable restauration publie les menus chaque semaine et répond à vos réclamations et avis en ligne.</p>
+            <div class="service-content" id="maintenance">
+              <div class="service-content-icon">🔧</div>
+              <h2>Maintenance <span>rapide & efficace</span></h2>
+              <p>Signalez une panne (électricité, plomberie, mobilier...) directement depuis votre espace étudiant, sans passer par un registre papier.</p>
+              <p>Le technicien reçoit votre demande, la traite et vous tient informée de l'avancement à chaque étape.</p>
               <ul class="service-features">
-                <li>Menus hebdomadaires publiés en ligne</li>
-                <li>Horaires petit-déjeuner, déjeuner et dîner</li>
-                <li>Consultation sans déplacement</li>
-                <li>Système d'avis et de réclamations intégré</li>
-                <li>Notifications en cas de changement de menu</li>
+                <li>Signalement de panne en ligne, en quelques clics</li>
+                <li>Suivi en temps réel du statut (en attente, en cours, résolue)</li>
+                <li>Historique complet de vos demandes</li>
+                <li>Notifications à chaque changement de statut</li>
+                <li>Gestion du stock de pièces par le technicien</li>
               </ul>
             </div>
-            <div class="service-content" id="bibliotheque">
-              <div class="service-content-icon">📚</div>
-              <h2>Bibliothèque <span>numérique</span></h2>
-              <p>Accédez au catalogue complet des ouvrages disponibles, vérifiez la disponibilité d'un livre et effectuez votre réservation en quelques clics depuis votre espace.</p>
-              <p>Plus besoin de se déplacer pour savoir si un ouvrage est disponible — le système gère tout automatiquement.</p>
+            <div class="service-content" id="foyer">
+              <div class="service-content-icon">🛍️</div>
+              <h2>Foyer <span>& vie pratique</span></h2>
+              <p>Consultez le catalogue d'articles du foyer et réservez ce dont vous avez besoin directement en ligne, sans file d'attente.</p>
+              <p>Le responsable du foyer publie les annonces et gère vos réservations en temps réel.</p>
               <ul class="service-features">
-                <li>Catalogue en ligne avec disponibilité en temps réel</li>
-                <li>Réservation de livres sans file d'attente</li>
-                <li>Délai de retrait 24h après confirmation</li>
-                <li>Rappels automatiques avant date de retour (J+15)</li>
-                <li>Historique complet de vos emprunts</li>
-              </ul>
-            </div>
-            <div class="service-content" id="activites">
-              <div class="service-content-icon">🎭</div>
-              <h2>Activités <span>culturelles & islamiques</span></h2>
-              <p>Inscrivez-vous aux activités culturelles, sportives et islamiques organisées au sein de la résidence. Restez informée des événements à venir grâce aux notifications.</p>
-              <p>Le foyer de la résidence propose également un catalogue d'articles (fast-food, cafétéria, magasin) réservables en ligne.</p>
-              <ul class="service-features">
-                <li>Activités culturelles & sportives (inscription en ligne)</li>
-                <li>Espace Mussala : horaires de prière & cercles Coran</li>
-                <li>Foyer : catalogue articles & réservations</li>
-                <li>Notifications d'acceptation ou de refus automatiques</li>
-                <li>Historique de vos inscriptions</li>
-              </ul>
-            </div>
-            <div class="service-content" id="sante">
-              <div class="service-content-icon">🩺</div>
-              <h2>Unité de <span>santé intégrée</span></h2>
-              <p>Prenez rendez-vous en ligne avec le médecin ou le psychologue de la résidence. Fini les longues files d'attente — choisissez votre créneau disponible directement.</p>
-              <p>L'unité de santé gère son calendrier de disponibilités et vous envoie une confirmation automatique pour chaque rendez-vous.</p>
-              <ul class="service-features">
-                <li>Prise de RDV médecin & psychologue en ligne</li>
-                <li>Consultation des créneaux disponibles en temps réel</li>
-                <li>Confirmation automatique par notification</li>
-                <li>Réduction des pics d'affluence à l'unité de santé</li>
-                <li>Notes médicales internes confidentielles</li>
+                <li>Catalogue d'articles consultable en ligne</li>
+                <li>Réservation d'articles en quelques clics</li>
+                <li>Annonces du foyer publiées en temps réel</li>
+                <li>Suivi de vos réservations</li>
+                <li>Notifications de confirmation</li>
               </ul>
             </div>
           </div>
@@ -220,7 +184,7 @@
               <div class="timeline-year">2026</div>
               <div class="timeline-title">Projet de numérisation Si Ouakli</div>
               <div class="timeline-description">
-                Lancement du projet de modernisation numérique visant à digitaliser tous les services : hébergement, maintenance, bibliothèque, santé, restauration et activités culturelles.
+                Lancement du projet de modernisation numérique visant à digitaliser les trois axes principaux : hébergement (renouvellement et changement de chambre), maintenance (signalement et suivi des pannes) et foyer (catalogue et réservations d'articles).
               </div>
             </div>
             <div class="timeline-item">
@@ -231,7 +195,7 @@
             <div class="tech-card">
               <div class="tech-icon">🚀</div>
               <div class="tech-title">Zéro papier, 100% numérique</div>
-              <div class="tech-description">Toutes les demandes (maintenance, chambre, bibliothèque, RDV médical) sont traitées en ligne. Fini les notes manuscrites et les files d'attente inutiles.</div>
+              <div class="tech-description">Toutes les demandes (maintenance, changement de chambre, réservations foyer) sont traitées en ligne. Fini les notes manuscrites et les files d'attente inutiles.</div>
             </div>
             <div class="tech-card">
               <div class="tech-icon">🔔</div>
@@ -376,10 +340,8 @@
             <h4>Services</h4>
             <div class="footer-links">
               <a href="#services" class="footer-link">Hébergement</a>
-              <a href="#services" class="footer-link">Restauration</a>
-              <a href="#services" class="footer-link">Bibliothèque</a>
-              <a href="#services" class="footer-link">Santé</a>
-              <a href="#services" class="footer-link">Activités</a>
+              <a href="#services" class="footer-link">Maintenance</a>
+              <a href="#services" class="footer-link">Foyer</a>
             </div>
           </div>
           <div class="footer-section">
@@ -433,44 +395,44 @@
         {
           url: "{{ asset('photo/564651935_802743812516379_3548021131265954541_n.jpg') }}",
           thumb: "{{ asset('photo/564651935_802743812516379_3548021131265954541_n.jpg') }}",
-          badge: "Bibliothèque",
-          title: "Catalogue numérique en ligne",
-          description: "Réservez vos livres sans file d'attente — vérifiez la disponibilité et récupérez sous 24h.",
+          badge: "Foyer",
+          title: "Catalogue du foyer en ligne",
+          description: "Réservez vos articles sans file d'attente — consultez le catalogue et suivez vos réservations.",
         },
         {
           url: "{{ asset('photo/5.png') }}",
           thumb: "{{ asset('photo/5.png') }}",
           badge: "Services intégrés",
           title: "Tous vos services en un clic",
-          description: "Maintenance, restauration, santé, foyer, activités culturelles — tout depuis votre espace personnel.",
+          description: "Hébergement, maintenance et foyer — tout depuis votre espace personnel.",
         },
         {
           url: "{{ asset('photo/3.png') }}",
           thumb: "{{ asset('photo/3.png') }}",
           badge: "Services intégrés",
           title: "Tous vos services en un clic",
-          description: "Maintenance, restauration, santé, foyer, activités culturelles — tout depuis votre espace personnel.",
+          description: "Hébergement, maintenance et foyer — tout depuis votre espace personnel.",
         },
         {
           url: "{{ asset('photo/548127153_778558304934930_5767677889783360502_n.jpg') }}",
           thumb: "{{ asset('photo/548127153_778558304934930_5767677889783360502_n.jpg') }}",
-          badge: "Santé",
-          title: "Unité de santé numérique",
-          description: "Prenez rendez-vous avec le médecin ou le psychologue en quelques secondes — disponible 24h/24.",
+          badge: "Maintenance",
+          title: "Signalement de pannes numérique",
+          description: "Signalez une panne en quelques secondes et suivez son traitement en temps réel.",
         },
         {
           url: "{{ asset('photo/6.png') }}",
           thumb: "{{ asset('photo/6.png') }}",
-          badge: "Activités culturelles",
-          title: "Vie culturelle & islamique",
-          description: "Inscrivez-vous aux activités sportives, culturelles et à la Mussala — horaires de prière en temps réel.",
+          badge: "Hébergement",
+          title: "Votre chambre, votre confort",
+          description: "Demandez un changement ou un renouvellement de chambre directement en ligne.",
         },
         {
           url: "{{ asset('photo/571316701_809531668504260_2327986354187602315_n.jpg') }}",
           thumb: "{{ asset('photo/571316701_809531668504260_2327986354187602315_n.jpg') }}",
-          badge: "Activités culturelles",
-          title: "Vie culturelle & islamique",
-          description: "Inscrivez-vous aux activités sportives, culturelles et à la Mussala — horaires de prière en temps réel.",
+          badge: "Résidence Si Ouakli",
+          title: "Un cadre de vie universitaire moderne",
+          description: "1318 résidentes accompagnées au quotidien à travers une plateforme 100% numérique.",
         },
       ];
 
