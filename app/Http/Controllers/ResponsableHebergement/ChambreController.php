@@ -11,12 +11,12 @@ class ChambreController extends Controller
 {
    public function dashboard()
 {
-    $stats = [
+        $stats = [
         'total'       => Chambre::count(),
-        'disponibles' => Chambre::where('statut', 'libre')->count(),
-        'occupees'    => Chambre::where('statut', 'occupee')->count(),
-        'une_place'   => Chambre::where('statut', 'partielle')->count(),
-        'publiees'    => Chambre::where('publiee', true)->count(),
+        'disponibles' => Chambre::libres()->count(),
+        'occupees'    => Chambre::occupees()->count(),
+        'une_place'   => Chambre::partielles()->count(),
+        'publiees'    => Chambre::publiees()->count(),
     ];
 
     $dernieres = Chambre::latest()->take(5)->get();
@@ -40,7 +40,9 @@ class ChambreController extends Controller
         }
 
         if ($request->boolean('vides')) {
-            $query->whereIn('statut', ['libre', 'partielle']);
+            $ids = Chambre::libres()->pluck('id')
+                    ->merge(Chambre::partielles()->pluck('id'));
+            $query->whereIn('id', $ids);
         }
 
         if ($request->filled('statut')) {
@@ -48,11 +50,11 @@ class ChambreController extends Controller
         }
         $chambres = $query->paginate(20)->withQueryString();
 
-        $stats = [
+            $stats = [
             'total'       => Chambre::count(),
-            'occupees'    => Chambre::where('statut', 'occupee')->count(),
-            'une_place'   => Chambre::where('statut', 'partielle')->count(),
-            'disponibles' => Chambre::where('statut', 'libre')->count(),
+            'occupees'    => Chambre::occupees()->count(),
+            'une_place'   => Chambre::partielles()->count(),
+            'disponibles' => Chambre::libres()->count(),
         ];
 
         return view('hebergement.chambres.index', compact('chambres', 'stats'));
@@ -146,8 +148,9 @@ class ChambreController extends Controller
 
     public function publierVides()
     {
-        $nb = Chambre::whereIn('statut', ['libre', 'partielle'])
-                     ->update(['publiee' => true]);
+        $ids = Chambre::libres()->pluck('id')
+                ->merge(Chambre::partielles()->pluck('id'));
+        $nb = Chambre::whereIn('id', $ids)->update(['publiee' => true]);
 
         return redirect()->route('hebergement.chambres.index')
                          ->with('success', "$nb chambre(s) publiée(s) avec succès.");
@@ -161,8 +164,10 @@ class ChambreController extends Controller
 
     public function chambresVides()
     {
+        $ids = Chambre::libres()->pluck('id')
+                ->merge(Chambre::partielles()->pluck('id'));
         $chambres = Chambre::where('publiee', true)
-                           ->whereIn('statut', ['libre', 'partielle'])
+                           ->whereIn('id', $ids)
                            ->get();
 
         return view('hebergement.chambres.vides', compact('chambres'));
