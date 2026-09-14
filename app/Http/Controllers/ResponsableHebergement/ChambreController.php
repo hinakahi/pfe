@@ -46,7 +46,12 @@ class ChambreController extends Controller
         }
 
         if ($request->filled('statut')) {
-          $query->where('statut', $request->statut);
+            match ($request->statut) {
+                'occupee'   => $query->occupees(),
+                'partielle' => $query->partielles(),
+                'libre'     => $query->libres(),
+                default     => null,
+            };
         }
         $chambres = $query->paginate(20)->withQueryString();
 
