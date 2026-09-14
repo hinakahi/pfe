@@ -6,7 +6,7 @@
 {{-- Stats cliquables --}}
 <div class="row mb-4">
     <div class="col-md-3">
-        <a href="{{ route('hebergement.chambres.index', array_filter(array_merge(request()->query(), ['statut' => null]))) }}"
+        <a href="{{ route('hebergement.chambres.index', array_filter(array_merge(request()->query(), ['statut' => null, 'page' => null]))) }}"
            class="text-decoration-none">
             <div class="stat-card {{ !request('statut') ? 'stat-card-active' : '' }}"
                  style="background: linear-gradient(135deg,#1a3c5e,#2d6a9f)">
@@ -16,7 +16,7 @@
         </a>
     </div>
     <div class="col-md-3">
-        <a href="{{ route('hebergement.chambres.index', array_merge(request()->query(), ['statut' => 'libre'])) }}"
+        <a href="{{ route('hebergement.chambres.index', array_filter(array_merge(request()->query(), ['statut' => 'libre', 'page' => null]))) }}"
            class="text-decoration-none">
             <div class="stat-card {{ request('statut') == 'libre' ? 'stat-card-active' : '' }}"
                  style="background: linear-gradient(135deg,#198754,#20c997)">
@@ -26,7 +26,7 @@
         </a>
     </div>
     <div class="col-md-3">
-        <a href="{{ route('hebergement.chambres.index', array_merge(request()->query(), ['statut' => 'occupee'])) }}"
+        <a href="{{ route('hebergement.chambres.index', array_filter(array_merge(request()->query(), ['statut' => 'occupee', 'page' => null]))) }}"
            class="text-decoration-none">
             <div class="stat-card {{ request('statut') == 'occupee' ? 'stat-card-active' : '' }}"
 
@@ -37,7 +37,7 @@
         </a>
     </div>
     <div class="col-md-3">
-        <a href="{{ route('hebergement.chambres.index', array_merge(request()->query(), ['statut' => 'partielle'])) }}"
+        <a href="{{ route('hebergement.chambres.index', array_filter(array_merge(request()->query(), ['statut' => 'partielle', 'page' => null]))) }}"
            class="text-decoration-none">
             <div class="stat-card {{ request('statut') == 'partielle' ? 'stat-card-active' : '' }}"
                   style="background: linear-gradient(135deg,#fd7e14,#ffc107)">

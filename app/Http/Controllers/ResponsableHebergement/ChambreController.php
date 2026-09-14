@@ -120,6 +120,38 @@ class ChambreController extends Controller
             'etudiante_2' => 'nullable|string|max:100',
         ]);
 
+        // Étudiantes qu'on veut assigner à CETTE chambre
+        $nouvelles = collect([$request->etudiante_1, $request->etudiante_2])->filter();
+
+        // Retirer ces étudiantes de toute AUTRE chambre où elles seraient déjà logées
+        foreach ($nouvelles as $matricule) {
+            Chambre::where('id', '!=', $chambre->id)
+                ->where(function ($q) use ($matricule) {
+                    $q->where('etudiante_1', $matricule)
+                      ->orWhere('etudiante_2', $matricule);
+                })
+                ->get()
+                ->each(function ($autreChambre) use ($matricule) {
+                    if ($autreChambre->etudiante_1 === $matricule) {
+                        $autreChambre->etudiante_1 = null;
+                    }
+                    if ($autreChambre->etudiante_2 === $matricule) {
+                        $autreChambre->etudiante_2 = null;
+                    }
+
+                    $occupied = collect([$autreChambre->etudiante_1, $autreChambre->etudiante_2])
+                                ->filter()->count();
+
+                    $autreChambre->statut = match($occupied) {
+                        0 => 'libre',
+                        1 => $autreChambre->type === 'double' ? 'partielle' : 'occupee',
+                        2 => 'occupee',
+                    };
+
+                    $autreChambre->save();
+                });
+        }
+
         $chambre->etudiante_1 = $request->etudiante_1;
         $chambre->etudiante_2 = $chambre->type === 'double' ? $request->etudiante_2 : null;
 
