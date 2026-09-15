@@ -108,7 +108,31 @@
                             <span class="text-muted">Non précisée</span>
                         @endif
                     </td>
-                    <td><small>{{ Str::limit($demande->motif, 50) }}</small></td>
+                    <td>
+    <small>{{ Str::limit($demande->motif, 50) }}</small>
+    @if(strlen($demande->motif) > 50)
+        <br>
+        <button type="button" class="btn btn-link btn-sm p-0" data-bs-toggle="modal" data-bs-target="#motifModal{{ $demande->id }}">
+            Voir plus
+        </button>
+        <div class="modal fade" id="motifModal{{ $demande->id }}" tabindex="-1">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Motif — {{ $demande->etudiante->name }}</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p class="mb-0">{{ $demande->motif }}</p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    @endif
+</td>
                     <td>
                         @if($demande->justificatif)
                             <a href="{{ asset('storage/'.$demande->justificatif) }}"
@@ -294,7 +318,31 @@
                             <br><small class="text-muted">Bloc {{ $demande->chambreDemandee->bloc }} — Ét.{{ $demande->chambreDemandee->etage }}</small>
                         @endif
                     </td>
-                    <td><small>{{ Str::limit($demande->motif, 50) }}</small></td>
+                    <td>
+    <small>{{ Str::limit($demande->motif, 30) }}</small>
+    @if(strlen($demande->motif) > 30)
+        <br>
+        <button type="button" class="btn btn-link btn-sm p-0" data-bs-toggle="modal" data-bs-target="#motifModalT{{ $demande->id }}">
+            Voir plus
+        </button>
+        <div class="modal fade" id="motifModalT{{ $demande->id }}" tabindex="-1">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Motif — {{ $demande->etudiante->name }}</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p class="mb-0">{{ $demande->motif }}</p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    @endif
+</td>
                     <td>
                         @if($demande->justificatif)
                             <a href="{{ asset('storage/'.$demande->justificatif) }}"
@@ -312,7 +360,35 @@
                             <span class="badge bg-danger">Refusée</span>
                         @endif
                     </td>
-                   <td><small>{{ $demande->motif_refus ?? '-' }}</small></td>
+                   <td>
+    @if($demande->motif_refus)
+        <small>{{ Str::limit($demande->motif_refus, 30) }}</small>
+        @if(strlen($demande->motif_refus) > 30)
+            <br>
+            <button type="button" class="btn btn-link btn-sm p-0" data-bs-toggle="modal" data-bs-target="#refusMotifModal{{ $demande->id }}">
+                Voir plus
+            </button>
+            <div class="modal fade" id="refusMotifModal{{ $demande->id }}" tabindex="-1">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">Motif du refus — {{ $demande->etudiante->name }}</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+                        <div class="modal-body">
+                            <p class="mb-0">{{ $demande->motif_refus }}</p>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        @endif
+    @else
+        <span class="text-muted">-</span>
+    @endif
+</td>
 <td>
     @if($demande->statut === 'acceptee')
         @if($demande->decision_pdf)

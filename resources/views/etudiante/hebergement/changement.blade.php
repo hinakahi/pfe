@@ -267,7 +267,37 @@
                             <span class="badge bg-danger">Refusée</span>
                         @endif
                     </td>
-                    <td><small>{{ $d->motif_refus ?? '-' }}</small></td>
+                    <td>
+    @if($d->motif_refus)
+        <small class="d-inline-block text-truncate" style="max-width: 180px; vertical-align: middle;">
+            {{ $d->motif_refus }}
+        </small>
+        @if(strlen($d->motif_refus) > 30)
+            <br>
+            <button type="button" class="btn btn-link btn-sm p-0" data-bs-toggle="modal" data-bs-target="#refusMotifModal{{ $d->id }}">
+                Voir plus
+            </button>
+            <div class="modal fade" id="refusMotifModal{{ $d->id }}" tabindex="-1">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">Motif du refus</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+                        <div class="modal-body">
+                            <p class="mb-0">{{ $d->motif_refus }}</p>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        @endif
+    @else
+        <span class="text-muted">-</span>
+    @endif
+</td>
                     <td>
                         @if($d->statut === 'acceptee' && ($d->decision_pdf || $d->prise_en_charge_pdf))
                             @if($d->decision_pdf)
