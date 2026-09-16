@@ -40,6 +40,7 @@
                     <th>Technicien</th>
                     <th>Localisation</th>
                     <th>Stock épuisé ?</th>
+                    <th>Incident</th>
                 </tr>
             </thead>
             <tbody>
@@ -69,6 +70,16 @@
                             <span class="badge bg-danger">Oui</span>
                         @else
                             <span class="badge bg-light text-dark border">Non</span>
+                        @endif
+                    </td>
+                    <td>
+                        @if($u->description_incident)
+                            <span class="badge bg-warning text-dark" title="{{ $u->description_incident }}">
+                                <i class="bi bi-exclamation-triangle-fill me-1"></i>
+                                {{ Str::limit($u->description_incident, 30) }}
+                            </span>
+                        @else
+                            <span class="text-muted">—</span>
                         @endif
                     </td>
                 </tr>

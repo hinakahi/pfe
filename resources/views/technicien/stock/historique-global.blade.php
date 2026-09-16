@@ -9,46 +9,43 @@
         <i class="bi bi-arrow-left me-1"></i>Retour au stock
     </a>
 
- 
-
     <div class="card mb-4">
-    <div class="card-body py-3">
-        <form method="GET" action="{{ route('technicien.stock.historique-global') }}">
-            <div class="row g-2 align-items-center">
-                <div class="col-md-4">
-                    <select name="stock_id" class="form-select" onchange="this.form.submit()">
-                        <option value="">Tous les matériels</option>
-                        @foreach($stocks as $s)
-                            <option value="{{ $s->id }}" {{ request('stock_id') == $s->id ? 'selected' : '' }}>
-                                {{ $s->designation }}
-                            </option>
-                        @endforeach
-                    </select>
-                </div>
-                <div class="col-md-3">
-                    <select name="semestre" class="form-select" onchange="this.form.submit()">
-                        <option value="">Tous les semestres</option>
-                        <option value="s1" {{ request('semestre') === 's1' ? 'selected' : '' }}>Semestre 1 (Sept - Jan)</option>
-                        <option value="s2" {{ request('semestre') === 's2' ? 'selected' : '' }}>Semestre 2 (Fév - Juin)</option>
-                    </select>
-                </div>
-                   <div class="col-md-3 text-end">
-    <a href="{{ route('technicien.stock.historique-global.pdf', request()->query()) }}" class="btn btn-outline-danger text-nowrap">
-        <i class="bi bi-file-earmark-pdf me-1"></i>Exporter en PDF
-    </a>
-</div>
-                <div class="col-md-3">
-                    @if(request('stock_id') || request('semestre'))
-                        <a href="{{ route('technicien.stock.historique-global') }}" class="btn btn-outline-secondary w-100">
-                            <i class="bi bi-x-lg"></i> Réinitialiser
+        <div class="card-body py-3">
+            <form method="GET" action="{{ route('technicien.stock.historique-global') }}">
+                <div class="row g-2 align-items-center">
+                    <div class="col-md-4">
+                        <select name="stock_id" class="form-select" onchange="this.form.submit()">
+                            <option value="">Tous les matériels</option>
+                            @foreach($stocks as $s)
+                                <option value="{{ $s->id }}" {{ request('stock_id') == $s->id ? 'selected' : '' }}>
+                                    {{ $s->designation }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <select name="semestre" class="form-select" onchange="this.form.submit()">
+                            <option value="">Tous les semestres</option>
+                            <option value="s1" {{ request('semestre') === 's1' ? 'selected' : '' }}>Semestre 1 (Sept - Jan)</option>
+                            <option value="s2" {{ request('semestre') === 's2' ? 'selected' : '' }}>Semestre 2 (Fév - Juin)</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3 text-end">
+                        <a href="{{ route('technicien.stock.historique-global.pdf', request()->query()) }}" class="btn btn-outline-danger text-nowrap">
+                            <i class="bi bi-file-earmark-pdf me-1"></i>Exporter en PDF
                         </a>
-                    @endif
+                    </div>
+                    <div class="col-md-2">
+                        @if(request('stock_id') || request('semestre'))
+                            <a href="{{ route('technicien.stock.historique-global') }}" class="btn btn-outline-secondary w-100">
+                                <i class="bi bi-x-lg"></i> Réinitialiser
+                            </a>
+                        @endif
+                    </div>
                 </div>
-              
-            </div>
-        </form>
+            </form>
+        </div>
     </div>
-</div>
 
     @if($utilisations->count())
     <div class="table-responsive">
@@ -62,6 +59,7 @@
                     <th>Technicien</th>
                     <th>Localisation</th>
                     <th>Stock épuisé ?</th>
+                    <th>Incident</th>
                 </tr>
             </thead>
             <tbody>
@@ -99,6 +97,16 @@
                             <span class="badge bg-danger">Oui</span>
                         @else
                             <span class="badge bg-light text-dark border">Non</span>
+                        @endif
+                    </td>
+                    <td>
+                        @if($u->description_incident)
+                            <span class="badge bg-warning text-dark" title="{{ $u->description_incident }}">
+                                <i class="bi bi-exclamation-triangle-fill me-1"></i>
+                                {{ Str::limit($u->description_incident, 30) }}
+                            </span>
+                        @else
+                            <span class="text-muted">—</span>
                         @endif
                     </td>
                 </tr>

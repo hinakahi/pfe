@@ -12,6 +12,7 @@
         tr:nth-child(even) { background-color: #f7f7f7; }
         .badge-oui { color: #c0392b; font-weight: bold; }
         .badge-non { color: #444; }
+        .badge-incident { color: #b8860b; font-weight: bold; }
     </style>
 </head>
 <body>
@@ -28,6 +29,7 @@
                 <th>Technicien</th>
                 <th>Localisation</th>
                 <th>Stock épuisé ?</th>
+                <th>Incident</th>
             </tr>
         </thead>
         <tbody>
@@ -60,6 +62,13 @@
                 </td>
                 <td class="{{ $u->stock_epuise ? 'badge-oui' : 'badge-non' }}">
                     {{ $u->stock_epuise ? 'Oui' : 'Non' }}
+                </td>
+                <td class="{{ $u->description_incident ? 'badge-incident' : 'badge-non' }}">
+                    @if($u->description_incident)
+                        ⚠️ {{ Str::limit($u->description_incident, 50) }}
+                    @else
+                        —
+                    @endif
                 </td>
             </tr>
             @endforeach
