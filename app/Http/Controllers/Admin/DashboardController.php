@@ -11,8 +11,9 @@ class DashboardController extends Controller
         return view('admin.dashboard', [
             'totalUtilisateurs'      => User::count(),
             'totalEtudiantes'        => User::where('role', 'etudiante')->count(),
-            'chambresDisponibles'    => Chambre::where('disponible', true)->count(),
-            'chambresOccupees'       => Chambre::where('disponible', false)->count(),
+            'chambresDisponibles'    => Chambre::libres()->count(),
+            'chambresPartielles'     => Chambre::partielles()->count(),
+            'chambresOccupees'       => Chambre::occupees()->count(),
             'demandesRenouvellement' => DemandeRenouvellement::where('statut', 'en_attente')->count(),
             'demandesChangement'     => DemandeChangement::where('statut', 'en_attente')->count(),
             'maintenancesEnCours'    => Maintenance::where('statut', 'en_cours')->count(),
@@ -30,10 +31,11 @@ class DashboardController extends Controller
     ];
 
     // 2. KPIs Chambres
-    $chambreStats = [
-        'disponibles' => \App\Models\Chambre::where('disponible', true)->count(),
-        'occupees'    => \App\Models\Chambre::where('disponible', false)->count(),
-    ];
+     $chambreStats = [
+    'disponibles' => Chambre::libres()->count(),
+    'partielles'  => Chambre::partielles()->count(),
+    'occupees'    => Chambre::occupees()->count(),
+];
 
     // 3. KPIs Demandes
     $demandeStats = [
