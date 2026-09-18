@@ -15,7 +15,7 @@ class CatalogueController extends Controller
             'total_articles' => ArticleFoyer::count(),
             'articles_disponibles' => ArticleFoyer::where('disponible', true)->count(),
             'reservations' => Reservation::where('statut', 'en_attente')->count(),
-            'stock_faible' => ArticleFoyer::where('disponible', true)->where('stock', '<=', 5)->count(),
+            'stock_faible' => ArticleFoyer::where('stock', '<=', 5)->count(),
             
         ];
 
