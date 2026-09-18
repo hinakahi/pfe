@@ -99,7 +99,7 @@ class DemandeMaintController extends Controller
 
         // On teste AVANT le premier update, tant que $maintenance->date_resolution
         // reflète encore l'état en base (avant modification).
-        $premiereFoisTerminee = $request->statut === 'terminee' && !$maintenance->date_resolution;
+        $premiereFoisTerminee = $request->statut === 'terminee' && $maintenance->statut !== 'terminee';
 
         $maintenance->update([
             'statut'                 => $request->statut,
