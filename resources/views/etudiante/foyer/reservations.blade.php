@@ -135,7 +135,13 @@
             <i class="bi bi-x-circle bg-icon"></i>
         </div>
     </div>
-   
+    <div class="col-6 col-md filter-card" data-filter="annulee">
+        <div class="stat-foyer" style="background: linear-gradient(135deg,#6c757d,#495057);">
+            <div class="big-num">{{ $annulees }}</div>
+            <div class="lbl">Annulées</div>
+            <i class="bi bi-slash-circle bg-icon"></i>
+        </div>
+    </div>
 </div>
 
 {{-- Liste des réservations --}}
