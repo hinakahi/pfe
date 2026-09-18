@@ -262,16 +262,19 @@
 </div>
 
                         <div class="col-md-6">
-                            <label class="form-label fw-semibold">Type <span class="text-danger">*</span></label>
-                            <select name="type" class="form-select @error('type') is-invalid @enderror" required>
-                                <option value="">Choisir</option>
-                                <option value="electricite" {{ old('type') === 'electricite' ? 'selected' : '' }}>Électricité</option>
-                                <option value="plomberie"   {{ old('type') === 'plomberie'   ? 'selected' : '' }}>Plomberie</option>
-                                <option value="menuiserie"  {{ old('type') === 'menuiserie'  ? 'selected' : '' }}>Menuiserie</option>
-                                <option value="autre"       {{ old('type') === 'autre'       ? 'selected' : '' }}>Autre</option>
-                            </select>
-                            @error('type') <div class="invalid-feedback">{{ $message }}</div> @enderror
-                        </div>
+    <label class="form-label fw-semibold">Type <span class="text-danger">*</span></label>
+    <select name="type" class="form-select @error('type') is-invalid @enderror" required>
+        <option value="">Choisir</option>
+        <option value="electricite" {{ old('type') === 'electricite' ? 'selected' : '' }}>Électricité</option>
+        <option value="plomberie"   {{ old('type') === 'plomberie'   ? 'selected' : '' }}>Plomberie</option>
+        <option value="menuiserie"  {{ old('type') === 'menuiserie'  ? 'selected' : '' }}>Menuiserie</option>
+        <option value="chauffage"   {{ old('type') === 'chauffage'   ? 'selected' : '' }}>Chauffage</option>
+        <option value="reseaux"     {{ old('type') === 'reseaux'     ? 'selected' : '' }}>Réseaux informatiques et Internet</option>
+        <option value="securite"    {{ old('type') === 'securite'    ? 'selected' : '' }}>Sécurité incendie et vidéosurveillance</option>
+        <option value="autre"       {{ old('type') === 'autre'       ? 'selected' : '' }}>Autre</option>
+    </select>
+    @error('type') <div class="invalid-feedback">{{ $message }}</div> @enderror
+</div>
 
                         <div class="col-md-6">
                             <label class="form-label fw-semibold">Urgence <span class="text-danger">*</span></label>
