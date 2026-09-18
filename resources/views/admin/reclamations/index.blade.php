@@ -35,11 +35,11 @@
                 <option value="en_attente" {{ request('statut') == 'en_attente' ? 'selected' : '' }}>
                     En attente
                 </option>
-                <option value="traitee" {{ request('statut') == 'traitee' ? 'selected' : '' }}>
-                    Traitée
+                <option value="en_cours" {{ request('statut') == 'en_cours' ? 'selected' : '' }}>
+                    En cours
                 </option>
-                <option value="fermee" {{ request('statut') == 'fermee' ? 'selected' : '' }}>
-                     Fermée
+                <option value="resolue" {{ request('statut') == 'resolue' ? 'selected' : '' }}>
+                    Terminée
                 </option>
             </select>
 
@@ -91,10 +91,12 @@
                     <td style="min-width:120px;">
                         @if($rec->statut === 'en_attente')
                             <span class="badge rounded-pill bg-warning text-dark px-3">En attente</span>
-                        @elseif($rec->statut === 'traitee')
-                            <span class="badge rounded-pill bg-success px-3">Traitée</span>
+                        @elseif($rec->statut === 'en_cours')
+                            <span class="badge rounded-pill bg-info text-dark px-3">En cours</span>
+                        @elseif($rec->statut === 'resolue')
+                            <span class="badge rounded-pill bg-success px-3">Terminée</span>
                         @else
-                            <span class="badge rounded-pill bg-secondary px-3">Fermée</span>
+                            <span class="badge rounded-pill bg-danger px-3">{{ $rec->statut }}</span>
                         @endif
                     </td>
                     <td class="pe-4" style="min-width:100px;">
