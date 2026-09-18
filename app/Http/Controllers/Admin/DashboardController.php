@@ -16,7 +16,7 @@ class DashboardController extends Controller
             'chambresOccupees'       => Chambre::occupees()->count(),
             'demandesRenouvellement' => DemandeRenouvellement::where('statut', 'en_attente')->count(),
             'demandesChangement'     => DemandeChangement::where('statut', 'en_attente')->count(),
-            'maintenancesEnCours'    => Maintenance::where('statut', 'en_cours')->count(),
+            'maintenancesEnCours' => Maintenance::whereIn('statut', ['en_attente', 'en_cours'])->count(),
             'periodeActive'          => Periode::where('active', true)->whereDate('date_debut', '<=', now())->whereDate('date_fin', '>=', now())->first(),
             'derniersUtilisateurs'   => User::latest()->take(6)->get(),
         ]);
