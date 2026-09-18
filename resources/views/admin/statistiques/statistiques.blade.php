@@ -156,12 +156,12 @@
             plugins: {
                 legend: { display: false },
                 tooltip: {
-                   callbacks: {
-                   label: function(context) {
-                   return 'Délai : ' + context.raw + ' min';
-               }
-    }
-}
+                    callbacks: {
+                        label: function(context) {
+                            return 'Délai : ' + (delaiFormatted[context.label] || '—');
+                        }
+                    }
+                }
             }
         }
     });
