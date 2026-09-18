@@ -36,6 +36,7 @@ class ReservationController extends Controller
             'validee'    => Reservation::where('statut', 'validee')->count(),
             'refusee'    => Reservation::where('statut', 'refusee')->count(),
             'recuperee'  => Reservation::where('statut', 'recuperee')->count(),
+            'annulee'    => Reservation::where('statut', 'annulee')->count(),
         ];
 
                     return view('foyer.reservations.index', compact('reservations', 'filtre', 'compteurs', 'groupes', 'search'));

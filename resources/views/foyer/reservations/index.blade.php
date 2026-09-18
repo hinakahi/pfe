@@ -163,7 +163,7 @@
 
 {{-- ── STAT CARDS ── --}}
 <div class="row g-3 mb-4">
-    <div class="col">
+    <div class="col-6 col-md-4 col-lg-2">
         <a href="{{ route('foyer.reservations', ['statut' => 'en_attente']) }}"
            class="stat-card {{ $filtre === 'en_attente' ? 'active-filter' : '' }}"
            style="background: linear-gradient(135deg,#b85c00,#f5820d);">
@@ -172,7 +172,7 @@
             <i class="bi bi-hourglass-split stat-icon"></i>
         </a>
     </div>
-    <div class="col">
+    <div class="col-6 col-md-4 col-lg-2">
         <a href="{{ route('foyer.reservations', ['statut' => 'validee']) }}"
            class="stat-card {{ $filtre === 'validee' ? 'active-filter' : '' }}"
            style="background: linear-gradient(135deg,#0d7a4e,#1aad72);">
@@ -181,7 +181,7 @@
             <i class="bi bi-check-circle stat-icon"></i>
         </a>
     </div>
-    <div class="col">
+    <div class="col-6 col-md-4 col-lg-2">
         <a href="{{ route('foyer.reservations', ['statut' => 'refusee']) }}"
            class="stat-card {{ $filtre === 'refusee' ? 'active-filter' : '' }}"
            style="background: linear-gradient(135deg,#9b1c1c,#e53e3e);">
@@ -190,7 +190,16 @@
             <i class="bi bi-x-circle stat-icon"></i>
         </a>
     </div>
-    <div class="col">
+    <div class="col-6 col-md-4 col-lg-2">
+        <a href="{{ route('foyer.reservations', ['statut' => 'annulee']) }}"
+           class="stat-card {{ $filtre === 'annulee' ? 'active-filter' : '' }}"
+           style="background: linear-gradient(135deg,#6c757d,#495057);">
+            <div class="stat-label"><i class="bi bi-slash-circle"></i> Annulées</div>
+            <div class="stat-value">{{ $compteurs['annulee'] }}</div>
+            <i class="bi bi-slash-circle stat-icon"></i>
+        </a>
+    </div>
+    <div class="col-6 col-md-4 col-lg-2">
         <a href="{{ route('foyer.reservations', ['statut' => 'recuperee']) }}"
            class="stat-card {{ $filtre === 'recuperee' ? 'active-filter' : '' }}"
            style="background: linear-gradient(135deg,#5b21b6,#7c3aed);">
@@ -199,13 +208,13 @@
             <i class="bi bi-bag-check stat-icon"></i>
         </a>
     </div>
-    <div class="col">
+    <div class="col-6 col-md-4 col-lg-2">
         <a href="{{ route('foyer.reservations') }}"
            class="stat-card {{ $filtre === 'tous' ? 'active-filter' : '' }}"
            style="background: linear-gradient(135deg,#1a4fa0,#2979d8);">
             <div class="stat-label"><i class="bi bi-list-ul"></i> Total</div>
             <div class="stat-value">
-                {{ $compteurs['en_attente'] + $compteurs['validee'] + $compteurs['refusee'] + $compteurs['recuperee'] }}
+                {{ $compteurs['en_attente'] + $compteurs['validee'] + $compteurs['refusee'] + $compteurs['annulee'] + $compteurs['recuperee'] }}
             </div>
             <i class="bi bi-list-ul stat-icon"></i>
         </a>
@@ -245,6 +254,7 @@
                 @if($filtre === 'en_attente')    <span style="color:#b45309;">En attente</span>
                 @elseif($filtre === 'validee')   <span style="color:#15803d;">Validées</span>
                 @elseif($filtre === 'refusee')   <span style="color:#b91c1c;">Refusées</span>
+                @elseif($filtre === 'annulee')   <span style="color:#6c757d;">Annulées</span>
                 @elseif($filtre === 'recuperee') <span style="color:#7c3aed;">Récupérées</span>
                 @endif
             </span>
