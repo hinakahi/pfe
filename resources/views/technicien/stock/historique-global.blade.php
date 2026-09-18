@@ -85,11 +85,21 @@
                     <td>{{ $u->maintenance->technicien->name ?? '—' }}</td>
                     <td>
                         @if($u->maintenance && $u->maintenance->chambre)
-                            Chambre {{ $u->maintenance->chambre->numero }} (Bloc {{ $u->maintenance->chambre->bloc }})
+                            <span class="badge bg-primary-subtle text-primary border border-primary-subtle">
+                                <i class="bi bi-house-door me-1"></i>
+                                Chambre {{ $u->maintenance->chambre->numero }}
+                            </span>
+                            <br>
+                            <small class="text-muted">Bloc {{ $u->maintenance->chambre->bloc }}</small>
                         @elseif($u->maintenance && $u->maintenance->lieu_commun)
-                            {{ $u->maintenance->lieu_commun }}
+                            <span class="badge bg-info-subtle text-info-emphasis border border-info-subtle">
+                                <i class="bi bi-people me-1"></i>
+                                Espace commun
+                            </span>
+                            <br>
+                            <small class="text-muted">{{ $u->maintenance->lieu_commun }}</small>
                         @else
-                            —
+                            <span class="text-muted">—</span>
                         @endif
                     </td>
                     <td>
@@ -101,10 +111,58 @@
                     </td>
                     <td>
                         @if($u->description_incident)
-                            <span class="badge bg-warning text-dark" title="{{ $u->description_incident }}">
+                            <button type="button"
+                                    class="badge bg-warning text-dark border-0 text-start"
+                                    style="max-width:200px; white-space:normal; cursor:pointer;"
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#incidentModal{{ $u->id }}">
                                 <i class="bi bi-exclamation-triangle-fill me-1"></i>
-                                {{ Str::limit($u->description_incident, 30) }}
-                            </span>
+                                {{ Str::limit($u->description_incident, 25) }}
+                                <i class="bi bi-eye ms-1"></i>
+                            </button>
+
+                            {{-- Modal détail incident --}}
+                            <div class="modal fade" id="incidentModal{{ $u->id }}" tabindex="-1" aria-hidden="true">
+                                <div class="modal-dialog modal-dialog-centered">
+                                    <div class="modal-content" style="border-radius:12px;">
+                                        <div class="modal-header bg-warning">
+                                            <h5 class="modal-title">
+                                                <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                                                Incident — Demande #{{ $u->maintenance->id ?? '—' }}
+                                            </h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <div class="mb-3">
+                                                <strong>Matériel :</strong>
+                                                {{ $u->stock->designation ?? '—' }}
+                                                <span class="text-muted">({{ $u->quantite }} {{ $u->stock->unite ?? '' }})</span>
+                                            </div>
+                                            <div class="mb-3">
+                                                <strong>Technicien :</strong>
+                                                {{ $u->maintenance->technicien->name ?? '—' }}
+                                            </div>
+                                            <div class="mb-3">
+                                                <strong>Date :</strong>
+                                                {{ $u->created_at->format('d/m/Y à H:i') }}
+                                            </div>
+                                            <hr>
+                                            <div>
+                                                <strong>Description de l'incident :</strong>
+                                                <div class="mt-2 p-3 bg-light rounded"
+                                                     style="white-space:pre-wrap; word-break:break-word; overflow-wrap:anywhere; max-height:300px; overflow-y:auto;">
+                                                    {{ $u->description_incident }}
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                                                Fermer
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         @else
                             <span class="text-muted">—</span>
                         @endif
