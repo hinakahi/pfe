@@ -47,7 +47,7 @@ class MaintenanceController extends Controller
             'lieu_bloc'    => 'nullable|string|max:50',
             'lieu_etage'   => 'nullable|string|max:50',
             'lieu_autre'   => 'required_if:lieu_type,Autre|nullable|string|max:255',
-            'type'         => 'required|in:electricite,plomberie,menuiserie,autre',
+            'type'         => 'required|in:electricite,plomberie,menuiserie,chauffage,reseaux,securite,autre',
             'description'  => 'required|string|max:500',
             'urgence'      => 'required|in:normale,urgente',
             'photo'        => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
@@ -78,6 +78,7 @@ class MaintenanceController extends Controller
             'urgence'      => $request->urgence,
             'photo'        => $photoPath,
             'statut'       => 'en_attente',
+            'date_signalement' => now(),
         ]);
 
         $techniciens = User::where('role', 'technicien')->get();
@@ -136,7 +137,7 @@ class MaintenanceController extends Controller
             'lieu_bloc'    => 'nullable|string|max:50',
             'lieu_etage'   => 'nullable|string|max:50',
             'lieu_autre'   => 'required_if:lieu_type,Autre|nullable|string|max:255',
-            'type'         => 'required|in:electricite,plomberie,menuiserie,autre',
+            'type'         => 'required|in:electricite,plomberie,menuiserie,chauffage,reseaux,securite,autre',
             'description'  => 'required|string|max:500',
             'urgence'      => 'required|in:normale,urgente',
             'photo'        => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
