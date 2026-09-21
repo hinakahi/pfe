@@ -18,11 +18,13 @@ class Annonce extends Model
         'date_publication',
         'publiee',
         'urgence',
+        'photos', 
 
     ];
 
     protected $casts = [
         'date_publication' => 'datetime',
+        'photos'           => 'array',
     ];
 
     public function user()

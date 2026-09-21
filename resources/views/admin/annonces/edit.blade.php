@@ -56,6 +56,43 @@
     .urg-icon  { font-size: 1.5rem; display: block; margin-bottom: 0.3rem; }
     .urg-label { font-size: 0.8rem; font-weight: 600; color: #334155; }
 
+    /* Photos */
+    .photo-grid {
+        display: flex; flex-wrap: wrap; gap: 10px; margin-top: 0.75rem;
+    }
+    .photo-thumb {
+        position: relative;
+        width: 96px; height: 96px;
+        border-radius: 10px;
+        overflow: hidden;
+        border: 1.5px solid #e2e8f0;
+    }
+    .photo-thumb img {
+        width: 100%; height: 100%; object-fit: cover; display: block;
+    }
+    .photo-remove {
+        position: absolute; top: 4px; right: 4px;
+        width: 22px; height: 22px;
+        border-radius: 50%;
+        background: rgba(220,53,69,0.92);
+        color: #fff;
+        display: flex; align-items: center; justify-content: center;
+        cursor: pointer;
+        font-size: 0.85rem;
+        line-height: 1;
+        transition: background 0.15s;
+    }
+    .photo-remove:hover { background: #b02a37; }
+    .photo-thumb.marked-remove { opacity: 0.35; filter: grayscale(1); }
+    .photo-thumb.marked-remove::after {
+        content: '✕';
+        position: absolute; inset: 0;
+        display: flex; align-items: center; justify-content: center;
+        color: #dc3545;
+        font-size: 2.2rem;
+        font-weight: 700;
+    }
+
     .form-buttons { display: flex; gap: 1rem; margin-top: 2rem; }
     .btn-submit {
         display: inline-flex; align-items: center; gap: 6px;
@@ -77,7 +114,9 @@
 
 <div class="form-card card">
     <div class="card-body">
-        <form method="POST" action="{{ route('admin.annonces.update', $annonce) }}">
+        <form method="POST"
+              action="{{ route('admin.annonces.update', $annonce) }}"
+              enctype="multipart/form-data">
             @csrf @method('PUT')
 
             {{-- Titre --}}
@@ -122,6 +161,55 @@
                 <textarea name="contenu" rows="6" class="form-control" required>{{ old('contenu', $annonce->contenu) }}</textarea>
             </div>
 
+            {{-- ✅ PHOTOS — Section complète --}}
+            <div class="mb-4">
+                <label class="form-label">
+                    Photos
+                    <small class="text-muted fw-normal" style="font-size:.78rem;">
+                        (max 5 · 3 Mo chacune · JPG, PNG, WebP)
+                    </small>
+                </label>
+
+                {{-- Photos existantes --}}
+                @if(!empty($annonce->photos))
+                    <div class="photo-grid" id="existingPhotos">
+                        @foreach($annonce->photos as $photo)
+                            <div class="photo-thumb" data-photo="{{ $photo }}">
+                                <img src="{{ asset('storage/'.$photo) }}" alt="Photo">
+                                <div class="photo-remove" title="Supprimer cette photo">
+                                    <i class="bi bi-x-lg"></i>
+                                </div>
+                                <input type="checkbox"
+                                       name="remove_photos[]"
+                                       value="{{ $photo }}"
+                                       class="remove-photo-input"
+                                       hidden>
+                            </div>
+                        @endforeach
+                    </div>
+                @endif
+
+                {{-- Nouvelle sélection --}}
+                <input type="file"
+                       name="photos[]"
+                       id="photosInput"
+                       class="form-control mt-3 @error('photos.*') is-invalid @enderror"
+                       accept="image/jpeg,image/png,image/webp"
+                       multiple>
+
+                @error('photos.*')
+                    <div class="invalid-feedback d-block">{{ $message }}</div>
+                @enderror
+
+                {{-- Aperçu des nouvelles photos --}}
+                <div class="photo-grid" id="photosPreview"></div>
+
+                <small class="text-muted d-block mt-2" style="font-size:.78rem;">
+                    <i class="bi bi-info-circle me-1"></i>
+                    Cliquez sur la croix rouge pour supprimer une photo existante.
+                </small>
+            </div>
+
             {{-- Boutons --}}
             <div class="form-buttons">
                 <button type="submit" class="btn-submit">
@@ -137,10 +225,51 @@
 
 @section('scripts')
 <script>
+/* ----- Urgence ----- */
 document.querySelectorAll('#urgOptions .urg-option input').forEach(radio => {
     radio.addEventListener('change', function () {
         document.querySelectorAll('#urgOptions .urg-option').forEach(opt => opt.className = 'urg-option');
         this.closest('.urg-option').classList.add('selected-' + this.value);
+    });
+});
+
+/* ----- Suppression de photos existantes ----- */
+document.querySelectorAll('#existingPhotos .photo-remove').forEach(btn => {
+    btn.addEventListener('click', function () {
+        const thumb = this.closest('.photo-thumb');
+        const input = thumb.querySelector('.remove-photo-input');
+        input.checked = !input.checked;
+        thumb.classList.toggle('marked-remove', input.checked);
+    });
+});
+
+/* ----- Aperçu des nouvelles photos ----- */
+document.getElementById('photosInput')?.addEventListener('change', function (e) {
+    const preview = document.getElementById('photosPreview');
+    preview.innerHTML = '';
+
+    const files = [...e.target.files];
+
+    if (files.length > 5) {
+        alert('Maximum 5 photos autorisées.');
+        e.target.value = '';
+        return;
+    }
+
+    files.forEach(file => {
+        if (file.size > 3 * 1024 * 1024) {
+            alert(`"${file.name}" dépasse 3 Mo.`);
+            return;
+        }
+
+        const thumb = document.createElement('div');
+        thumb.className = 'photo-thumb';
+
+        const img = document.createElement('img');
+        img.src = URL.createObjectURL(file);
+
+        thumb.appendChild(img);
+        preview.appendChild(thumb);
     });
 });
 </script>

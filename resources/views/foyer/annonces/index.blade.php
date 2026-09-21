@@ -97,6 +97,25 @@
                                 {{ $annonce->titre }}
                             </div>
 
+                            {{-- ✅ Photos miniatures --}}
+                            @if(!empty($annonce->photos))
+                                <div class="d-flex flex-wrap gap-2 my-2">
+                                    @foreach($annonce->photos as $index => $photo)
+                                        <a href="{{ asset('storage/'.$photo) }}"
+                                           target="_blank"
+                                           class="d-block"
+                                           title="Voir en grand">
+                                            <img src="{{ asset('storage/'.$photo) }}"
+                                                 alt="Photo {{ $index + 1 }}"
+                                                 class="rounded border"
+                                                 style="width:70px;height:70px;object-fit:cover;cursor:zoom-in;transition:transform .15s;"
+                                                 onmouseover="this.style.transform='scale(1.06)'"
+                                                 onmouseout="this.style.transform='scale(1)'">
+                                        </a>
+                                    @endforeach
+                                </div>
+                            @endif
+
                             {{-- Contenu --}}
                             <div class="text-muted mb-2" style="font-size:.88rem; line-height:1.5;">
                                 {{ Str::limit($annonce->contenu, 200) }}
@@ -198,6 +217,25 @@
                     <div class="fw-bold mb-1" style="font-size:1rem;">
                         {{ $annonce->titre }}
                     </div>
+
+                    {{-- ✅ Photos miniatures --}}
+                    @if(!empty($annonce->photos))
+                        <div class="d-flex flex-wrap gap-2 my-2">
+                            @foreach($annonce->photos as $index => $photo)
+                                <a href="{{ asset('storage/'.$photo) }}"
+                                   target="_blank"
+                                   class="d-block"
+                                   title="Voir en grand">
+                                    <img src="{{ asset('storage/'.$photo) }}"
+                                         alt="Photo {{ $index + 1 }}"
+                                         class="rounded border"
+                                         style="width:70px;height:70px;object-fit:cover;cursor:zoom-in;transition:transform .15s;"
+                                         onmouseover="this.style.transform='scale(1.06)'"
+                                         onmouseout="this.style.transform='scale(1)'">
+                                </a>
+                            @endforeach
+                        </div>
+                    @endif
 
                     {{-- Contenu --}}
                     <div class="text-muted mb-2" style="font-size:.88rem; line-height:1.5;">

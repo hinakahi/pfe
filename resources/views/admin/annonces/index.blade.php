@@ -29,9 +29,10 @@
             <span class="text-muted" style="font-size:.85rem;">
                 {{ $annonces->total() }} annonce(s)
             </span>
-<a href="{{ route('admin.annonces.create') }}" class="btn btn-primary w-100 w-md-auto ms-md-auto">
-    <i class="bi bi-plus-lg me-1"></i>Nouvelle annonce
-</a>
+
+            <a href="{{ route('admin.annonces.create') }}" class="btn btn-primary w-100 w-md-auto ms-md-auto">
+                <i class="bi bi-plus-lg me-1"></i>Nouvelle annonce
+            </a>
         </div>
     </div>
 </div>
@@ -72,14 +73,33 @@
                         {{ $a->titre }}
                     </div>
 
+                    {{-- ✅ Photos (NOUVEAU) --}}
+                    @if(!empty($a->photos))
+                        <div class="d-flex flex-wrap gap-2 my-2">
+                            @foreach($a->photos as $index => $photo)
+                                <a href="{{ asset('storage/'.$photo) }}"
+                                   target="_blank"
+                                   class="d-block"
+                                   title="Voir en grand">
+                                    <img src="{{ asset('storage/'.$photo) }}"
+                                         alt="Photo {{ $index + 1 }}"
+                                         class="rounded border"
+                                         style="width:80px;height:80px;object-fit:cover;cursor:zoom-in;transition:transform .15s;"
+                                         onmouseover="this.style.transform='scale(1.06)'"
+                                         onmouseout="this.style.transform='scale(1)'">
+                                </a>
+                            @endforeach
+                        </div>
+                    @endif
+
                     {{-- Contenu --}}
                     <div class="text-muted mb-2 text-break" style="font-size:.88rem; line-height:1.5;">
-    {{ Str::limit($a->contenu, 200) }}
-</div>
+                        {{ Str::limit($a->contenu, 200) }}
+                    </div>
 
                     {{-- Meta --}}
                     <div class="d-flex flex-wrap gap-3 text-muted" style="font-size:.78rem;">
-                        <span><i class="bi bi-person me-e1"></i>{{ $a->user->name ?? '—' }}</span>
+                        <span><i class="bi bi-person me-1"></i>{{ $a->user->name ?? '—' }}</span>
                         <span><i class="bi bi-clock me-1"></i>{{ $a->created_at->diffForHumans() }}</span>
                         <span><i class="bi bi-calendar me-1"></i>{{ $a->created_at->format('d/m/Y H:i') }}</span>
                     </div>

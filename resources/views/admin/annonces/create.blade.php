@@ -1,8 +1,10 @@
 @extends('layouts.app')
 @section('title', 'Nouvelle annonce')
+
 @section('sidebar')
     @include('admin.partials._sidebar')
 @endsection
+
 @section('page-title', 'Nouvelle annonce')
 
 @section('content')
@@ -56,6 +58,42 @@
     .urg-icon  { font-size: 1.5rem; display: block; margin-bottom: 0.3rem; }
     .urg-label { font-size: 0.8rem; font-weight: 600; color: #334155; }
 
+    /* ✅ Photos */
+    .photo-grid {
+        display: flex; flex-wrap: wrap; gap: 10px; margin-top: 0.75rem;
+    }
+    .photo-thumb {
+        position: relative;
+        width: 96px; height: 96px;
+        border-radius: 10px;
+        overflow: hidden;
+        border: 1.5px solid #e2e8f0;
+    }
+    .photo-thumb img {
+        width: 100%; height: 100%; object-fit: cover; display: block;
+    }
+    .photo-remove {
+        position: absolute; top: 4px; right: 4px;
+        width: 22px; height: 22px;
+        border-radius: 50%;
+        background: rgba(220,53,69,0.92);
+        color: #fff;
+        display: flex; align-items: center; justify-content: center;
+        cursor: pointer;
+        font-size: 0.85rem;
+        line-height: 1;
+        transition: background 0.15s;
+    }
+    .photo-remove:hover { background: #b02a37; }
+    .photo-size {
+        position: absolute; bottom: 4px; left: 4px;
+        background: rgba(0,0,0,0.65);
+        color: #fff;
+        font-size: 0.65rem;
+        padding: 1px 5px;
+        border-radius: 4px;
+    }
+
     /* Boutons */
     .form-buttons { display: flex; gap: 1rem; margin-top: 2rem; }
     .btn-submit {
@@ -78,7 +116,9 @@
 
 <div class="form-card card">
     <div class="card-body">
-        <form method="POST" action="{{ route('admin.annonces.store') }}">
+        <form method="POST"
+              action="{{ route('admin.annonces.store') }}"
+              enctype="multipart/form-data">
             @csrf
 
             {{-- Titre --}}
@@ -131,6 +171,35 @@
                 @error('contenu')<div class="invalid-feedback">{{ $message }}</div>@enderror
             </div>
 
+            {{-- ✅ PHOTOS (NOUVEAU) --}}
+            <div class="mb-4">
+                <label class="form-label">
+                    Photos
+                    <small class="text-muted fw-normal" style="font-size:.78rem;">
+                        (max 5 · 3 Mo chacune · JPG, PNG, WebP)
+                    </small>
+                </label>
+
+                <input type="file"
+                       name="photos[]"
+                       id="photosInput"
+                       class="form-control @error('photos.*') is-invalid @enderror"
+                       accept="image/jpeg,image/png,image/webp"
+                       multiple>
+
+                @error('photos.*')
+                    <div class="invalid-feedback">{{ $message }}</div>
+                @enderror
+
+                {{-- Aperçu --}}
+                <div class="photo-grid" id="photosPreview"></div>
+
+                <small class="text-muted d-block mt-2" style="font-size:.78rem;">
+                    <i class="bi bi-info-circle me-1"></i>
+                    Astuce : privilégiez des images horizontales pour un meilleur rendu.
+                </small>
+            </div>
+
             {{-- Boutons --}}
             <div class="form-buttons">
                 <button type="submit" class="btn-submit">
@@ -146,10 +215,48 @@
 
 @section('scripts')
 <script>
+/* ----- Urgence ----- */
 document.querySelectorAll('#urgOptions .urg-option input').forEach(radio => {
     radio.addEventListener('change', function () {
         document.querySelectorAll('#urgOptions .urg-option').forEach(opt => opt.className = 'urg-option');
         this.closest('.urg-option').classList.add('selected-' + this.value);
+    });
+});
+
+/* ----- Aperçu des photos ----- */
+document.getElementById('photosInput')?.addEventListener('change', function (e) {
+    const preview = document.getElementById('photosPreview');
+    preview.innerHTML = '';
+
+    const files = [...e.target.files];
+
+    // Limite : 5 photos
+    if (files.length > 5) {
+        alert('Maximum 5 photos autorisées.');
+        e.target.value = '';
+        return;
+    }
+
+    files.forEach(file => {
+        // Vérif taille (3 Mo)
+        if (file.size > 3 * 1024 * 1024) {
+            alert(`"${file.name}" dépasse 3 Mo.`);
+            return;
+        }
+
+        const thumb = document.createElement('div');
+        thumb.className = 'photo-thumb';
+
+        const img = document.createElement('img');
+        img.src = URL.createObjectURL(file);
+
+        const size = document.createElement('span');
+        size.className = 'photo-size';
+        size.textContent = (file.size / 1024).toFixed(0) + ' Ko';
+
+        thumb.appendChild(img);
+        thumb.appendChild(size);
+        preview.appendChild(thumb);
     });
 });
 </script>

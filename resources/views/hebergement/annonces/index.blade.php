@@ -16,37 +16,43 @@
             <div id="carouselUrgent" class="carousel slide" data-bs-ride="carousel" data-bs-interval="5000">
                 <div class="carousel-inner">
                     @foreach($annoncesUrgentes as $index => $annonce)
+                    @php
+                        // ✅ Photo de fond dynamique
+                        $bgImage = !empty($annonce->photos)
+                            ? asset('storage/'.$annonce->photos[0])
+                            : asset('photo/7.jpg');
+                    @endphp
                     <div class="carousel-item {{ $index === 0 ? 'active' : '' }}">
-<div style="position: relative; height: 320px; background: url('{{ asset('photo/7.jpg') }}') center/cover no-repeat; border-radius: 12px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.3);">
-    <div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: linear-gradient(to bottom, rgba(0,0,0,0.4) 0%, rgba(0,0,0,0.65) 100%);"></div>
+                        <div style="position: relative; height: 320px; background: url('{{ $bgImage }}') center/cover no-repeat; border-radius: 12px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.3);">
+                            <div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: linear-gradient(to bottom, rgba(0,0,0,0.4) 0%, rgba(0,0,0,0.65) 100%);"></div>
 
-    <div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; display: flex; flex-direction: column; justify-content: center; align-items: center; color: white; text-align: center; padding: 2rem;">
+                            <div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; display: flex; flex-direction: column; justify-content: center; align-items: center; color: white; text-align: center; padding: 2rem;">
 
-        <span style="background: rgba(239,68,68,0.95); padding: 0.5rem 1.2rem; border-radius: 50px; font-weight: bold; font-size: 0.9rem; margin-bottom: 1rem; display: inline-flex; align-items: center; gap: 0.4rem; box-shadow: 0 2px 8px rgba(239,68,68,0.5);">
-            🔴 URGENT
-        </span>
+                                <span style="background: rgba(239,68,68,0.95); padding: 0.5rem 1.2rem; border-radius: 50px; font-weight: bold; font-size: 0.9rem; margin-bottom: 1rem; display: inline-flex; align-items: center; gap: 0.4rem; box-shadow: 0 2px 8px rgba(239,68,68,0.5);">
+                                    🔴 URGENT
+                                </span>
 
-        <h2 style="font-size: 1.8rem; font-weight: bold; margin-bottom: 0.8rem; text-shadow: 2px 2px 8px rgba(0,0,0,0.8); line-height: 1.3;">
-            {{ Str::limit($annonce->titre, 80) }}
-        </h2>
+                                <h2 style="font-size: 1.8rem; font-weight: bold; margin-bottom: 0.8rem; text-shadow: 2px 2px 8px rgba(0,0,0,0.8); line-height: 1.3;">
+                                    {{ Str::limit($annonce->titre, 80) }}
+                                </h2>
 
-        <p style="font-size: 1rem; text-shadow: 1px 1px 4px rgba(0,0,0,0.8); max-width: 600px; opacity: 0.9;">
-            {{ Str::limit($annonce->contenu, 150, '...') }}
-        </p>
+                                <p style="font-size: 1rem; text-shadow: 1px 1px 4px rgba(0,0,0,0.8); max-width: 600px; opacity: 0.9;">
+                                    {{ Str::limit($annonce->contenu, 150, '...') }}
+                                </p>
 
-        <div style="margin-top: 1.2rem;">
-            <button class="btn btn-light btn-sm fw-bold px-4 py-2"
-                    data-bs-toggle="modal"
-                    data-bs-target="#annonce{{ $annonce->id }}"
-                    style="border-radius: 50px; letter-spacing: 0.5px;">
-                Voir plus →
-            </button>
-        </div>
-    </div>
-</div>
+                                <div style="margin-top: 1.2rem;">
+                                    <button class="btn btn-light btn-sm fw-bold px-4 py-2"
+                                            data-bs-toggle="modal"
+                                            data-bs-target="#annonce{{ $annonce->id }}"
+                                            style="border-radius: 50px; letter-spacing: 0.5px;">
+                                        Voir plus →
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
-                    <!-- Modal -->
+                    <!-- Modal urgente -->
                     <div class="modal fade" id="annonce{{ $annonce->id }}" tabindex="-1">
                         <div class="modal-dialog modal-lg">
                             <div class="modal-content">
@@ -55,6 +61,21 @@
                                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                                 </div>
                                 <div class="modal-body">
+                                    {{-- ✅ Photos --}}
+                                    @if(!empty($annonce->photos))
+                                        <div class="d-flex flex-wrap gap-2 mb-3">
+                                            @foreach($annonce->photos as $photo)
+                                                <a href="{{ asset('storage/'.$photo) }}" target="_blank">
+                                                    <img src="{{ asset('storage/'.$photo) }}"
+                                                         class="rounded border"
+                                                         style="width:100px;height:100px;object-fit:cover;cursor:zoom-in;transition:transform .15s;"
+                                                         onmouseover="this.style.transform='scale(1.05)'"
+                                                         onmouseout="this.style.transform='scale(1)'">
+                                                </a>
+                                            @endforeach
+                                        </div>
+                                    @endif
+
                                     <p>{{ $annonce->contenu }}</p>
                                     <hr>
                                     <small class="text-muted">
@@ -86,7 +107,7 @@
     @endif
 
     <!-- ===== CONTENU PRINCIPAL ===== -->
-  <div class="container" style="margin-top: 2rem;">
+    <div class="container" style="margin-top: 2rem;">
 
     <!-- ===== BARRE RECHERCHE + TRI + FILTRE ===== -->
     <div class="row mb-4">
@@ -140,76 +161,119 @@
     @if($annonces->count() > 0)
         <div class="row g-3">
             @foreach($annonces as $annonce)
-@php
-    $categories = [
-        'generale'    => ['couleur' => '#6c757d', 'bg' => '#f8f9fa', 'label' => 'Générale'],
-        'hebergement' => ['couleur' => '#0d6efd', 'bg' => '#e7f0ff', 'label' => 'Hébergement'],
-        'foyer'       => ['couleur' => '#198754', 'bg' => '#e8f5ee', 'label' => 'Foyer'],
-        'maintenance' => ['couleur' => '#fd7e14', 'bg' => '#fff3e0', 'label' => 'Maintenance'],
-        'promotion'   => ['couleur' => '#dc3545', 'bg' => '#fde8ea', 'label' => 'Promotion'],
-    ];
-    $cat = $categories[$annonce->categorie] ?? $categories['generale'];
+            @php
+                $categories = [
+                    'generale'    => ['couleur' => '#6c757d', 'bg' => '#f8f9fa', 'label' => 'Générale'],
+                    'hebergement' => ['couleur' => '#0d6efd', 'bg' => '#e7f0ff', 'label' => 'Hébergement'],
+                    'foyer'       => ['couleur' => '#198754', 'bg' => '#e8f5ee', 'label' => 'Foyer'],
+                    'maintenance' => ['couleur' => '#fd7e14', 'bg' => '#fff3e0', 'label' => 'Maintenance'],
+                    'promotion'   => ['couleur' => '#dc3545', 'bg' => '#fde8ea', 'label' => 'Promotion'],
+                ];
+                $cat = $categories[$annonce->categorie] ?? $categories['generale'];
 
-    $urgences = [
-        'general'        => ['couleur' => '#0dcaf0', 'label' => 'Général'],
-        'urgent'         => ['couleur' => '#dc3545', 'label' => 'Urgent'],
-        'administration' => ['couleur' => '#212529', 'label' => 'Administration'],
-    ];
-    $urg = $urgences[$annonce->urgence ?? 'general'] ?? $urgences['general'];
-@endphp
+                $urgences = [
+                    'general'        => ['couleur' => '#0dcaf0', 'label' => 'Général'],
+                    'urgent'         => ['couleur' => '#dc3545', 'label' => 'Urgent'],
+                    'administration' => ['couleur' => '#212529', 'label' => 'Administration'],
+                ];
+                $urg = $urgences[$annonce->urgence ?? 'general'] ?? $urgences['general'];
+            @endphp
 
-<div class="col-md-12">
-    <div class="card border-0 shadow-sm hover-card"
-         style="background-color: {{ $cat['bg'] }}; border-left: 5px solid {{ $cat['couleur'] }} !important; border-radius: 12px;">
-        <div class="card-body py-3">
-            <div class="d-flex justify-content-between align-items-center">
-                <div class="flex-grow-1">
-                    <div class="mb-2">
-                       <span class="badge rounded-pill" style="background-color: {{ $cat['couleur'] }};">{{ $cat['label'] }}</span>
-@if($annonce->urgence !== 'general')
-    <span class="badge rounded-pill ms-1" style="background-color: {{ $urg['couleur'] }};">{{ $urg['label'] }}</span>
-@endif
+            <div class="col-md-12">
+                <div class="card border-0 shadow-sm hover-card"
+                     style="background-color: {{ $cat['bg'] }}; border-left: 5px solid {{ $cat['couleur'] }} !important; border-radius: 12px;">
+                    <div class="card-body py-3">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div class="flex-grow-1">
+
+                                {{-- Badges --}}
+                                <div class="mb-2">
+                                    <span class="badge rounded-pill" style="background-color: {{ $cat['couleur'] }};">{{ $cat['label'] }}</span>
+                                    @if($annonce->urgence !== 'general')
+                                        <span class="badge rounded-pill ms-1" style="background-color: {{ $urg['couleur'] }};">{{ $urg['label'] }}</span>
+                                    @endif
+                                </div>
+
+                                {{-- Titre --}}
+                                <h5 class="fw-bold mb-1" style="color: {{ $cat['couleur'] }};">{{ $annonce->titre }}</h5>
+
+                                {{-- ✅ Photos miniatures --}}
+                                @if(!empty($annonce->photos))
+                                    <div class="d-flex flex-wrap gap-2 my-2">
+                                        @foreach($annonce->photos as $index => $photo)
+                                            <a href="{{ asset('storage/'.$photo) }}"
+                                               target="_blank"
+                                               class="d-block"
+                                               title="Voir en grand">
+                                                <img src="{{ asset('storage/'.$photo) }}"
+                                                     alt="Photo {{ $index + 1 }}"
+                                                     class="rounded border"
+                                                     style="width:70px;height:70px;object-fit:cover;cursor:zoom-in;transition:transform .15s;"
+                                                     onmouseover="this.style.transform='scale(1.06)'"
+                                                     onmouseout="this.style.transform='scale(1)'">
+                                            </a>
+                                        @endforeach
+                                    </div>
+                                @endif
+
+                                {{-- Contenu --}}
+                                <p class="text-muted mb-2" style="font-size: 0.9rem;">{{ Str::limit($annonce->contenu, 150, '...') }}</p>
+
+                                {{-- Meta --}}
+                                <small class="text-muted">
+                                    {{ $annonce->created_at->format('d/m/Y') }} - {{ $annonce->user->name ?? 'Admin' }}
+                                </small>
+                            </div>
+                            <button class="btn btn-sm ms-3 fw-bold"
+                                    style="background-color: {{ $cat['couleur'] }}; color: white; border-radius: 8px;"
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#annonce{{ $annonce->id }}">
+                                Voir
+                            </button>
+                        </div>
                     </div>
-                    <h5 class="fw-bold mb-1" style="color: {{ $cat['couleur'] }};">{{ $annonce->titre }}</h5>
-                    <p class="text-muted mb-2" style="font-size: 0.9rem;">{{ Str::limit($annonce->contenu, 150, '...') }}</p>
-                    <small class="text-muted">
-                        {{ $annonce->created_at->format('d/m/Y') }} - {{ $annonce->user->name ?? 'Admin' }}
-                    </small>
                 </div>
-                <button class="btn btn-sm ms-3 fw-bold"
-                        style="background-color: {{ $cat['couleur'] }}; color: white; border-radius: 8px;"
-                        data-bs-toggle="modal"
-                        data-bs-target="#annonce{{ $annonce->id }}">
-                    Voir
-                </button>
             </div>
-        </div>
-    </div>
-</div>
 
-<!-- Modal -->
-<div class="modal fade" id="annonce{{ $annonce->id }}" tabindex="-1">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header border-0" style="background-color: {{ $cat['bg'] }}; border-left: 5px solid {{ $cat['couleur'] }} !important;">
-                <h5 class="modal-title fw-bold" style="color: {{ $cat['couleur'] }};">{{ $annonce->titre }}</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body">
-                <div class="mb-3">
-                    <span class="badge rounded-pill" style="background-color: {{ $cat['couleur'] }};">{{ $cat['label'] }}</span>
-                    <span class="badge rounded-pill ms-1" style="background-color: {{ $urg['couleur'] }};">{{ $urg['label'] }}</span>
+            <!-- Modal -->
+            <div class="modal fade" id="annonce{{ $annonce->id }}" tabindex="-1">
+                <div class="modal-dialog modal-lg">
+                    <div class="modal-content">
+                        <div class="modal-header border-0" style="background-color: {{ $cat['bg'] }}; border-left: 5px solid {{ $cat['couleur'] }} !important;">
+                            <h5 class="modal-title fw-bold" style="color: {{ $cat['couleur'] }};">{{ $annonce->titre }}</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="mb-3">
+                                <span class="badge rounded-pill" style="background-color: {{ $cat['couleur'] }};">{{ $cat['label'] }}</span>
+                                <span class="badge rounded-pill ms-1" style="background-color: {{ $urg['couleur'] }};">{{ $urg['label'] }}</span>
+                            </div>
+
+                            {{-- ✅ Photos dans la modale --}}
+                            @if(!empty($annonce->photos))
+                                <div class="d-flex flex-wrap gap-2 mb-3">
+                                    @foreach($annonce->photos as $photo)
+                                        <a href="{{ asset('storage/'.$photo) }}" target="_blank">
+                                            <img src="{{ asset('storage/'.$photo) }}"
+                                                 class="rounded border"
+                                                 style="width:120px;height:120px;object-fit:cover;cursor:zoom-in;transition:transform .15s;"
+                                                 onmouseover="this.style.transform='scale(1.05)'"
+                                                 onmouseout="this.style.transform='scale(1)'">
+                                        </a>
+                                    @endforeach
+                                </div>
+                            @endif
+
+                            <p style="line-height: 1.8; font-size: 1.05rem;">{{ $annonce->contenu }}</p>
+                            <hr>
+                            <small class="text-muted">
+                                {{ $annonce->created_at->format('d/m/Y à H:i') }} - {{ $annonce->user->name ?? 'Admin' }}
+                            </small>
+                        </div>
+                    </div>
                 </div>
-                <p style="line-height: 1.8; font-size: 1.05rem;">{{ $annonce->contenu }}</p>
-                <hr>
-                <small class="text-muted">
-                    {{ $annonce->created_at->format('d/m/Y à H:i') }} - {{ $annonce->user->name ?? 'Admin' }}
-                </small>
             </div>
-        </div>
-    </div>
-</div>
-@endforeach
+            @endforeach
         </div>
 
         <!-- Pagination -->
@@ -226,7 +290,7 @@
             </div>
         </div>
     @endif
-</div>
+    </div>
 </div>
 
 <style>
